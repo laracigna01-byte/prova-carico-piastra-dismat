@@ -694,7 +694,17 @@ export default function App() {
       />
 
       <header style={{ background: T.surface, borderBottom: `1px solid ${T.border}`, padding: "10px 16px", display: "flex", alignItems: "center", gap: 12, position: "sticky", top: 0, zIndex: 100 }}>
-        <DismantLogo size={30} />
+        <img
+  src="/logo-dismat.jpg"
+  alt="Laboratorio DISMAT"
+  style={{
+    width: 46,
+    height: 46,
+    borderRadius: 8,
+    objectFit: "cover",
+    background: "#fff",
+  }}
+/>
         <div>
           <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: "0.06em", color: T.text }}>DISMAT</div>
           <div style={{ fontSize: 9, color: T.textMuted, letterSpacing: "0.04em" }}>CNR 146/92 · Prova di Carico su Piastra</div>
