@@ -1,20 +1,48 @@
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, ReferenceLine,
 } from "recharts";
 
 // ─── design tokens ────────────────────────────────────────────────────────────
-const T = {
-  bg: "#0d1117", surface: "#161b22", surfaceHigh: "#1c2330",
-  border: "#30363d", borderHigh: "#484f58",
-  accent: "#3fb950", accentBlue: "#58a6ff",
-  accentOrange: "#f0883e", accentRed: "#f85149",
-  accentYellow: "#d29922",
-  text: "#e6edf3", textMuted: "#8b949e", textDim: "#484f58",
-  cycle1: "#58a6ff", cycle2: "#f0883e",
+const THEMES = {
+  dark: {
+    bg: "#0d1117",
+    surface: "#161b22",
+    surfaceHigh: "#1c2330",
+    border: "#30363d",
+    borderHigh: "#484f58",
+    accent: "#3fb950",
+    accentBlue: "#58a6ff",
+    accentOrange: "#f0883e",
+    accentRed: "#f85149",
+    accentYellow: "#d29922",
+    text: "#e6edf3",
+    textMuted: "#8b949e",
+    textDim: "#484f58",
+    cycle1: "#58a6ff",
+    cycle2: "#f0883e",
+  },
+  light: {
+    bg: "#f4f6f8",
+    surface: "#ffffff",
+    surfaceHigh: "#eef2f7",
+    border: "#d1d5db",
+    borderHigh: "#9ca3af",
+    accent: "#16a34a",
+    accentBlue: "#2563eb",
+    accentOrange: "#ea580c",
+    accentRed: "#dc2626",
+    accentYellow: "#ca8a04",
+    text: "#111827",
+    textMuted: "#6b7280",
+    textDim: "#9ca3af",
+    cycle1: "#2563eb",
+    cycle2: "#ea580c",
+  },
 };
 
+let T = THEMES.dark;
 // ─── helpers ──────────────────────────────────────────────────────────────────
 function interp(x, xp, fp) {
   if (x <= xp[0]) return fp[0];
@@ -382,6 +410,16 @@ function GeneralInfoPanel({
 }
 
 export default function App() {
+    const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("theme") || "dark";
+  });
+
+  T = THEMES[theme];
+
+  useEffect(() => {
+    localStorage.setItem("theme", theme);
+    document.body.style.background = T.bg;
+  }, [theme]);
   const [verbale, setVerbale]         = useState("");
   const [cantiere, setCantiere]       = useState("");
   const [committente, setCommittente] = useState("");
@@ -670,6 +708,23 @@ export default function App() {
           </div>
         )}
         <div style={{ display: "flex", gap: 8 }}>
+          <button
+  type="button"
+  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+  style={{
+    background: T.surfaceHigh,
+    color: T.text,
+    border: `1px solid ${T.border}`,
+    borderRadius: 7,
+    padding: "8px 12px",
+    fontSize: 11,
+    fontWeight: 700,
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+  }}
+>
+  {theme === "dark" ? "☀️ Chiaro" : "🌙 Scuro"}
+</button>
           <button
             onClick={() => exportPDF(true)}
             disabled={exporting}
