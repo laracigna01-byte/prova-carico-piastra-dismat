@@ -932,7 +932,19 @@ const exportPDF = useCallback(async (preview = false) => {
     zIndex: 100,
     flexWrap: "wrap",
   }}
+  
 >
+  <img
+    src="/logo-dismat.jpg"
+    alt="Laboratorio DISMAT"
+    style={{
+      width: 46,
+      height: 46,
+      borderRadius: 8,
+      objectFit: "cover",
+      background: "#fff",
+    }}
+  />
         <div>
           <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: "0.06em", color: T.text }}>DISMAT</div>
           <div style={{ fontSize: 9, color: T.textMuted, letterSpacing: "0.04em" }}>CNR 146/92 · Prova di Carico su Piastra</div>
