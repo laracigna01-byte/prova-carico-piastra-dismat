@@ -1,3 +1,4 @@
+import { jsPDF } from "jspdf";
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid,
@@ -512,21 +513,7 @@ export default function App() {
     setExporting(true);
 
     try {
-      // Load jsPDF directly from CDN UMD
-      if (!window.jspdf || !window.jspdf.jsPDF) {
-        await new Promise((resolve, reject) => {
-          const s = document.createElement('script');
-          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-          s.onload = resolve;
-          s.onerror = reject;
-          document.head.appendChild(s);
-        });
-      }
-      const jsPDF = window.jspdf?.jsPDF;
-      if (typeof jsPDF !== 'function') {
-        throw new Error('jsPDF constructor not available');
-      }
-
+    
       const html2canvasModule = await import('html2canvas');
       const html2canvas = html2canvasModule.default ?? html2canvasModule;
       const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
