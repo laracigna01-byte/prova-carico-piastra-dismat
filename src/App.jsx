@@ -203,6 +203,168 @@ function SelectInput({ label, value, onChange, options }) {
   );
 }
 
+
+function SignatureBox({ label, value, onChange }) {
+  const canvasRef = useRef(null);
+  const drawingRef = useRef(false);
+  const lastPointRef = useRef(null);
+
+  const resizeCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const parent = canvas.parentElement;
+    const cssWidth = Math.max(parent?.clientWidth || 320, 280);
+    const cssHeight = 130;
+    const ratio = window.devicePixelRatio || 1;
+
+    canvas.width = Math.floor(cssWidth * ratio);
+    canvas.height = Math.floor(cssHeight * ratio);
+    canvas.style.width = `${cssWidth}px`;
+    canvas.style.height = `${cssHeight}px`;
+
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.lineWidth = 2.2;
+    ctx.strokeStyle = T.text;
+
+    ctx.fillStyle = T.bg;
+    ctx.fillRect(0, 0, cssWidth, cssHeight);
+
+    if (value) {
+      const img = new Image();
+      img.onload = () => ctx.drawImage(img, 0, 0, cssWidth, cssHeight);
+      img.src = value;
+    }
+  }, [value]);
+
+  useEffect(() => {
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+    return () => window.removeEventListener("resize", resizeCanvas);
+  }, [resizeCanvas]);
+
+  const getPoint = (event) => {
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    };
+  };
+
+  const saveSignature = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    onChange(canvas.toDataURL("image/png"));
+  };
+
+  const startDrawing = (event) => {
+    event.preventDefault();
+    drawingRef.current = true;
+    lastPointRef.current = getPoint(event);
+  };
+
+  const draw = (event) => {
+    if (!drawingRef.current) return;
+    event.preventDefault();
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const point = getPoint(event);
+    const last = lastPointRef.current;
+
+    ctx.beginPath();
+    ctx.moveTo(last.x, last.y);
+    ctx.lineTo(point.x, point.y);
+    ctx.stroke();
+
+    lastPointRef.current = point;
+  };
+
+  const stopDrawing = (event) => {
+    if (!drawingRef.current) return;
+    event.preventDefault();
+    drawingRef.current = false;
+    lastPointRef.current = null;
+    saveSignature();
+  };
+
+  const clearSignature = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const ctx = canvas.getContext("2d");
+
+    ctx.fillStyle = T.bg;
+    ctx.fillRect(0, 0, rect.width, rect.height);
+
+    onChange(null);
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+        <label style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", color: T.textMuted, textTransform: "uppercase" }}>
+          {label}
+        </label>
+        <button
+          type="button"
+          onClick={clearSignature}
+          style={{
+            background: T.surfaceHigh,
+            border: `1px solid ${T.border}`,
+            borderRadius: 6,
+            color: T.textMuted,
+            cursor: "pointer",
+            fontSize: 11,
+            fontWeight: 700,
+            padding: "6px 10px",
+            WebkitTapHighlightColor: "transparent",
+          }}
+        >
+          Cancella firma
+        </button>
+      </div>
+
+      <div
+        style={{
+          background: T.bg,
+          border: `1px solid ${T.border}`,
+          borderRadius: 8,
+          padding: 8,
+        }}
+      >
+        <canvas
+          ref={canvasRef}
+          onPointerDown={startDrawing}
+          onPointerMove={draw}
+          onPointerUp={stopDrawing}
+          onPointerCancel={stopDrawing}
+          onPointerLeave={stopDrawing}
+          style={{
+            display: "block",
+            width: "100%",
+            height: 130,
+            borderRadius: 6,
+            touchAction: "none",
+            cursor: "crosshair",
+            background: T.bg,
+          }}
+        />
+        <div style={{ marginTop: 6, fontSize: 10, color: T.textDim }}>
+          Firma con dito, penna touch o mouse. La firma verrà riportata nel PDF.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
 // Elemento invisibile o visibile per clonare temporaneamente il grafico nel PDF
 const FixedChartContainer = ({ chart1, chartScarico1, chart2, chartScarico2, innerRef }) => {
   return (
@@ -326,7 +488,7 @@ function GeneralInfoPanel({
   diametro, setDiametro, dataProva, setDataProva, provaGiorno, setProvaGiorno,
   tratta, setTratta, km, setKm, sezione, setSezione, terra, setTerra,
   strato, setStrato, quota, setQuota, distBordo, setDistBordo, tecnico, setTecnico,
-  presenti, setPresenti, fotoProva, setFotoProva
+  presenti, setPresenti, fotoProva, setFotoProva, firmaTecnico, setFirmaTecnico
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -404,6 +566,13 @@ function GeneralInfoPanel({
               )}
             </div>
           </div>
+
+          <SectionHeader label="Firma elettronica" step="C" />
+          <SignatureBox
+            label="Firma tecnico esecutore"
+            value={firmaTecnico}
+            onChange={setFirmaTecnico}
+          />
         </div>
       )}
     </div>
@@ -438,6 +607,7 @@ export default function App() {
   const [tecnico, setTecnico]         = useState("");
   const [presenti, setPresenti]       = useState("");
   const [fotoProva, setFotoProva]     = useState(null);
+  const [firmaTecnico, setFirmaTecnico] = useState(null);
   const [c1, setC1]                   = useState(INIT_C1);
   const [c2, setC2]                   = useState(INIT_C2);
   const setC1step = (key) => (rows) => setC1((p) => ({ ...p, [key]: rows }));
@@ -830,6 +1000,14 @@ if (fotoProva) {
     // FIRMA
     const signY = 224;
 
+    if (firmaTecnico) {
+      try {
+        pdf.addImage(firmaTecnico, "PNG", ML + 4, signY - 22, 62, 18);
+      } catch {
+        // Se la firma non è leggibile, resta comunque la riga firma.
+      }
+    }
+
     pdf.setDrawColor(180, 180, 180);
     pdf.line(ML, signY, ML + 72, signY);
     pdf.line(PW - ML - 72, signY, PW - ML, signY);
@@ -899,6 +1077,7 @@ if (fotoProva) {
   provaValida,
   tableRows,
   fotoProva,
+  firmaTecnico,
   chart1,
   chartScarico1,
   chart2,
@@ -1034,6 +1213,7 @@ if (fotoProva) {
         tecnico={tecnico} setTecnico={setTecnico}
         presenti={presenti} setPresenti={setPresenti}
         fotoProva={fotoProva} setFotoProva={setFotoProva}
+        firmaTecnico={firmaTecnico} setFirmaTecnico={setFirmaTecnico}
       />
       <div
   style={{
