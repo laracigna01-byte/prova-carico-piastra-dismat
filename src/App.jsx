@@ -509,161 +509,400 @@ export default function App() {
   const provaValida = rapporto !== null && rapporto < 1;
   const rapportoColor = rapporto === null ? T.textMuted : provaValida ? T.accent : T.accentRed;
 
-  const exportPDF = useCallback(async (preview = false) => {
-    setExporting(true);
+const exportPDF = useCallback(async (preview = false) => {
+  setExporting(true);
 
-    try {
-    
-      const html2canvasModule = await import('html2canvas');
-      const html2canvas = html2canvasModule.default ?? html2canvasModule;
-      const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
-      const PW = 210, ML = 14, CW = PW - ML * 2;
-      let y = 12;
+  try {
+    const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
 
-      pdf.setFillColor(22, 27, 34);
-      pdf.rect(0, 0, PW, 18, "F");
-      pdf.setFontSize(14); pdf.setFont("helvetica", "bold"); pdf.setTextColor(232, 237, 243);
-      pdf.text("DISMAT", ML, 11);
-      pdf.setFontSize(8); pdf.setFont("helvetica", "normal"); pdf.setTextColor(139, 148, 158);
-      pdf.text("CNR 146/92 · Determinazione dei Moduli di Deformazione · IO 07-11-B", ML, 15.5);
-      y = 26;
+    const PW = 210;
+    const PH = 297;
+    const ML = 10;
+    const CW = PW - ML * 2;
 
-      pdf.setFontSize(9);
-      pdf.setFont("helvetica", "bold"); pdf.setTextColor(88, 166, 255);
-      pdf.text("DATI GENERALI", ML, y); y += 5;
-      pdf.setDrawColor(48, 54, 61);
-      pdf.line(ML, y, PW - ML, y); y += 5;
-
-      const fields = [
-        ["Committente", committente], ["Cantiere", cantiere], ["Verbale N°", verbale],
-        ["Data Prova", dataProva], ["Prova n°", provaGiorno], ["Tratta", tratta],
-        ["km", km], ["Sezione", sezione], ["Quota", quota],
-        ["Dist. dal bordo", distBordo], ["Tecnico Esecutore", tecnico], ["Presenti", presenti],
-        ["Diametro Piastra", diametro + " mm"], ["Terra", terra], ["Strato", strato],
-      ].filter(([, v]) => v);
-      pdf.setFontSize(9); pdf.setFont("helvetica", "normal"); pdf.setTextColor(230, 237, 243);
-      const colW = CW / 2;
-      fields.forEach(([label, val], i) => {
-        const col = i % 2;
-        const row = Math.floor(i / 2);
-        const cx = ML + col * colW;
-        const cy = y + row * 6;
-        pdf.setTextColor(139, 148, 158); pdf.text(label + ":", cx, cy);
-        pdf.setTextColor(230, 237, 243); pdf.text(String(val), cx + 38, cy);
-      });
-      y += Math.ceil(fields.length / 2) * 6 + 6;
-
-      pdf.setFontSize(9);
-      pdf.setFont("helvetica", "bold"); pdf.setTextColor(88, 166, 255);
-      pdf.text("RISULTATI DEL CALCOLO", ML, y); y += 5;
-      pdf.setDrawColor(48, 54, 61);
-      pdf.line(ML, y, PW - ML, y); y += 6;
-
-      const res = [
-        ["Md — 1° Ciclo (0.25–0.35 MPa)", md !== null ? md.toFixed(2) + " MPa" : "—", [88,166,255]],
-        ["Md' — 2° Ciclo (0.25–0.35 MPa)", mdp !== null ? mdp.toFixed(2) + " MPa" : "—", [240,136,62]],
-        ["Rapporto Md / Md'", rapporto !== null ? rapporto.toFixed(3) : "—", provaValida ? [63,185,80] : [248,81,73]],
-        ["Esito Prova", rapporto !== null ? (provaValida ? "VALIDA (Md/Md' < 1)" : "NON VALIDA (Md/Md' >= 1)") : "—", provaValida ? [63,185,80] : [248,81,73]],
-      ];
-      res.forEach(([label, val, col]) => {
-        pdf.setFont("helvetica", "normal"); pdf.setTextColor(139, 148, 158);
-        pdf.text(label + ":", ML, y);
-        pdf.setFont("helvetica", "bold"); pdf.setTextColor(...col);
-        pdf.text(val, ML + 90, y);
-        y += 6;
-      });
-      y += 4;
-
-      pdf.setFontSize(9); pdf.setFont("helvetica", "bold"); pdf.setTextColor(88, 166, 255);
-      pdf.text("TABELLA LETTURE STABILIZZATE", ML, y); y += 5;
-      pdf.setDrawColor(48, 54, 61); pdf.line(ML, y, PW - ML, y); y += 5;
-      const headers = ["Carico (kPa)", "Lett. C1 (mm)", "s1 (mm)", "Lett. C2 (mm)", "s2 (mm)"];
-      const colXs = [ML, ML+30, ML+66, ML+100, ML+136];
-      const colWs = [28, 34, 32, 34, 32];
-      pdf.setFontSize(8); pdf.setFont("helvetica", "bold"); pdf.setTextColor(139,148,158);
-      headers.forEach((h, i) => pdf.text(h, colXs[i], y, { maxWidth: colWs[i] }));
-      y += 5;
-      pdf.setDrawColor(48,54,61); pdf.line(ML, y, PW-ML, y);
-      y += 3;
-
-      tableRows.forEach(({ p, r1, s1: s1Val, r2, s2: s2Val, isRef }) => {
-        pdf.setFont("helvetica", isRef ? "bold" : "normal");
-        pdf.setTextColor(isRef ? 88 : 230, isRef ? 166 : 237, isRef ? 255 : 243);
-        pdf.text(String(p), colXs[0], y);
-        pdf.setTextColor(88,166,255); pdf.text(r1 !== null ? r1.toFixed(2) : "—", colXs[1], y);
-        pdf.setTextColor(230,237,243); pdf.text(s1Val !== null ? s1Val.toFixed(3) : "—", colXs[2], y);
-        pdf.setTextColor(240,136,62); pdf.text(r2 !== null ? r2.toFixed(2) : "—", colXs[3], y);
-        pdf.setTextColor(230,237,243); pdf.text(s2Val !== null ? s2Val.toFixed(3) : "—", colXs[4], y);
-        y += 5;
-      });
-      y += 4;
-
-      // FIX: Uso il container nascosto fisso (hiddenChartRef) così html2canvas non fallisce se si è su altri tab
-      const targetChart = hiddenChartRef.current || chartRef.current;
-      if (targetChart && (chart1.length > 0 || chart2.length > 0)) {
-        pdf.setFontSize(9);
-        pdf.setFont("helvetica", "bold"); pdf.setTextColor(88, 166, 255);
-        pdf.text("DIAGRAMMA CEDIMENTO — CARICO", ML, y); y += 5;
-        pdf.setDrawColor(48, 54, 61);
-        pdf.line(ML, y, PW - ML, y); y += 3;
-        
-        const canvas = await html2canvas(targetChart, { backgroundColor: "#161b22", scale: 2 });
-        const imgData = canvas.toDataURL("image/png");
-        const imgH = (canvas.height / canvas.width) * CW;
-        const availH = 297 - y - 14;
-        const finalH = Math.min(imgH, availH);
-        pdf.addImage(imgData, "PNG", ML, y, CW, finalH);
-        y += finalH + 4;
-      }
-
-      if (fotoProva) {
-        if (y + 60 > 287) { pdf.addPage(); y = 14; }
-        pdf.setFontSize(9); pdf.setFont("helvetica", "bold"); pdf.setTextColor(88, 166, 255);
-        pdf.text("FOTO DELLA PROVA", ML, y); y += 5;
-        pdf.setDrawColor(48, 54, 61); pdf.line(ML, y, PW - ML, y); y += 3;
-        const img = new Image(); img.src = fotoProva;
-        await new Promise(r => { img.onload = r; });
-        const fW = CW, fH = Math.min((img.height / img.width) * fW, 70);
-        pdf.addImage(fotoProva, "JPEG", ML, y, fW, fH);
-      }
-
-      const pageCount = pdf.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
-        pdf.setPage(i);
-        pdf.setFontSize(7);
-        pdf.setTextColor(72, 79, 88);
-        pdf.text(`DISMAT · IO 07-11-B · CNR 146/92`, ML, 293);
-        pdf.text(`Pag. ${i}/${pageCount}`, PW - ML, 293, { align: "right" });
-      }
-
-      const filename = `Prova_Piastra_${verbale || "report"}_${(dataProva || "").replace(/[/]/g,"-") || new Date().toISOString().slice(0,10)}.pdf`;
-      const blob = pdf.output("blob");
-      const blobUrl = URL.createObjectURL(blob);
-
-      // FIX: Per l'anteprima, creiamo un link sicuro cliccabile via codice ad esecuzione terminata.
-      // Questo bypassa il blocco pop-up asincrono in iOS/Android.
-      if (preview) {
-        const link = document.createElement("a");
-        link.href = blobUrl;
-        link.target = "_blank";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } else {
-        pdf.save(filename);
-      }
-
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
-    } catch (err) {
-      console.error(err);
-      alert("Errore nella generazione del PDF: " + (err && err.message ? err.name + " - " + err.message : String(err)));
-    } finally {
-      setExporting(false);
+    function section(x, y, w, title) {
+      pdf.setFillColor(235, 238, 242);
+      pdf.rect(x, y, w, 5.5, "F");
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(6.8);
+      pdf.setTextColor(20, 20, 20);
+      pdf.text(title, x + 1.5, y + 3.8);
+      return y + 7;
     }
-  }, [committente, cantiere, verbale, dataProva, provaGiorno, tratta, km, sezione, quota,
-      distBordo, tecnico, presenti, diametro, terra, strato,
-      md, mdp, rapporto, provaValida, tableRows, fotoProva, chart1, chart2]);
 
+    function cell(x, y, w, h, label, value) {
+      pdf.setDrawColor(185, 185, 185);
+      pdf.rect(x, y, w, h);
+
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(5.4);
+      pdf.setTextColor(90, 90, 90);
+      pdf.text(label, x + 1.3, y + 3);
+
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(6.5);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text(String(value || "—"), x + 1.3, y + 7.1, { maxWidth: w - 2.5 });
+    }
+
+    function drawPdfChart(x, y, w, h) {
+      pdf.setFillColor(255, 255, 255);
+      pdf.rect(x, y, w, h, "F");
+      pdf.setDrawColor(170, 170, 170);
+      pdf.rect(x, y, w, h);
+
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(6.5);
+      pdf.setTextColor(20, 20, 20);
+      pdf.text("Diagramma cedimento - carico", x + 2, y + 4.5);
+
+      const allPoints = [
+        ...chart1,
+        ...chartScarico1,
+        ...chart2,
+        ...chartScarico2,
+      ].filter((p) => p && Number.isFinite(p.x) && Number.isFinite(p.y));
+
+      if (!allPoints.length) {
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(7);
+        pdf.setTextColor(90, 90, 90);
+        pdf.text("Grafico disponibile dopo inserimento letture.", x + w / 2, y + h / 2, {
+          align: "center",
+        });
+        return;
+      }
+
+      const plotX = x + 13;
+      const plotY = y + 11;
+      const plotW = w - 20;
+      const plotH = h - 20;
+
+      const maxX = 500;
+      const maxY = Math.max(...allPoints.map((p) => p.y), 1) + 0.5;
+
+      pdf.setDrawColor(225, 225, 225);
+      for (let i = 1; i <= 4; i++) {
+        const gx = plotX + (plotW / 5) * i;
+        const gy = plotY + (plotH / 5) * i;
+        pdf.line(gx, plotY, gx, plotY + plotH);
+        pdf.line(plotX, gy, plotX + plotW, gy);
+      }
+
+      pdf.setDrawColor(70, 70, 70);
+      pdf.line(plotX, plotY + plotH, plotX + plotW, plotY + plotH);
+      pdf.line(plotX, plotY, plotX, plotY + plotH);
+
+      function px(p) {
+        return plotX + (p.x / maxX) * plotW;
+      }
+
+      function py(p) {
+        return plotY + (p.y / maxY) * plotH;
+      }
+
+      function drawSeries(points, color, dashed = false) {
+        if (!points.length) return;
+
+        pdf.setDrawColor(...color);
+        pdf.setFillColor(...color);
+
+        if (dashed) pdf.setLineDashPattern([2, 2], 0);
+        else pdf.setLineDashPattern([], 0);
+
+        let prev = null;
+
+        points.forEach((p) => {
+          const cx = px(p);
+          const cy = py(p);
+
+          if (prev) pdf.line(prev.x, prev.y, cx, cy);
+
+          if (!dashed) pdf.circle(cx, cy, 1.1, "F");
+
+          prev = { x: cx, y: cy };
+        });
+
+        pdf.setLineDashPattern([], 0);
+      }
+
+      drawSeries(chart1, [40, 99, 180], false);
+      drawSeries(chartScarico1, [40, 99, 180], true);
+      drawSeries(chart2, [210, 110, 35], false);
+      drawSeries(chartScarico2, [210, 110, 35], true);
+
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(4.8);
+      pdf.setTextColor(70, 70, 70);
+
+      pdf.text("Carico [kPa]", plotX + plotW / 2, y + h - 3, { align: "center" });
+      pdf.text("Cedimento [mm]", x + 4.5, plotY + plotH / 2, { angle: 90 });
+
+      pdf.text("0", plotX, plotY + plotH + 3);
+      pdf.text("500", plotX + plotW, plotY + plotH + 3, { align: "right" });
+      pdf.text(maxY.toFixed(1), plotX - 2, plotY + 1.5, { align: "right" });
+
+      pdf.setFontSize(5.2);
+      pdf.setTextColor(40, 99, 180);
+      pdf.text("1° ciclo", x + w - 34, y + 5);
+      pdf.setTextColor(210, 110, 35);
+      pdf.text("2° ciclo", x + w - 18, y + 5);
+    }
+
+    // SFONDO
+    pdf.setFillColor(255, 255, 255);
+    pdf.rect(0, 0, PW, PH, "F");
+
+    // HEADER
+    try {
+      const logo = await fetch("/logo-dismat.jpg")
+        .then((r) => r.blob())
+        .then(
+          (blob) =>
+            new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result);
+              reader.readAsDataURL(blob);
+            })
+        );
+
+      pdf.addImage(logo, "JPEG", ML, 8, 18, 18);
+    } catch {}
+
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(10.5);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text("L A B O R A T O R I O   D I S M A T", ML + 23, 12);
+
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(6.2);
+    pdf.text("Sperimentazione sulle Strutture e sui Materiali da Costruzione", ML + 23, 16);
+    pdf.text("CNR 146/92 - Prova di carico su piastra - Determinazione dei moduli di deformazione", ML + 23, 19.8);
+    pdf.text("Procedura interna DISMAT - IO 07-11-B", ML + 23, 23.5);
+
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(8);
+    pdf.text("MINUTA DI PROVA", PW - ML, 12, { align: "right" });
+    pdf.setFontSize(7);
+    pdf.text("PROVA DI CARICO SU PIASTRA", PW - ML, 17, { align: "right" });
+
+    pdf.setDrawColor(60, 60, 60);
+    pdf.line(ML, 29, PW - ML, 29);
+
+    // DATI GENERALI + FOTO
+    let y = 34;
+    const leftW = 112;
+    const rightX = ML + leftW + 6;
+    const rightW = CW - leftW - 6;
+
+    let gy = section(ML, y, leftW, "DATI GENERALI");
+
+    const h = 9.2;
+    const w2 = leftW / 2;
+
+    cell(ML, gy, w2, h, "Verbale n.", verbale);
+    cell(ML + w2, gy, w2, h, "Data prova", dataProva);
+    gy += h;
+
+    cell(ML, gy, w2, h, "Committente", committente);
+    cell(ML + w2, gy, w2, h, "Cantiere", cantiere);
+    gy += h;
+
+    cell(ML, gy, w2, h, "Tratta / km", `${tratta || "—"} ${km || ""}`);
+    cell(ML + w2, gy, w2, h, "Sezione / quota", `${sezione || "—"} ${quota || ""}`);
+    gy += h;
+
+    cell(ML, gy, w2, h, "Terreno / strato", `${terra || "—"} ${strato || ""}`);
+    cell(ML + w2, gy, w2, h, "Diametro piastra", `${diametro || "—"} mm`);
+    gy += h;
+
+    cell(ML, gy, w2, h, "Tecnico esecutore", tecnico);
+    cell(ML + w2, gy, w2, h, "Presenti", presenti);
+    gy += h;
+
+    let fy = section(rightX, y, rightW, "FOTO PROVA");
+
+    pdf.setDrawColor(185, 185, 185);
+    pdf.rect(rightX, fy, rightW, 45);
+
+    if (fotoProva) {
+      try {
+        pdf.addImage(fotoProva, "JPEG", rightX + 1.5, fy + 1.5, rightW - 3, 42);
+      } catch {
+        pdf.setFontSize(7);
+        pdf.text("Foto non leggibile", rightX + rightW / 2, fy + 23, { align: "center" });
+      }
+    } else {
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(7);
+      pdf.setTextColor(90, 90, 90);
+      pdf.text("Foto prova non inserita", rightX + rightW / 2, fy + 23, { align: "center" });
+    }
+
+    // RISULTATI
+    y = 88;
+    let ry = section(ML, y, CW, "RISULTATI DELLA PROVA");
+
+    const resW = CW / 4;
+
+    cell(ML, ry, resW, 11, "Md - 1° ciclo", md !== null ? `${md.toFixed(2)} MPa` : "—");
+    cell(ML + resW, ry, resW, 11, "Md' - 2° ciclo", mdp !== null ? `${mdp.toFixed(2)} MPa` : "—");
+    cell(ML + 2 * resW, ry, resW, 11, "Rapporto Md/Md'", rapporto !== null ? rapporto.toFixed(3) : "—");
+    cell(
+      ML + 3 * resW,
+      ry,
+      resW,
+      11,
+      "Esito",
+      rapporto !== null ? (provaValida ? "VALIDA" : "NON VALIDA") : "—"
+    );
+
+    // TABELLA
+    y = 108;
+    let ty = section(ML, y, 82, "TABELLA LETTURE STABILIZZATE");
+
+    const tx = ML;
+    const col = [18, 16, 16, 16, 16];
+    const heads = ["kPa", "L1", "s1", "L2", "s2"];
+
+    pdf.setFillColor(245, 245, 245);
+    pdf.rect(tx, ty, 82, 6, "F");
+
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(5.8);
+    pdf.setTextColor(40, 40, 40);
+
+    let cx = tx;
+    heads.forEach((head, i) => {
+      pdf.text(head, cx + 1.5, ty + 4);
+      cx += col[i];
+    });
+
+    ty += 6;
+
+    tableRows.forEach(({ p, r1, s1: s1Val, r2, s2: s2Val }) => {
+      pdf.setDrawColor(210, 210, 210);
+      pdf.rect(tx, ty, 82, 7);
+
+      const vals = [
+        p,
+        r1 !== null ? r1.toFixed(2) : "—",
+        s1Val !== null ? s1Val.toFixed(3) : "—",
+        r2 !== null ? r2.toFixed(2) : "—",
+        s2Val !== null ? s2Val.toFixed(3) : "—",
+      ];
+
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(5.8);
+      pdf.setTextColor(0, 0, 0);
+
+      cx = tx;
+      vals.forEach((v, i) => {
+        pdf.text(String(v), cx + 1.3, ty + 4.7, { maxWidth: col[i] - 2 });
+        cx += col[i];
+      });
+
+      ty += 7;
+    });
+
+    // FORMULE + NOTE
+    let ny = section(ML, ty + 5, 82, "FORMULE E NOTE");
+
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(5.7);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text("Md = (Δp / Δs) · D", ML + 1.5, ny + 1);
+    pdf.text("Intervallo di calcolo: 0,25 - 0,35 MPa", ML + 1.5, ny + 5);
+    pdf.text("Prova valida se Md/Md' < 1", ML + 1.5, ny + 9);
+    pdf.text("Norma: CNR 146/92", ML + 1.5, ny + 13);
+
+    // GRAFICO
+    const chartX = ML + 88;
+    const chartY = 108;
+    const chartW = CW - 88;
+    const chartH = 105;
+
+    section(chartX, chartY, chartW, "GRAFICO CARICO - CEDIMENTO");
+    drawPdfChart(chartX, chartY + 7, chartW, chartH - 7);
+
+    // FIRMA
+    const signY = 224;
+
+    pdf.setDrawColor(180, 180, 180);
+    pdf.line(ML, signY, ML + 72, signY);
+    pdf.line(PW - ML - 72, signY, PW - ML, signY);
+
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(6.5);
+    pdf.setTextColor(60, 60, 60);
+    pdf.text("Il tecnico esecutore", ML, signY + 5);
+    pdf.text("Direzione lavori / Committente", PW - ML - 72, signY + 5);
+
+    // FOOTER
+    pdf.setDrawColor(100, 100, 100);
+    pdf.line(ML, PH - 13, PW - ML, PH - 13);
+
+    pdf.setFontSize(6);
+    pdf.setTextColor(90, 90, 90);
+    pdf.text("DISMAT - CNR 146/92 - Prova di carico su piastra", ML, PH - 8);
+    pdf.text("Pagina 1/1", PW - ML, PH - 8, { align: "right" });
+
+    const filename = `Prova_Piastra_${verbale || "report"}_${
+      (dataProva || "").replace(/[/]/g, "-") || new Date().toISOString().slice(0, 10)
+    }.pdf`;
+
+    const blob = pdf.output("blob");
+    const blobUrl = URL.createObjectURL(blob);
+
+    if (preview) {
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      pdf.save(filename);
+    }
+
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
+  } catch (err) {
+    console.error(err);
+    alert(
+      "Errore nella generazione del PDF: " +
+        (err && err.message ? err.name + " - " + err.message : String(err))
+    );
+  } finally {
+    setExporting(false);
+  }
+}, [
+  committente,
+  cantiere,
+  verbale,
+  dataProva,
+  provaGiorno,
+  tratta,
+  km,
+  sezione,
+  quota,
+  distBordo,
+  tecnico,
+  presenti,
+  diametro,
+  terra,
+  strato,
+  md,
+  mdp,
+  rapporto,
+  provaValida,
+  tableRows,
+  fotoProva,
+  chart1,
+  chartScarico1,
+  chart2,
+  chartScarico2,
+]);
+     
   const tabs = [
     { id: "c1", label: "1° Ciclo" },
     { id: "c2", label: "2° Ciclo" },
@@ -965,5 +1204,4 @@ export default function App() {
         )}
       </div>
     </div>
-  );
-}
+  );}
