@@ -693,18 +693,20 @@ export default function App() {
         innerRef={hiddenChartRef} 
       />
 
-      <header style={{ background: T.surface, borderBottom: `1px solid ${T.border}`, padding: "10px 16px", display: "flex", alignItems: "center", gap: 12, position: "sticky", top: 0, zIndex: 100 }}>
-        <img
-  src="/logo-dismat.jpg"
-  alt="Laboratorio DISMAT"
+      <header
   style={{
-    width: 46,
-    height: 46,
-    borderRadius: 8,
-    objectFit: "cover",
-    background: "#fff",
+    background: T.surface,
+    borderBottom: `1px solid ${T.border}`,
+    padding: "10px 16px",
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    position: "sticky",
+    top: 0,
+    zIndex: 100,
+    flexWrap: "wrap",
   }}
-/>
+>
         <div>
           <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: "0.06em", color: T.text }}>DISMAT</div>
           <div style={{ fontSize: 9, color: T.textMuted, letterSpacing: "0.04em" }}>CNR 146/92 · Prova di Carico su Piastra</div>
@@ -717,7 +719,14 @@ export default function App() {
             <Pill label="Md/Md'" value={rapporto.toFixed(3)} color={rapportColor} bold />
           </div>
         )}
-        <div style={{ display: "flex", gap: 8 }}>
+        <div
+  style={{
+    display: "flex",
+    gap: 8,
+    flexWrap: "wrap",
+    justifyContent: "flex-end",
+  }}
+>
           <button
   type="button"
   onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
@@ -731,6 +740,7 @@ export default function App() {
     fontWeight: 700,
     cursor: "pointer",
     whiteSpace: "nowrap",
+    minWidth: 92,
   }}
 >
   {theme === "dark" ? "☀️ Chiaro" : "🌙 Scuro"}
@@ -744,7 +754,7 @@ export default function App() {
               border: `1px solid ${T.border}`, borderRadius: 7,
               padding: "8px 12px", fontSize: 11, fontWeight: 700,
               letterSpacing: "0.06em", cursor: exporting ? "default" : "pointer",
-              WebkitTapHighlightColor: "transparent",
+              WebkitTapHighlightColor: "transparent",minWidth: 92,
             }}
           >
             Anteprima
@@ -759,7 +769,7 @@ export default function App() {
               padding: "8px 14px", fontSize: 11, fontWeight: 800,
               letterSpacing: "0.08em", cursor: exporting ? "default" : "pointer",
               whiteSpace: "nowrap", flexShrink: 0,
-              WebkitTapHighlightColor: "transparent",
+              WebkitTapHighlightColor: "transparent",minWidth: 92,
             }}
           >
             {exporting ? "⏳ Generando..." : "↓ PDF"}
@@ -785,6 +795,54 @@ export default function App() {
         presenti={presenti} setPresenti={setPresenti}
         fotoProva={fotoProva} setFotoProva={setFotoProva}
       />
+      <div
+  style={{
+    margin: "12px 16px 0",
+    background: T.surface,
+    border: `1px solid ${T.border}`,
+    borderRadius: 12,
+    padding: "12px 14px",
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+  }}
+>
+  <div>
+    <div
+      style={{
+        fontSize: 10,
+        fontWeight: 900,
+        letterSpacing: "0.12em",
+        textTransform: "uppercase",
+        color: T.textMuted,
+      }}
+    >
+      Riferimento normativo
+    </div>
+    <div
+      style={{
+        marginTop: 3,
+        fontSize: 14,
+        fontWeight: 800,
+        color: T.text,
+      }}
+    >
+      CNR 146/92 · Determinazione dei moduli di deformazione Md e Md'
+    </div>
+  </div>
+
+  <div
+    style={{
+      fontSize: 12,
+      color: T.textMuted,
+      fontWeight: 700,
+    }}
+  >
+    Procedura interna DISMAT · IO 07-11-B
+  </div>
+</div>
 
       <div style={{ background: T.surface, borderBottom: `1px solid ${T.border}`, display: "flex", padding: "0 16px" }}>
         {tabs.map((t) => (
