@@ -720,14 +720,16 @@ const exportPDF = useCallback(async (preview = false) => {
     cell(ML + w2, gy, w2, h, "Presenti", presenti);
     gy += h;
 
-    let fy = section(rightX, y, rightW, "FOTO PROVA");
+   let fy = section(rightX, y, rightW, "FOTO PROVA");
 
-    pdf.setDrawColor(185, 185, 185);
-    pdf.rect(rightX, fy, rightW, 45);
+const photoH = 56;
 
-    if (fotoProva) {
-      try {
-        pdf.addImage(fotoProva, "JPEG", rightX + 1.5, fy + 1.5, rightW - 3, 42);
+pdf.setDrawColor(185, 185, 185);
+pdf.rect(rightX, fy, rightW, photoH);
+
+if (fotoProva) {
+  try {
+    pdf.addImage(fotoProva, "JPEG", rightX + 1.5, fy + 1.5, rightW - 3, photoH - 3);
       } catch {
         pdf.setFontSize(7);
         pdf.text("Foto non leggibile", rightX + rightW / 2, fy + 23, { align: "center" });
@@ -736,7 +738,7 @@ const exportPDF = useCallback(async (preview = false) => {
       pdf.setFont("helvetica", "normal");
       pdf.setFontSize(7);
       pdf.setTextColor(90, 90, 90);
-      pdf.text("Foto prova non inserita", rightX + rightW / 2, fy + 23, { align: "center" });
+      pdf.text("Foto prova non inserita", rightX + rightW / 2, fy + photoH / 2, { align: "center" });
     }
 
     // RISULTATI
