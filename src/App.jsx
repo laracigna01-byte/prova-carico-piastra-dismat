@@ -1217,7 +1217,7 @@ if (fotoProva) {
           <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
             <Pill label="Md" value={md !== null ? md.toFixed(1) : "—"} unit="MPa" color={T.cycle1} />
             <Pill label="Md'" value={mdp !== null ? mdp.toFixed(1) : "—"} unit="MPa" color={T.cycle2} />
-            <Pill label="Md/Md'" value={rapporto.toFixed(3)} color={rapportColor} bold />
+            <Pill label="Md/Md'" value={rapporto.toFixed(3)} color={rapportoColor} bold />
           </div>
         )}
         <div
