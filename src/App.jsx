@@ -974,7 +974,7 @@ const exportPDF = useCallback(async (preview = false) => {
 
    let fy = section(rightX, y, rightW, "FOTO PROVA");
 
-const photoH = 56;
+const photoH = 43;
 
 pdf.setDrawColor(185, 185, 185);
 pdf.rect(rightX, fy, rightW, photoH);
