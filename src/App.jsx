@@ -1,22 +1,49 @@
-import { useState, useCallback, useMemo, useRef } from "react";
-import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, ReferenceLine,
 } from "recharts";
 
 // ─── design tokens ────────────────────────────────────────────────────────────
-const T = {
-  bg: "#0d1117", surface: "#161b22", surfaceHigh: "#1c2330",
-  border: "#30363d", borderHigh: "#484f58",
-  accent: "#3fb950", accentBlue: "#58a6ff",
-  accentOrange: "#f0883e", accentRed: "#f85149",
-  accentYellow: "#d29922",
-  text: "#e6edf3", textMuted: "#8b949e", textDim: "#484f58",
-  cycle1: "#58a6ff", cycle2: "#f0883e",
+const THEMES = {
+  dark: {
+    bg: "#0d1117",
+    surface: "#161b22",
+    surfaceHigh: "#1c2330",
+    border: "#30363d",
+    borderHigh: "#484f58",
+    accent: "#3fb950",
+    accentBlue: "#58a6ff",
+    accentOrange: "#f0883e",
+    accentRed: "#f85149",
+    accentYellow: "#d29922",
+    text: "#e6edf3",
+    textMuted: "#8b949e",
+    textDim: "#484f58",
+    cycle1: "#58a6ff",
+    cycle2: "#f0883e",
+  },
+  light: {
+    bg: "#f4f6f8",
+    surface: "#ffffff",
+    surfaceHigh: "#eef2f7",
+    border: "#d1d5db",
+    borderHigh: "#9ca3af",
+    accent: "#16a34a",
+    accentBlue: "#2563eb",
+    accentOrange: "#ea580c",
+    accentRed: "#dc2626",
+    accentYellow: "#ca8a04",
+    text: "#111827",
+    textMuted: "#6b7280",
+    textDim: "#9ca3af",
+    cycle1: "#2563eb",
+    cycle2: "#ea580c",
+  },
 };
 
+let T = THEMES.dark;
 // ─── helpers ──────────────────────────────────────────────────────────────────
 function interp(x, xp, fp) {
   if (x <= xp[0]) return fp[0];
@@ -43,44 +70,6 @@ function stabilityInfo(rows, threshold = 0.02, minCount = 3) {
   if (last.length < 2) return { stable: false, delta: null, count: vals.length };
   const delta = Math.max(...last) - Math.min(...last);
   return { stable: delta <= threshold, delta, count: vals.length };
-}
-
-
-// ─── archivio locale prove ───────────────────────────────────────────────────
-const ARCHIVE_KEY = "piastra_archive_v1";
-const COUNTER_KEY = "piastra_counter_v1";
-
-function listArchivedTests() {
-  try {
-    return JSON.parse(localStorage.getItem(ARCHIVE_KEY) || "[]");
-  } catch {
-    return [];
-  }
-}
-
-function saveArchivedTest(record) {
-  const list = listArchivedTests();
-  const idx = list.findIndex((item) => item.id === record.id);
-  const next = idx >= 0
-    ? list.map((item) => (item.id === record.id ? record : item))
-    : [record, ...list];
-  localStorage.setItem(ARCHIVE_KEY, JSON.stringify(next));
-  return next;
-}
-
-function deleteArchivedTest(id) {
-  const next = listArchivedTests().filter((item) => item.id !== id);
-  localStorage.setItem(ARCHIVE_KEY, JSON.stringify(next));
-  return next;
-}
-
-function nextPiastraId() {
-  const year = new Date().getFullYear();
-  const raw = localStorage.getItem(COUNTER_KEY);
-  const state = raw ? JSON.parse(raw) : { year, n: 0 };
-  const n = state.year === year ? state.n + 1 : 1;
-  localStorage.setItem(COUNTER_KEY, JSON.stringify({ year, n }));
-  return `PIA-${year}-${String(n).padStart(3, "0")}`;
 }
 
 // ─── struttura dati iniziale ─────────────────────────────────────────────────
@@ -214,6 +203,168 @@ function SelectInput({ label, value, onChange, options }) {
   );
 }
 
+
+function SignatureBox({ label, value, onChange }) {
+  const canvasRef = useRef(null);
+  const drawingRef = useRef(false);
+  const lastPointRef = useRef(null);
+
+  const resizeCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const parent = canvas.parentElement;
+    const cssWidth = Math.max(parent?.clientWidth || 320, 280);
+    const cssHeight = 130;
+    const ratio = window.devicePixelRatio || 1;
+
+    canvas.width = Math.floor(cssWidth * ratio);
+    canvas.height = Math.floor(cssHeight * ratio);
+    canvas.style.width = `${cssWidth}px`;
+    canvas.style.height = `${cssHeight}px`;
+
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.lineWidth = 2.2;
+    ctx.strokeStyle = T.text;
+
+    ctx.fillStyle = T.bg;
+    ctx.fillRect(0, 0, cssWidth, cssHeight);
+
+    if (value) {
+      const img = new Image();
+      img.onload = () => ctx.drawImage(img, 0, 0, cssWidth, cssHeight);
+      img.src = value;
+    }
+  }, [value]);
+
+  useEffect(() => {
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+    return () => window.removeEventListener("resize", resizeCanvas);
+  }, [resizeCanvas]);
+
+  const getPoint = (event) => {
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    };
+  };
+
+  const saveSignature = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    onChange(canvas.toDataURL("image/png"));
+  };
+
+  const startDrawing = (event) => {
+    event.preventDefault();
+    drawingRef.current = true;
+    lastPointRef.current = getPoint(event);
+  };
+
+  const draw = (event) => {
+    if (!drawingRef.current) return;
+    event.preventDefault();
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const point = getPoint(event);
+    const last = lastPointRef.current;
+
+    ctx.beginPath();
+    ctx.moveTo(last.x, last.y);
+    ctx.lineTo(point.x, point.y);
+    ctx.stroke();
+
+    lastPointRef.current = point;
+  };
+
+  const stopDrawing = (event) => {
+    if (!drawingRef.current) return;
+    event.preventDefault();
+    drawingRef.current = false;
+    lastPointRef.current = null;
+    saveSignature();
+  };
+
+  const clearSignature = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const ctx = canvas.getContext("2d");
+
+    ctx.fillStyle = T.bg;
+    ctx.fillRect(0, 0, rect.width, rect.height);
+
+    onChange(null);
+  };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+        <label style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", color: T.textMuted, textTransform: "uppercase" }}>
+          {label}
+        </label>
+        <button
+          type="button"
+          onClick={clearSignature}
+          style={{
+            background: T.surfaceHigh,
+            border: `1px solid ${T.border}`,
+            borderRadius: 6,
+            color: T.textMuted,
+            cursor: "pointer",
+            fontSize: 11,
+            fontWeight: 700,
+            padding: "6px 10px",
+            WebkitTapHighlightColor: "transparent",
+          }}
+        >
+          Cancella firma
+        </button>
+      </div>
+
+      <div
+        style={{
+          background: T.bg,
+          border: `1px solid ${T.border}`,
+          borderRadius: 8,
+          padding: 8,
+        }}
+      >
+        <canvas
+          ref={canvasRef}
+          onPointerDown={startDrawing}
+          onPointerMove={draw}
+          onPointerUp={stopDrawing}
+          onPointerCancel={stopDrawing}
+          onPointerLeave={stopDrawing}
+          style={{
+            display: "block",
+            width: "100%",
+            height: 130,
+            borderRadius: 6,
+            touchAction: "none",
+            cursor: "crosshair",
+            background: T.bg,
+          }}
+        />
+        <div style={{ marginTop: 6, fontSize: 10, color: T.textDim }}>
+          Firma con dito, penna touch o mouse. La firma verrà riportata nel PDF.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
 // Elemento invisibile o visibile per clonare temporaneamente il grafico nel PDF
 const FixedChartContainer = ({ chart1, chartScarico1, chart2, chartScarico2, innerRef }) => {
   return (
@@ -337,7 +488,7 @@ function GeneralInfoPanel({
   diametro, setDiametro, dataProva, setDataProva, provaGiorno, setProvaGiorno,
   tratta, setTratta, km, setKm, sezione, setSezione, terra, setTerra,
   strato, setStrato, quota, setQuota, distBordo, setDistBordo, tecnico, setTecnico,
-  presenti, setPresenti, fotoProva, setFotoProva
+  presenti, setPresenti, fotoProva, setFotoProva, firmaTecnico, setFirmaTecnico
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -415,59 +566,13 @@ function GeneralInfoPanel({
               )}
             </div>
           </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
-
-function ArchivePanel({ items, onOpen, onDuplicate, onDelete }) {
-  return (
-    <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, overflow: "hidden" }}>
-      <div style={{ padding: "12px 14px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-        <div>
-          <div style={{ fontSize: 12, fontWeight: 800, color: T.text }}>Archivio prove</div>
-          <div style={{ fontSize: 10, color: T.textMuted, marginTop: 2 }}>Salvataggio locale sul dispositivo/browser, utilizzabile anche offline.</div>
-        </div>
-        <span style={{ fontSize: 11, color: T.textMuted, fontFamily: "monospace" }}>{items.length} prove</span>
-      </div>
-      {items.length === 0 ? (
-        <div style={{ padding: 18, color: T.textMuted, fontSize: 12 }}>Nessuna prova salvata. Usa “Salva in archivio” dalla barra in alto dopo aver compilato la scheda.</div>
-      ) : (
-        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: 11, fontFamily: "monospace", minWidth: 760 }}>
-            <thead>
-              <tr style={{ background: T.surfaceHigh, color: T.textMuted }}>
-                <th style={{ padding: "9px 12px" }}>ID</th>
-                <th style={{ padding: "9px 12px" }}>Data prova</th>
-                <th style={{ padding: "9px 12px" }}>Verbale</th>
-                <th style={{ padding: "9px 12px" }}>Cantiere</th>
-                <th style={{ padding: "9px 12px" }}>Committente</th>
-                <th style={{ padding: "9px 12px" }}>Esito</th>
-                <th style={{ padding: "9px 12px" }}>Azioni</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item) => (
-                <tr key={item.id} style={{ borderTop: `1px solid ${T.border}` }}>
-                  <td style={{ padding: "9px 12px", color: T.accentBlue, fontWeight: 800 }}>{item.id}</td>
-                  <td style={{ padding: "9px 12px" }}>{item.data?.dataProva || "—"}</td>
-                  <td style={{ padding: "9px 12px" }}>{item.data?.verbale || "—"}</td>
-                  <td style={{ padding: "9px 12px" }}>{item.data?.cantiere || "—"}</td>
-                  <td style={{ padding: "9px 12px" }}>{item.data?.committente || "—"}</td>
-                  <td style={{ padding: "9px 12px", color: item.data?.provaValida ? T.accent : T.accentRed }}>{item.data?.rapporto === null || item.data?.rapporto === undefined ? "—" : item.data.provaValida ? "VALIDA" : "NON VALIDA"}</td>
-                  <td style={{ padding: "9px 12px" }}>
-                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                      <button onClick={() => onOpen(item)} style={{ background: T.surfaceHigh, color: T.text, border: `1px solid ${T.border}`, borderRadius: 6, padding: "6px 8px", cursor: "pointer" }}>Apri</button>
-                      <button onClick={() => onDuplicate(item)} style={{ background: T.surfaceHigh, color: T.text, border: `1px solid ${T.border}`, borderRadius: 6, padding: "6px 8px", cursor: "pointer" }}>Duplica</button>
-                      <button onClick={() => onDelete(item.id)} style={{ background: `${T.accentRed}22`, color: T.accentRed, border: `1px solid ${T.accentRed}55`, borderRadius: 6, padding: "6px 8px", cursor: "pointer" }}>Elimina</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <SectionHeader label="Firma elettronica" step="C" />
+          <SignatureBox
+            label="Firma tecnico esecutore"
+            value={firmaTecnico}
+            onChange={setFirmaTecnico}
+          />
         </div>
       )}
     </div>
@@ -475,6 +580,17 @@ function ArchivePanel({ items, onOpen, onDuplicate, onDelete }) {
 }
 
 export default function App() {
+    const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("theme") || "dark";
+  });
+
+  T = THEMES[theme];
+
+  useEffect(() => {
+    
+    localStorage.setItem("theme", theme);
+    document.body.style.background = T.bg;
+  }, [theme]);
   const [verbale, setVerbale]         = useState("");
   const [cantiere, setCantiere]       = useState("");
   const [committente, setCommittente] = useState("");
@@ -492,15 +608,96 @@ export default function App() {
   const [tecnico, setTecnico]         = useState("");
   const [presenti, setPresenti]       = useState("");
   const [fotoProva, setFotoProva]     = useState(null);
+  const [firmaTecnico, setFirmaTecnico] = useState(null);
   const [c1, setC1]                   = useState(INIT_C1);
   const [c2, setC2]                   = useState(INIT_C2);
-  const [archive, setArchive]         = useState(listArchivedTests);
   const setC1step = (key) => (rows) => setC1((p) => ({ ...p, [key]: rows }));
   const setC2step = (key) => (rows) => setC2((p) => ({ ...p, [key]: rows }));
   
   const chartRef = useRef(null);
   const hiddenChartRef = useRef(null); // Ref per il grafico nascosto fisso (evita bug tab nascoste)
   const [exporting, setExporting] = useState(false);
+  const STORAGE_KEY = "prova-piastra-dati-v1";
+
+useEffect(() => {
+  
+  const saved = localStorage.getItem(STORAGE_KEY);
+  console.log("CARICAMENTO", saved);
+  if (!saved) return;
+
+  try {
+    const data = JSON.parse(saved);
+
+    setVerbale(data.verbale || "");
+    setCantiere(data.cantiere || "");
+    setCommittente(data.committente || "");
+    setDiametro(data.diametro || "300");
+    setDataProva(data.dataProva || "");
+    setProvaGiorno(data.provaGiorno || "");
+    setTratta(data.tratta || "");
+    setKm(data.km || "");
+    setSezione(data.sezione || "");
+    setTerra(data.terra || "");
+    setStrato(data.strato || "");
+    setQuota(data.quota || "");
+    setDistBordo(data.distBordo || "");
+    setTecnico(data.tecnico || "");
+    setPresenti(data.presenti || "");
+    setFotoProva(data.fotoProva || null);
+    setFirmaTecnico(data.firmaTecnico || null);
+    setC1(data.c1 || INIT_C1);
+    setC2(data.c2 || INIT_C2);
+  } catch {
+    console.error("Errore caricamento dati salvati");
+  }
+}, []);
+
+useEffect(() => {
+  const data = {
+    verbale,
+    cantiere,
+    committente,
+    diametro,
+    dataProva,
+    provaGiorno,
+    tratta,
+    km,
+    sezione,
+    terra,
+    strato,
+    quota,
+    distBordo,
+    tecnico,
+    presenti,
+    fotoProva,
+    firmaTecnico,
+    c1,
+    c2,
+  };
+
+console.log("SALVATAGGIO", data);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}, [
+  verbale,
+  cantiere,
+  committente,
+  diametro,
+  dataProva,
+  provaGiorno,
+  tratta,
+  km,
+  sezione,
+  terra,
+  strato,
+  quota,
+  distBordo,
+  tecnico,
+  presenti,
+  fotoProva,
+  firmaTecnico,
+  c1,
+  c2,
+]);
 
   const { md, mdp, rapporto, chart1, chartScarico1, chart2, chartScarico2, tableRows, rScarico2, sScarico2 } = useMemo(() => {
     const D = parseFloat(diametro) || 300;
@@ -564,217 +761,415 @@ export default function App() {
   const provaValida = rapporto !== null && rapporto < 1;
   const rapportoColor = rapporto === null ? T.textMuted : provaValida ? T.accent : T.accentRed;
 
-  const exportPDF = useCallback(async (preview = false) => {
-    setExporting(true);
+const exportPDF = useCallback(async (preview = false) => {
+  setExporting(true);
 
-    try {
-      const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
-      const PW = 210, ML = 14, CW = PW - ML * 2;
-      let y = 12;
+  try {
+    const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
 
-      pdf.setFillColor(22, 27, 34);
-      pdf.rect(0, 0, PW, 18, "F");
-      pdf.setFontSize(14); pdf.setFont("helvetica", "bold"); pdf.setTextColor(232, 237, 243);
-      pdf.text("DISMAT", ML, 11);
-      pdf.setFontSize(8); pdf.setFont("helvetica", "normal"); pdf.setTextColor(139, 148, 158);
-      pdf.text("CNR 146/92 · Determinazione dei Moduli di Deformazione · IO 07-11-B", ML, 15.5);
-      y = 26;
+    const PW = 210;
+    const PH = 297;
+    const ML = 10;
+    const CW = PW - ML * 2;
 
-      pdf.setFontSize(9);
-      pdf.setFont("helvetica", "bold"); pdf.setTextColor(88, 166, 255);
-      pdf.text("DATI GENERALI", ML, y); y += 5;
-      pdf.setDrawColor(48, 54, 61);
-      pdf.line(ML, y, PW - ML, y); y += 5;
-
-      const fields = [
-        ["Committente", committente], ["Cantiere", cantiere], ["Verbale N°", verbale],
-        ["Data Prova", dataProva], ["Prova n°", provaGiorno], ["Tratta", tratta],
-        ["km", km], ["Sezione", sezione], ["Quota", quota],
-        ["Dist. dal bordo", distBordo], ["Tecnico Esecutore", tecnico], ["Presenti", presenti],
-        ["Diametro Piastra", diametro + " mm"], ["Terra", terra], ["Strato", strato],
-      ].filter(([, v]) => v);
-      pdf.setFontSize(9); pdf.setFont("helvetica", "normal"); pdf.setTextColor(230, 237, 243);
-      const colW = CW / 2;
-      fields.forEach(([label, val], i) => {
-        const col = i % 2;
-        const row = Math.floor(i / 2);
-        const cx = ML + col * colW;
-        const cy = y + row * 6;
-        pdf.setTextColor(139, 148, 158); pdf.text(label + ":", cx, cy);
-        pdf.setTextColor(230, 237, 243); pdf.text(String(val), cx + 38, cy);
-      });
-      y += Math.ceil(fields.length / 2) * 6 + 6;
-
-      pdf.setFontSize(9);
-      pdf.setFont("helvetica", "bold"); pdf.setTextColor(88, 166, 255);
-      pdf.text("RISULTATI DEL CALCOLO", ML, y); y += 5;
-      pdf.setDrawColor(48, 54, 61);
-      pdf.line(ML, y, PW - ML, y); y += 6;
-
-      const res = [
-        ["Md — 1° Ciclo (0.25–0.35 MPa)", md !== null ? md.toFixed(2) + " MPa" : "—", [88,166,255]],
-        ["Md' — 2° Ciclo (0.25–0.35 MPa)", mdp !== null ? mdp.toFixed(2) + " MPa" : "—", [240,136,62]],
-        ["Rapporto Md / Md'", rapporto !== null ? rapporto.toFixed(3) : "—", provaValida ? [63,185,80] : [248,81,73]],
-        ["Esito Prova", rapporto !== null ? (provaValida ? "VALIDA (Md/Md' < 1)" : "NON VALIDA (Md/Md' >= 1)") : "—", provaValida ? [63,185,80] : [248,81,73]],
-      ];
-      res.forEach(([label, val, col]) => {
-        pdf.setFont("helvetica", "normal"); pdf.setTextColor(139, 148, 158);
-        pdf.text(label + ":", ML, y);
-        pdf.setFont("helvetica", "bold"); pdf.setTextColor(...col);
-        pdf.text(val, ML + 90, y);
-        y += 6;
-      });
-      y += 4;
-
-      pdf.setFontSize(9); pdf.setFont("helvetica", "bold"); pdf.setTextColor(88, 166, 255);
-      pdf.text("TABELLA LETTURE STABILIZZATE", ML, y); y += 5;
-      pdf.setDrawColor(48, 54, 61); pdf.line(ML, y, PW - ML, y); y += 5;
-      const headers = ["Carico (kPa)", "Lett. C1 (mm)", "s1 (mm)", "Lett. C2 (mm)", "s2 (mm)"];
-      const colXs = [ML, ML+30, ML+66, ML+100, ML+136];
-      const colWs = [28, 34, 32, 34, 32];
-      pdf.setFontSize(8); pdf.setFont("helvetica", "bold"); pdf.setTextColor(139,148,158);
-      headers.forEach((h, i) => pdf.text(h, colXs[i], y, { maxWidth: colWs[i] }));
-      y += 5;
-      pdf.setDrawColor(48,54,61); pdf.line(ML, y, PW-ML, y);
-      y += 3;
-
-      tableRows.forEach(({ p, r1, s1: s1Val, r2, s2: s2Val, isRef }) => {
-        pdf.setFont("helvetica", isRef ? "bold" : "normal");
-        pdf.setTextColor(isRef ? 88 : 230, isRef ? 166 : 237, isRef ? 255 : 243);
-        pdf.text(String(p), colXs[0], y);
-        pdf.setTextColor(88,166,255); pdf.text(r1 !== null ? r1.toFixed(2) : "—", colXs[1], y);
-        pdf.setTextColor(230,237,243); pdf.text(s1Val !== null ? s1Val.toFixed(3) : "—", colXs[2], y);
-        pdf.setTextColor(240,136,62); pdf.text(r2 !== null ? r2.toFixed(2) : "—", colXs[3], y);
-        pdf.setTextColor(230,237,243); pdf.text(s2Val !== null ? s2Val.toFixed(3) : "—", colXs[4], y);
-        y += 5;
-      });
-      y += 4;
-
-      // FIX: Uso il container nascosto fisso (hiddenChartRef) così html2canvas non fallisce se si è su altri tab
-      const targetChart = hiddenChartRef.current || chartRef.current;
-      if (targetChart && (chart1.length > 0 || chart2.length > 0)) {
-        pdf.setFontSize(9);
-        pdf.setFont("helvetica", "bold"); pdf.setTextColor(88, 166, 255);
-        pdf.text("DIAGRAMMA CEDIMENTO — CARICO", ML, y); y += 5;
-        pdf.setDrawColor(48, 54, 61);
-        pdf.line(ML, y, PW - ML, y); y += 3;
-        
-        const canvas = await html2canvas(targetChart, { backgroundColor: "#161b22", scale: 2 });
-        const imgData = canvas.toDataURL("image/png");
-        const imgH = (canvas.height / canvas.width) * CW;
-        const availH = 297 - y - 14;
-        const finalH = Math.min(imgH, availH);
-        pdf.addImage(imgData, "PNG", ML, y, CW, finalH);
-        y += finalH + 4;
-      }
-
-      if (fotoProva) {
-        if (y + 60 > 287) { pdf.addPage(); y = 14; }
-        pdf.setFontSize(9); pdf.setFont("helvetica", "bold"); pdf.setTextColor(88, 166, 255);
-        pdf.text("FOTO DELLA PROVA", ML, y); y += 5;
-        pdf.setDrawColor(48, 54, 61); pdf.line(ML, y, PW - ML, y); y += 3;
-        const img = new Image(); img.src = fotoProva;
-        await new Promise(r => { img.onload = r; });
-        const fW = CW, fH = Math.min((img.height / img.width) * fW, 70);
-        pdf.addImage(fotoProva, "JPEG", ML, y, fW, fH);
-      }
-
-      const pageCount = pdf.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
-        pdf.setPage(i);
-        pdf.setFontSize(7);
-        pdf.setTextColor(72, 79, 88);
-        pdf.text(`DISMAT · IO 07-11-B · CNR 146/92`, ML, 293);
-        pdf.text(`Pag. ${i}/${pageCount}`, PW - ML, 293, { align: "right" });
-      }
-
-      const filename = `Prova_Piastra_${verbale || "report"}_${(dataProva || "").replace(/[/]/g,"-") || new Date().toISOString().slice(0,10)}.pdf`;
-      const blob = pdf.output("blob");
-      const blobUrl = URL.createObjectURL(blob);
-
-      // FIX: Per l'anteprima, creiamo un link sicuro cliccabile via codice ad esecuzione terminata.
-      // Questo bypassa il blocco pop-up asincrono in iOS/Android.
-      if (preview) {
-        const link = document.createElement("a");
-        link.href = blobUrl;
-        link.target = "_blank";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } else {
-        pdf.save(filename);
-      }
-
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
-    } catch (err) {
-      console.error(err);
-      alert("Errore nella generazione del PDF: " + (err && err.message ? err.name + " - " + err.message : String(err)));
-    } finally {
-      setExporting(false);
+    function section(x, y, w, title) {
+      pdf.setFillColor(235, 238, 242);
+      pdf.rect(x, y, w, 5.5, "F");
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(6.8);
+      pdf.setTextColor(20, 20, 20);
+      pdf.text(title, x + 1.5, y + 3.8);
+      return y + 7;
     }
-  }, [committente, cantiere, verbale, dataProva, provaGiorno, tratta, km, sezione, quota,
-      distBordo, tecnico, presenti, diametro, terra, strato,
-      md, mdp, rapporto, provaValida, tableRows, fotoProva, chart1, chart2]);
 
+    function cell(x, y, w, h, label, value) {
+      pdf.setDrawColor(185, 185, 185);
+      pdf.rect(x, y, w, h);
 
-  function currentRecordData(extra = {}) {
-    return {
-      verbale, cantiere, committente, diametro, dataProva, provaGiorno,
-      tratta, km, sezione, terra, strato, quota, distBordo, tecnico, presenti,
-      fotoProva, c1, c2, rapporto, provaValida, md, mdp, ...extra,
-    };
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(5.4);
+      pdf.setTextColor(90, 90, 90);
+      pdf.text(label, x + 1.3, y + 3);
+
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(6.5);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text(String(value || "—"), x + 1.3, y + 7.1, { maxWidth: w - 2.5 });
+    }
+
+    function drawPdfChart(x, y, w, h) {
+      pdf.setFillColor(255, 255, 255);
+      pdf.rect(x, y, w, h, "F");
+      pdf.setDrawColor(170, 170, 170);
+      pdf.rect(x, y, w, h);
+
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(6.5);
+      pdf.setTextColor(20, 20, 20);
+      pdf.text("Diagramma cedimento - carico", x + 2, y + 4.5);
+
+      const allPoints = [
+        ...chart1,
+        ...chartScarico1,
+        ...chart2,
+        ...chartScarico2,
+      ].filter((p) => p && Number.isFinite(p.x) && Number.isFinite(p.y));
+
+      if (!allPoints.length) {
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(7);
+        pdf.setTextColor(90, 90, 90);
+        pdf.text("Grafico disponibile dopo inserimento letture.", x + w / 2, y + h / 2, {
+          align: "center",
+        });
+        return;
+      }
+
+      const plotX = x + 13;
+      const plotY = y + 11;
+      const plotW = w - 20;
+      const plotH = h - 20;
+
+      const maxX = 500;
+      const maxY = Math.max(...allPoints.map((p) => p.y), 1) + 0.5;
+
+      pdf.setDrawColor(225, 225, 225);
+      for (let i = 1; i <= 4; i++) {
+        const gx = plotX + (plotW / 5) * i;
+        const gy = plotY + (plotH / 5) * i;
+        pdf.line(gx, plotY, gx, plotY + plotH);
+        pdf.line(plotX, gy, plotX + plotW, gy);
+      }
+
+      pdf.setDrawColor(70, 70, 70);
+      pdf.line(plotX, plotY + plotH, plotX + plotW, plotY + plotH);
+      pdf.line(plotX, plotY, plotX, plotY + plotH);
+
+      function px(p) {
+        return plotX + (p.x / maxX) * plotW;
+      }
+
+      function py(p) {
+        return plotY + (p.y / maxY) * plotH;
+      }
+
+      function drawSeries(points, color, dashed = false) {
+        if (!points.length) return;
+
+        pdf.setDrawColor(...color);
+        pdf.setFillColor(...color);
+
+        if (dashed) pdf.setLineDashPattern([2, 2], 0);
+        else pdf.setLineDashPattern([], 0);
+
+        let prev = null;
+
+        points.forEach((p) => {
+          const cx = px(p);
+          const cy = py(p);
+
+          if (prev) pdf.line(prev.x, prev.y, cx, cy);
+
+          if (!dashed) pdf.circle(cx, cy, 1.1, "F");
+
+          prev = { x: cx, y: cy };
+        });
+
+        pdf.setLineDashPattern([], 0);
+      }
+
+      drawSeries(chart1, [40, 99, 180], false);
+      drawSeries(chartScarico1, [40, 99, 180], true);
+      drawSeries(chart2, [210, 110, 35], false);
+      drawSeries(chartScarico2, [210, 110, 35], true);
+
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(4.8);
+      pdf.setTextColor(70, 70, 70);
+
+      pdf.text("Carico [kPa]", plotX + plotW / 2, y + h - 3, { align: "center" });
+      pdf.text("Cedimento [mm]", x + 4.5, plotY + plotH / 2, { angle: 90 });
+
+      pdf.text("0", plotX, plotY + plotH + 3);
+      pdf.text("500", plotX + plotW, plotY + plotH + 3, { align: "right" });
+      pdf.text(maxY.toFixed(1), plotX - 2, plotY + 1.5, { align: "right" });
+
+      pdf.setFontSize(5.2);
+      pdf.setTextColor(40, 99, 180);
+      pdf.text("1° ciclo", x + w - 34, y + 5);
+      pdf.setTextColor(210, 110, 35);
+      pdf.text("2° ciclo", x + w - 18, y + 5);
+    }
+
+    // SFONDO
+    pdf.setFillColor(255, 255, 255);
+    pdf.rect(0, 0, PW, PH, "F");
+
+    // HEADER
+    try {
+      const logo = await fetch("/logo-dismat.jpg")
+        .then((r) => r.blob())
+        .then(
+          (blob) =>
+            new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result);
+              reader.readAsDataURL(blob);
+            })
+        );
+
+      pdf.addImage(logo, "JPEG", ML, 8, 18, 18);
+    } catch {}
+
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(10.5);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text("L A B O R A T O R I O   D I S M A T", ML + 23, 12);
+
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(6.2);
+    pdf.text("Sperimentazione sulle Strutture e sui Materiali da Costruzione", ML + 23, 16);
+    pdf.text("CNR 146/92 - Prova di carico su piastra - Determinazione dei moduli di deformazione", ML + 23, 19.8);
+    pdf.text("Procedura interna DISMAT - IO 07-11-B", ML + 23, 23.5);
+
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(8);
+    pdf.text("MINUTA DI PROVA", PW - ML, 12, { align: "right" });
+    pdf.setFontSize(7);
+    pdf.text("PROVA DI CARICO SU PIASTRA", PW - ML, 17, { align: "right" });
+
+    pdf.setDrawColor(60, 60, 60);
+    pdf.line(ML, 29, PW - ML, 29);
+
+    // DATI GENERALI + FOTO
+    let y = 34;
+    const leftW = 112;
+    const rightX = ML + leftW + 6;
+    const rightW = CW - leftW - 6;
+
+    let gy = section(ML, y, leftW, "DATI GENERALI");
+
+    const h = 9.2;
+    const w2 = leftW / 2;
+
+    cell(ML, gy, w2, h, "Verbale n.", verbale);
+    cell(ML + w2, gy, w2, h, "Data prova", dataProva);
+    gy += h;
+
+    cell(ML, gy, w2, h, "Committente", committente);
+    cell(ML + w2, gy, w2, h, "Cantiere", cantiere);
+    gy += h;
+
+    cell(ML, gy, w2, h, "Tratta / km", `${tratta || "—"} ${km || ""}`);
+    cell(ML + w2, gy, w2, h, "Sezione / quota", `${sezione || "—"} ${quota || ""}`);
+    gy += h;
+
+    cell(ML, gy, w2, h, "Terreno / strato", `${terra || "—"} ${strato || ""}`);
+    cell(ML + w2, gy, w2, h, "Diametro piastra", `${diametro || "—"} mm`);
+    gy += h;
+
+    cell(ML, gy, w2, h, "Tecnico esecutore", tecnico);
+    cell(ML + w2, gy, w2, h, "Presenti", presenti);
+    gy += h;
+
+   let fy = section(rightX, y, rightW, "FOTO PROVA");
+
+const photoH = 56;
+
+pdf.setDrawColor(185, 185, 185);
+pdf.rect(rightX, fy, rightW, photoH);
+
+if (fotoProva) {
+  try {
+    pdf.addImage(fotoProva, "JPEG", rightX + 1.5, fy + 1.5, rightW - 3, photoH - 3);
+      } catch {
+        pdf.setFontSize(7);
+        pdf.text("Foto non leggibile", rightX + rightW / 2, fy + 23, { align: "center" });
+      }
+    } else {
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(7);
+      pdf.setTextColor(90, 90, 90);
+      pdf.text("Foto prova non inserita", rightX + rightW / 2, fy + photoH / 2, { align: "center" });
+    }
+
+    // RISULTATI
+    y = 88;
+    let ry = section(ML, y, CW, "RISULTATI DELLA PROVA");
+
+    const resW = CW / 4;
+
+    cell(ML, ry, resW, 11, "Md - 1° ciclo", md !== null ? `${md.toFixed(2)} MPa` : "—");
+    cell(ML + resW, ry, resW, 11, "Md' - 2° ciclo", mdp !== null ? `${mdp.toFixed(2)} MPa` : "—");
+    cell(ML + 2 * resW, ry, resW, 11, "Rapporto Md/Md'", rapporto !== null ? rapporto.toFixed(3) : "—");
+    cell(
+      ML + 3 * resW,
+      ry,
+      resW,
+      11,
+      "Esito",
+      rapporto !== null ? (provaValida ? "VALIDA" : "NON VALIDA") : "—"
+    );
+
+    // TABELLA
+    y = 108;
+    let ty = section(ML, y, 82, "TABELLA LETTURE STABILIZZATE");
+
+    const tx = ML;
+    const col = [18, 16, 16, 16, 16];
+    const heads = ["kPa", "L1", "s1", "L2", "s2"];
+
+    pdf.setFillColor(245, 245, 245);
+    pdf.rect(tx, ty, 82, 6, "F");
+
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(5.8);
+    pdf.setTextColor(40, 40, 40);
+
+    let cx = tx;
+    heads.forEach((head, i) => {
+      pdf.text(head, cx + 1.5, ty + 4);
+      cx += col[i];
+    });
+
+    ty += 6;
+
+    tableRows.forEach(({ p, r1, s1: s1Val, r2, s2: s2Val }) => {
+      pdf.setDrawColor(210, 210, 210);
+      pdf.rect(tx, ty, 82, 7);
+
+      const vals = [
+        p,
+        r1 !== null ? r1.toFixed(2) : "—",
+        s1Val !== null ? s1Val.toFixed(3) : "—",
+        r2 !== null ? r2.toFixed(2) : "—",
+        s2Val !== null ? s2Val.toFixed(3) : "—",
+      ];
+
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(5.8);
+      pdf.setTextColor(0, 0, 0);
+
+      cx = tx;
+      vals.forEach((v, i) => {
+        pdf.text(String(v), cx + 1.3, ty + 4.7, { maxWidth: col[i] - 2 });
+        cx += col[i];
+      });
+
+      ty += 7;
+    });
+
+    // FORMULE + NOTE
+    let ny = section(ML, ty + 5, 82, "FORMULE E NOTE");
+
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(5.7);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text("Md = (Δp / Δs) · D", ML + 1.5, ny + 1);
+    pdf.text("Intervallo di calcolo: 0,25 - 0,35 MPa", ML + 1.5, ny + 5);
+    pdf.text("Prova valida se Md/Md' < 1", ML + 1.5, ny + 9);
+    pdf.text("Norma: CNR 146/92", ML + 1.5, ny + 13);
+
+    // GRAFICO
+    const chartX = ML + 88;
+    const chartY = 108;
+    const chartW = CW - 88;
+    const chartH = 105;
+
+    section(chartX, chartY, chartW, "GRAFICO CARICO - CEDIMENTO");
+    drawPdfChart(chartX, chartY + 7, chartW, chartH - 7);
+
+    // FIRMA
+    const signY = 224;
+
+    if (firmaTecnico) {
+      try {
+        pdf.addImage(firmaTecnico, "PNG", ML + 4, signY - 22, 62, 18);
+      } catch {
+        // Se la firma non è leggibile, resta comunque la riga firma.
+      }
+    }
+
+    pdf.setDrawColor(180, 180, 180);
+    pdf.line(ML, signY, ML + 72, signY);
+    pdf.line(PW - ML - 72, signY, PW - ML, signY);
+
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(6.5);
+    pdf.setTextColor(60, 60, 60);
+    pdf.text("Il tecnico esecutore", ML, signY + 5);
+    pdf.text("Direzione lavori / Committente", PW - ML - 72, signY + 5);
+
+    // FOOTER
+    pdf.setDrawColor(100, 100, 100);
+    pdf.line(ML, PH - 13, PW - ML, PH - 13);
+
+    pdf.setFontSize(6);
+    pdf.setTextColor(90, 90, 90);
+    pdf.text("DISMAT - CNR 146/92 - Prova di carico su piastra", ML, PH - 8);
+    pdf.text("Pagina 1/1", PW - ML, PH - 8, { align: "right" });
+
+    const filename = `Prova_Piastra_${verbale || "report"}_${
+      (dataProva || "").replace(/[/]/g, "-") || new Date().toISOString().slice(0, 10)
+    }.pdf`;
+
+    const blob = pdf.output("blob");
+    const blobUrl = URL.createObjectURL(blob);
+
+    if (preview) {
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      pdf.save(filename);
+    }
+
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
+  } catch (err) {
+    console.error(err);
+    alert(
+      "Errore nella generazione del PDF: " +
+        (err && err.message ? err.name + " - " + err.message : String(err))
+    );
+  } finally {
+    setExporting(false);
   }
-
-  function saveCurrent() {
-    const id = verbale || nextPiastraId();
-    if (!verbale) setVerbale(id);
-    const data = currentRecordData({ verbale: id });
-    const record = { id, savedAt: new Date().toISOString(), data };
-    setArchive(saveArchivedTest(record));
-    window.alert(`Prova ${id} salvata in archivio.`);
-  }
-
-  function openRecord(record) {
-    const d = record.data || {};
-    setVerbale(d.verbale || record.id || "");
-    setCantiere(d.cantiere || "");
-    setCommittente(d.committente || "");
-    setDiametro(d.diametro || "300");
-    setDataProva(d.dataProva || "");
-    setProvaGiorno(d.provaGiorno || "");
-    setTratta(d.tratta || "");
-    setKm(d.km || "");
-    setSezione(d.sezione || "");
-    setTerra(d.terra || "");
-    setStrato(d.strato || "");
-    setQuota(d.quota || "");
-    setDistBordo(d.distBordo || "");
-    setTecnico(d.tecnico || "");
-    setPresenti(d.presenti || "");
-    setFotoProva(d.fotoProva || null);
-    setC1(d.c1 || INIT_C1);
-    setC2(d.c2 || INIT_C2);
-    setTab("c1");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  function duplicateRecord(record) {
-    openRecord({ ...record, data: { ...(record.data || {}), verbale: nextPiastraId() } });
-  }
-
-  function newTest() {
-    if (!window.confirm("Creare una nuova prova? I dati non salvati verranno persi.")) return;
-    setVerbale(nextPiastraId());
-    setCantiere(""); setCommittente(""); setDiametro("300"); setDataProva(""); setProvaGiorno("");
-    setTratta(""); setKm(""); setSezione(""); setTerra(""); setStrato(""); setQuota(""); setDistBordo("");
-    setTecnico(""); setPresenti(""); setFotoProva(null); setC1(INIT_C1); setC2(INIT_C2); setTab("c1");
-  }
-
+}, [
+  committente,
+  cantiere,
+  verbale,
+  dataProva,
+  provaGiorno,
+  tratta,
+  km,
+  sezione,
+  quota,
+  distBordo,
+  tecnico,
+  presenti,
+  diametro,
+  terra,
+  strato,
+  md,
+  mdp,
+  rapporto,
+  provaValida,
+  tableRows,
+  fotoProva,
+  firmaTecnico,
+  chart1,
+  chartScarico1,
+  chart2,
+  chartScarico2,
+]);
+     
   const tabs = [
     { id: "c1", label: "1° Ciclo" },
     { id: "c2", label: "2° Ciclo" },
     { id: "results", label: "Risultati" },
-    { id: "archive", label: "Archivio" },
   ];
 
   return (
@@ -787,8 +1182,32 @@ export default function App() {
         innerRef={hiddenChartRef} 
       />
 
-      <header style={{ background: T.surface, borderBottom: `1px solid ${T.border}`, padding: "10px 16px", display: "flex", alignItems: "center", gap: 12, position: "sticky", top: 0, zIndex: 100 }}>
-        <DismantLogo size={30} />
+      <header
+  style={{
+    background: T.surface,
+    borderBottom: `1px solid ${T.border}`,
+    padding: "10px 16px",
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    position: "sticky",
+    top: 0,
+    zIndex: 100,
+    flexWrap: "wrap",
+  }}
+  
+>
+  <img
+    src="/logo-dismat.jpg"
+    alt="Laboratorio DISMAT"
+    style={{
+      width: 46,
+      height: 46,
+      borderRadius: 8,
+      objectFit: "cover",
+      background: "#fff",
+    }}
+  />
         <div>
           <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: "0.06em", color: T.text }}>DISMAT</div>
           <div style={{ fontSize: 9, color: T.textMuted, letterSpacing: "0.04em" }}>CNR 146/92 · Prova di Carico su Piastra</div>
@@ -801,19 +1220,54 @@ export default function App() {
             <Pill label="Md/Md'" value={rapporto.toFixed(3)} color={rapportColor} bold />
           </div>
         )}
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+        <div
+  style={{
+    display: "flex",
+    gap: 8,
+    flexWrap: "wrap",
+    justifyContent: "flex-end",
+  }}
+>
           <button
-            onClick={saveCurrent}
-            style={{ background: T.surfaceHigh, color: T.text, border: `1px solid ${T.border}`, borderRadius: 7, padding: "8px 12px", fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}
-          >
-            Salva
-          </button>
-          <button
-            onClick={newTest}
-            style={{ background: T.surfaceHigh, color: T.textMuted, border: `1px solid ${T.border}`, borderRadius: 7, padding: "8px 12px", fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", cursor: "pointer", WebkitTapHighlightColor: "transparent" }}
-          >
-            Nuova
-          </button>
+  type="button"
+  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+  style={{
+    background: T.surfaceHigh,
+    color: T.text,
+    border: `1px solid ${T.border}`,
+    borderRadius: 7,
+    padding: "8px 12px",
+    fontSize: 11,
+    fontWeight: 700,
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+    minWidth: 92,
+  }}
+>
+  {theme === "dark" ? "☀️ Chiaro" : "🌙 Scuro"}
+</button>
+<button
+  type="button"
+  onClick={() => {
+    if (window.confirm("Vuoi iniziare una nuova prova? Tutti i dati verranno cancellati.")) {
+      localStorage.removeItem("prova-piastra-dati-v1");
+      window.location.reload();
+    }
+  }}
+  style={{
+    background: T.accentRed,
+    color: "#fff",
+    border: "none",
+    borderRadius: 7,
+    padding: "8px 12px",
+    fontSize: 11,
+    fontWeight: 700,
+    cursor: "pointer",
+    minWidth: 92,
+  }}
+>
+  Nuova prova
+</button>
           <button
             onClick={() => exportPDF(true)}
             disabled={exporting}
@@ -823,8 +1277,9 @@ export default function App() {
               border: `1px solid ${T.border}`, borderRadius: 7,
               padding: "8px 12px", fontSize: 11, fontWeight: 700,
               letterSpacing: "0.06em", cursor: exporting ? "default" : "pointer",
-              WebkitTapHighlightColor: "transparent",
+              WebkitTapHighlightColor: "transparent",minWidth: 92,
             }}
+            
           >
             Anteprima
           </button>
@@ -838,12 +1293,13 @@ export default function App() {
               padding: "8px 14px", fontSize: 11, fontWeight: 800,
               letterSpacing: "0.08em", cursor: exporting ? "default" : "pointer",
               whiteSpace: "nowrap", flexShrink: 0,
-              WebkitTapHighlightColor: "transparent",
+              WebkitTapHighlightColor: "transparent",minWidth: 92,
             }}
           >
             {exporting ? "⏳ Generando..." : "↓ PDF"}
           </button>
         </div>
+
       </header>
 
       <GeneralInfoPanel
@@ -863,7 +1319,56 @@ export default function App() {
         tecnico={tecnico} setTecnico={setTecnico}
         presenti={presenti} setPresenti={setPresenti}
         fotoProva={fotoProva} setFotoProva={setFotoProva}
+        firmaTecnico={firmaTecnico} setFirmaTecnico={setFirmaTecnico}
       />
+      <div
+  style={{
+    margin: "12px 16px 0",
+    background: T.surface,
+    border: `1px solid ${T.border}`,
+    borderRadius: 12,
+    padding: "12px 14px",
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+  }}
+>
+  <div>
+    <div
+      style={{
+        fontSize: 10,
+        fontWeight: 900,
+        letterSpacing: "0.12em",
+        textTransform: "uppercase",
+        color: T.textMuted,
+      }}
+    >
+      Riferimento normativo
+    </div>
+    <div
+      style={{
+        marginTop: 3,
+        fontSize: 14,
+        fontWeight: 800,
+        color: T.text,
+      }}
+    >
+      CNR 146/92 · Determinazione dei moduli di deformazione Md e Md'
+    </div>
+  </div>
+
+  <div
+    style={{
+      fontSize: 12,
+      color: T.textMuted,
+      fontWeight: 700,
+    }}
+  >
+    Procedura interna DISMAT · IO 07-11-B
+  </div>
+</div>
 
       <div style={{ background: T.surface, borderBottom: `1px solid ${T.border}`, display: "flex", padding: "0 16px" }}>
         {tabs.map((t) => (
@@ -997,16 +1502,6 @@ export default function App() {
 
           </div>
         )}
-
-        {tab === "archive" && (
-          <ArchivePanel
-            items={archive}
-            onOpen={openRecord}
-            onDuplicate={duplicateRecord}
-            onDelete={(id) => setArchive(deleteArchivedTest(id))}
-          />
-        )}
       </div>
     </div>
-  );
-}
+  );}
