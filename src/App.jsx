@@ -4,6 +4,15 @@ import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, ReferenceLine,
 } from "recharts";
+import {
+  listTests,
+  saveTest,
+  deleteTest,
+  writeTests,
+  loadServerTests,
+  syncServerTests,
+  nextReportId,
+} from "./utils/storage";
 
 // ─── design tokens ────────────────────────────────────────────────────────────
 const THEMES = {
@@ -579,6 +588,132 @@ function GeneralInfoPanel({
   );
 }
 
+
+function ArchivePanel({ items = [], onOpen, onDuplicate, onDelete, onExport }) {
+  const [query, setQuery] = useState("");
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+
+    return [...items]
+      .sort((a, b) => new Date(b.savedAt || 0) - new Date(a.savedAt || 0))
+      .filter((item) => {
+        if (!q) return true;
+
+        const text = [
+          item.id,
+          item.data?.verbale,
+          item.data?.cantiere,
+          item.data?.committente,
+          item.data?.dataProva,
+          item.data?.tecnico,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return text.includes(q);
+      });
+  }, [items, query]);
+
+  function handleDelete(item) {
+    const ok = window.confirm(
+      `Eliminare definitivamente la prova ${item.id || item.data?.verbale || ""}?`
+    );
+
+    if (!ok) return;
+
+    onDelete(item.id);
+  }
+
+  return (
+    <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, overflow: "hidden" }}>
+      <div style={{ padding: "12px 14px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 800, color: T.text }}>Archivio prove</div>
+          <div style={{ fontSize: 10, color: T.textMuted, marginTop: 2 }}>
+            Archivio locale con IndexedDB, utilizzabile anche offline.
+          </div>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Cerca prova..."
+            style={{
+              background: T.bg,
+              border: `1px solid ${T.border}`,
+              borderRadius: 7,
+              color: T.text,
+              fontSize: 12,
+              padding: "7px 10px",
+              outline: "none",
+              minWidth: 180,
+            }}
+          />
+          <span style={{ fontSize: 11, color: T.textMuted, fontFamily: "monospace" }}>
+            {filtered.length} / {items.length} prove
+          </span>
+        </div>
+      </div>
+
+      {items.length === 0 ? (
+        <div style={{ padding: 18, color: T.textMuted, fontSize: 12 }}>
+          Nessuna prova salvata. Usa “Salva” dalla barra in alto dopo aver compilato la scheda.
+        </div>
+      ) : filtered.length === 0 ? (
+        <div style={{ padding: 18, color: T.textMuted, fontSize: 12 }}>
+          Nessuna prova trovata con questa ricerca.
+        </div>
+      ) : (
+        <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: 11, fontFamily: "monospace", minWidth: 820 }}>
+            <thead>
+              <tr style={{ background: T.surfaceHigh, color: T.textMuted }}>
+                <th style={{ padding: "9px 12px" }}>ID</th>
+                <th style={{ padding: "9px 12px" }}>Salvata il</th>
+                <th style={{ padding: "9px 12px" }}>Data prova</th>
+                <th style={{ padding: "9px 12px" }}>Verbale</th>
+                <th style={{ padding: "9px 12px" }}>Cantiere</th>
+                <th style={{ padding: "9px 12px" }}>Committente</th>
+                <th style={{ padding: "9px 12px" }}>Esito</th>
+                <th style={{ padding: "9px 12px" }}>Azioni</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {filtered.map((item) => (
+                <tr key={item.id} style={{ borderTop: `1px solid ${T.border}` }}>
+                  <td style={{ padding: "9px 12px", color: T.accentBlue, fontWeight: 800 }}>{item.id || "—"}</td>
+                  <td style={{ padding: "9px 12px" }}>{item.savedAt ? new Date(item.savedAt).toLocaleString("it-IT") : "—"}</td>
+                  <td style={{ padding: "9px 12px" }}>{item.data?.dataProva || "—"}</td>
+                  <td style={{ padding: "9px 12px" }}>{item.data?.verbale || "—"}</td>
+                  <td style={{ padding: "9px 12px" }}>{item.data?.cantiere || "—"}</td>
+                  <td style={{ padding: "9px 12px" }}>{item.data?.committente || "—"}</td>
+                  <td style={{ padding: "9px 12px", color: item.data?.rapporto === null || item.data?.rapporto === undefined ? T.textMuted : item.data?.provaValida ? T.accent : T.accentRed }}>
+                    {item.data?.rapporto === null || item.data?.rapporto === undefined ? "—" : item.data?.provaValida ? "VALIDA" : "NON VALIDA"}
+                  </td>
+                  <td style={{ padding: "9px 12px" }}>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      <button type="button" onClick={() => onOpen(item)} style={{ background: T.surfaceHigh, color: T.text, border: `1px solid ${T.border}`, borderRadius: 6, padding: "6px 8px", cursor: "pointer" }}>Apri</button>
+                      <button type="button" onClick={() => onDuplicate(item)} style={{ background: T.surfaceHigh, color: T.text, border: `1px solid ${T.border}`, borderRadius: 6, padding: "6px 8px", cursor: "pointer" }}>Duplica</button>
+                      <button type="button" onClick={() => onExport(item)} style={{ background: T.surfaceHigh, color: T.text, border: `1px solid ${T.border}`, borderRadius: 6, padding: "6px 8px", cursor: "pointer" }}>PDF</button>
+                      <button type="button" onClick={() => handleDelete(item)} style={{ background: `${T.accentRed}22`, color: T.accentRed, border: `1px solid ${T.accentRed}55`, borderRadius: 6, padding: "6px 8px", cursor: "pointer" }}>Elimina</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 export default function App() {
     const [theme, setTheme] = useState(() => {
     return localStorage.getItem("theme") || "dark";
@@ -611,13 +746,26 @@ export default function App() {
   const [firmaTecnico, setFirmaTecnico] = useState(null);
   const [c1, setC1]                   = useState(INIT_C1);
   const [c2, setC2]                   = useState(INIT_C2);
+  const [archive, setArchive] = useState(listTests);
   const setC1step = (key) => (rows) => setC1((p) => ({ ...p, [key]: rows }));
   const setC2step = (key) => (rows) => setC2((p) => ({ ...p, [key]: rows }));
   
   const chartRef = useRef(null);
   const hiddenChartRef = useRef(null); // Ref per il grafico nascosto fisso (evita bug tab nascoste)
   const [exporting, setExporting] = useState(false);
+  useEffect(() => {
+  (async () => {
+    const savedArchive = await loadServerTests();
+    if (savedArchive.length) setArchive(savedArchive);
+  })();
+}, []);
+
+useEffect(() => {
+  writeTests(archive);
+  syncServerTests(archive);
+}, [archive]);
   const STORAGE_KEY = "prova-piastra-dati-v1";
+  
 
 useEffect(() => {
   
@@ -1165,11 +1313,103 @@ if (fotoProva) {
   chart2,
   chartScarico2,
 ]);
+function currentRecordData(extra = {}) {
+  return {
+    verbale,
+    cantiere,
+    committente,
+    diametro,
+    dataProva,
+    provaGiorno,
+    tratta,
+    km,
+    sezione,
+    terra,
+    strato,
+    quota,
+    distBordo,
+    tecnico,
+    presenti,
+    fotoProva,
+    firmaTecnico,
+    c1,
+    c2,
+    rapporto,
+    provaValida,
+    md,
+    mdp,
+    ...extra,
+  };
+}
+
+function saveCurrent() {
+  const id = verbale || nextReportId();
+  if (!verbale) setVerbale(id);
+
+  const data = currentRecordData({ verbale: id });
+  const record = { id, savedAt: new Date().toISOString(), data };
+
+  setArchive(saveTest(record));
+  window.alert(`Prova ${id} salvata in archivio.`);
+}
+
+function openRecord(record) {
+  const d = record.data || {};
+
+  setVerbale(d.verbale || record.id || "");
+  setCantiere(d.cantiere || "");
+  setCommittente(d.committente || "");
+  setDiametro(d.diametro || "300");
+  setDataProva(d.dataProva || "");
+  setProvaGiorno(d.provaGiorno || "");
+  setTratta(d.tratta || "");
+  setKm(d.km || "");
+  setSezione(d.sezione || "");
+  setTerra(d.terra || "");
+  setStrato(d.strato || "");
+  setQuota(d.quota || "");
+  setDistBordo(d.distBordo || "");
+  setTecnico(d.tecnico || "");
+  setPresenti(d.presenti || "");
+  setFotoProva(d.fotoProva || null);
+  setFirmaTecnico(d.firmaTecnico || null);
+  setC1(d.c1 || INIT_C1);
+  setC2(d.c2 || INIT_C2);
+  setTab("c1");
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function duplicateRecord(record) {
+  const newId = nextReportId();
+
+  const duplicatedData = {
+    ...(record.data || {}),
+    verbale: newId,
+  };
+
+  const duplicatedRecord = {
+    id: newId,
+    savedAt: new Date().toISOString(),
+    data: duplicatedData,
+  };
+
+  setArchive(saveTest(duplicatedRecord));
+  openRecord(duplicatedRecord);
+  window.alert(`Prova duplicata come ${newId}.`);
+}
+
+function exportRecord(record) {
+  openRecord(record);
+  window.alert("Prova aperta. Ora puoi generare il PDF dal pulsante in alto.");
+}
+
      
   const tabs = [
     { id: "c1", label: "1° Ciclo" },
     { id: "c2", label: "2° Ciclo" },
     { id: "results", label: "Risultati" },
+    { id: "archive", label: "Archivio" },
   ];
 
   return (
@@ -1298,6 +1538,23 @@ if (fotoProva) {
           >
             {exporting ? "⏳ Generando..." : "↓ PDF"}
           </button>
+          <button
+  type="button"
+  onClick={saveCurrent}
+  style={{
+    background: T.surfaceHigh,
+    color: T.text,
+    border: `1px solid ${T.border}`,
+    borderRadius: 7,
+    padding: "8px 12px",
+    fontSize: 11,
+    fontWeight: 700,
+    cursor: "pointer",
+    minWidth: 92,
+  }}
+>
+  Salva
+</button>
         </div>
 
       </header>
@@ -1424,7 +1681,6 @@ if (fotoProva) {
               <ResultCard label="Md' — 2° Ciclo" value={mdp !== null ? mdp.toFixed(2) : "—"} unit="MPa" color={T.cycle2} sub="Intervallo 0.25–0.35 MPa" />
               <ResultCard label="Rapporto Md / Md'" value={rapporto !== null ? rapporto.toFixed(3) : "—"} unit="—" color={rapportoColor} highlight={rapporto !== null ? rapportoColor : undefined} sub={rapporto === null ? "In attesa dati" : provaValida ? "✓ Prova VALIDA (< 1)" : "✗ Prova NON VALIDA (≥ 1)"} />
             </div>
-
             <div ref={chartRef} style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "14px 10px", marginBottom: 20 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
                 <div>
@@ -1502,6 +1758,17 @@ if (fotoProva) {
 
           </div>
         )}
+
+        {tab === "archive" && (
+          <ArchivePanel
+            items={archive}
+            onOpen={openRecord}
+            onDuplicate={duplicateRecord}
+            onDelete={(id) => setArchive(deleteTest(id))}
+            onExport={exportRecord}
+          />
+        )}
+
       </div>
     </div>
   );}
