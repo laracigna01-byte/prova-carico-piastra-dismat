@@ -212,3 +212,48 @@
   font-size: 15px;
   font-weight: 700;
 }
+.dismat-instructions-toggle {
+  width: 100%;
+  margin: 4px 0 18px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 11px 14px;
+  background: #f9fafb;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.dismat-instructions-toggle:hover {
+  border-color: #d71920;
+  color: #d71920;
+  background: #ffffff;
+}
+
+.dismat-instructions-box {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  text-align: left;
+  color: #374151;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.dismat-instructions-box h4 {
+  margin: 10px 0 6px;
+  color: #d71920;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.dismat-instructions-box h4:first-child {
+  margin-top: 0;
+}
+
+.dismat-instructions-box p {
+  margin: 0 0 9px;
+}
