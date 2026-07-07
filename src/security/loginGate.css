@@ -1,0 +1,214 @@
+.dismat-login-page {
+  min-height: 100vh;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at top left, rgba(215, 25, 32, 0.12), transparent 32%),
+    linear-gradient(135deg, #f3f4f6 0%, #ffffff 45%, #e5e7eb 100%);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.dismat-login-card {
+  width: 100%;
+  max-width: 460px;
+  padding: 34px 30px 26px;
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.16);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.dismat-login-logo {
+  width: min(360px, 92%);
+  height: auto;
+  max-height: 120px;
+  object-fit: contain;
+  margin-bottom: 26px;
+  background: #000;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.dismat-login-card h1 {
+  margin: 0;
+  font-size: 25px;
+  line-height: 1.2;
+  color: #111827;
+  letter-spacing: -0.03em;
+}
+
+.dismat-login-card h2 {
+  margin: 10px 0 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #d71920;
+}
+
+.dismat-login-text {
+  margin: 16px 0 22px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #4b5563;
+}
+
+.dismat-login-form {
+  display: grid;
+  gap: 14px;
+  text-align: left;
+}
+
+.dismat-login-form label {
+  display: grid;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #374151;
+}
+
+.dismat-login-form input[type="text"],
+.dismat-login-form input[type="password"] {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 13px 14px;
+  font-size: 16px;
+  outline: none;
+  background: #f9fafb;
+  color: #111827;
+}
+
+.dismat-login-form input:focus {
+  border-color: #d71920;
+  box-shadow: 0 0 0 4px rgba(215, 25, 32, 0.12);
+  background: #ffffff;
+}
+
+.dismat-show-password {
+  display: flex !important;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 9px !important;
+  font-weight: 600 !important;
+  color: #4b5563 !important;
+}
+
+.dismat-show-password input {
+  width: 16px;
+  height: 16px;
+}
+
+.dismat-login-error {
+  padding: 11px 12px;
+  border-radius: 12px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.dismat-login-form button {
+  margin-top: 4px;
+  width: 100%;
+  border: none;
+  border-radius: 14px;
+  padding: 14px 18px;
+  background: #d71920;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+}
+
+.dismat-login-form button:hover {
+  background: #b9151b;
+}
+
+.dismat-login-form button:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.dismat-login-card footer {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid #e5e7eb;
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.dismat-auth-bar {
+  position: sticky;
+  top: 0;
+  z-index: 9999;
+  min-height: 38px;
+  padding: 7px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+
+.dismat-auth-bar span::before {
+  content: "🔒 ";
+}
+
+.dismat-auth-bar button {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  padding: 6px 13px;
+  background: transparent;
+  color: #ffffff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.dismat-auth-bar button:hover {
+  background: #d71920;
+  border-color: #d71920;
+}
+
+@media (max-width: 520px) {
+  .dismat-login-page {
+    padding: 14px;
+  }
+
+  .dismat-login-card {
+    padding: 28px 20px 22px;
+    border-radius: 18px;
+  }
+
+  .dismat-login-card h1 {
+    font-size: 22px;
+  }
+
+  .dismat-auth-bar {
+    justify-content: space-between;
+    padding: 8px 12px;
+  }
+}
+.dismat-module-title {
+  margin: 10px 0 6px;
+  color: #d71920;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.dismat-login-subtitle {
+  margin: 0 0 18px;
+  color: #d71920;
+  font-size: 15px;
+  font-weight: 700;
+}

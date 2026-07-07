@@ -13,6 +13,8 @@ import {
   syncServerTests,
   nextReportId,
 } from "./utils/storage";
+import { LoginGate } from "./security/LoginGate";
+import { useAuth } from "./security/AuthContext";
 
 // ─── design tokens ────────────────────────────────────────────────────────────
 const THEMES = {
@@ -712,7 +714,29 @@ function ArchivePanel({ items = [], onOpen, onDuplicate, onDelete, onExport }) {
     </div>
   );
 }
+function LogoutButton() {
+  const { logout } = useAuth();
 
+  return (
+    <button
+      type="button"
+      onClick={logout}
+      style={{
+        background: "#d71920",
+        color: "#fff",
+        border: "none",
+        borderRadius: 7,
+        padding: "8px 12px",
+        fontSize: 11,
+        fontWeight: 700,
+        cursor: "pointer",
+        minWidth: 92,
+      }}
+    >
+      🔒 Esci
+    </button>
+  );
+}
 
 export default function App() {
     const [theme, setTheme] = useState(() => {
@@ -1413,6 +1437,11 @@ function exportRecord(record) {
   ];
 
   return (
+     
+     <LoginGate
+    appName="Sistema Gestione Prove DISMAT"
+    moduleName="Prova di carico su piastra"
+    >
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: T.bg, color: T.text, fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif" }}>
       
       {/* Container invisibile per consentire ad html2canvas di fotografare il grafico anche se l'utente si trova in un tab differente */}
@@ -1486,6 +1515,7 @@ function exportRecord(record) {
 >
   {theme === "dark" ? "☀️ Chiaro" : "🌙 Scuro"}
 </button>
+<LogoutButton />
 <button
   type="button"
   onClick={() => {
@@ -1771,4 +1801,5 @@ function exportRecord(record) {
 
       </div>
     </div>
+    </LoginGate>
   );}
