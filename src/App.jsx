@@ -83,11 +83,45 @@ function stabilityInfo(rows, threshold = 0.02, minCount = 3) {
   return { stable: delta <= threshold, delta, count: vals.length };
 }
 
+// ─── configurazioni dei tipi di prova ────────────────────────────────────────
+const TEST_TYPES = {
+  fondazione: {
+    label: "Fondazione",
+    ciclo1: [20, 50, 150, 250, 350, 450],
+    scarico1: 50,
+    ciclo2: [50, 150, 250, 350],
+    scarico2: 20,
+    md: [250, 350],
+    mdp: [250, 350],
+  },
+  fondo_scavo: {
+    label: "Fondo scavo",
+    ciclo1: [20, 50, 100, 150, 200],
+    scarico1: 50,
+    ciclo2: [50, 100, 150],
+    scarico2: 20,
+    md: [50, 150],
+    mdp: [50, 150],
+  },
+  rilevato: {
+    label: "Rilevato",
+    ciclo1: [20, 50, 150, 250, 350],
+    scarico1: 50,
+    ciclo2: [50, 150, 250],
+    scarico2: 20,
+    md: [150, 250],
+    mdp: [150, 250],
+  },
+};
+
+const stepKey = (kpa) => `p${kpa}`;
+
 // ─── struttura dati iniziale ─────────────────────────────────────────────────
 const EMPTY_ROWS = () => Array(10).fill("");
 const INIT_C1 = {
   p20:   EMPTY_ROWS(),
   p50:   EMPTY_ROWS(),
+  p100:  EMPTY_ROWS(),
   p150:  EMPTY_ROWS(),
   p250:  EMPTY_ROWS(),
   p350:  EMPTY_ROWS(),
@@ -96,6 +130,7 @@ const INIT_C1 = {
 };
 const INIT_C2 = {
   p50:   EMPTY_ROWS(),
+  p100:  EMPTY_ROWS(),
   p150:  EMPTY_ROWS(),
   p250:  EMPTY_ROWS(),
   p350:  EMPTY_ROWS(),
@@ -377,7 +412,15 @@ function SignatureBox({ label, value, onChange }) {
 
 
 // Elemento invisibile o visibile per clonare temporaneamente il grafico nel PDF
-const FixedChartContainer = ({ chart1, chartScarico1, chart2, chartScarico2, innerRef }) => {
+const FixedChartContainer = ({
+  chart1,
+  chartScarico1,
+  chart2,
+  chartScarico2,
+  innerRef,
+  testConfig,
+  chartMaxX
+}) => {
   return (
     <div style={{ position: "absolute", left: "-9999px", top: "-9999px" }}>
       <div ref={innerRef} style={{ width: "650px", height: "300px", background: "#161b22", padding: "20px" }}>
@@ -386,14 +429,26 @@ const FixedChartContainer = ({ chart1, chartScarico1, chart2, chartScarico2, inn
           <ResponsiveContainer width="100%" height="100%">
             <ScatterChart margin={{ top: 5, right: 20, bottom: 5, left: -25 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#30363d" />
-              <XAxis type="number" dataKey="x" name="Carico" unit="kPa" domain={[0, 500]} stroke={T.textMuted} tickLine={false} />
+              <XAxis type="number" dataKey="x" name="Carico" unit="kPa" domain={[0, chartMaxX]} stroke={T.textMuted} tickLine={false} />
               <YAxis type="number" dataKey="y" name="Cedimento" unit="mm" domain={["dataMax + 0.5", 0]} stroke={T.textMuted} tickLine={false} />
               <Scatter name="1° Ciclo" data={chart1} line={{ stroke: T.cycle1, strokeWidth: 2 }} fill={T.cycle1} shape="circle" />
               <Scatter name="Scarico C1" data={chartScarico1} line={{ stroke: T.cycle1, strokeWidth: 1.5, strokeDasharray: "4 4" }} fill="none" shape="none" />
               <Scatter name="2° Ciclo" data={chart2} line={{ stroke: T.cycle2, strokeWidth: 2 }} fill={T.cycle2} shape="circle" />
               <Scatter name="Scarico C2" data={chartScarico2} line={{ stroke: T.cycle2, strokeWidth: 1.5, strokeDasharray: "4 4" }} fill="none" shape="none" />
-              <ReferenceLine x={250} stroke={`${T.accentBlue}25`} strokeDasharray="3 3" />
-              <ReferenceLine x={350} stroke={`${T.accentBlue}25`} strokeDasharray="3 3" />
+              <ReferenceLine
+  x={testConfig.md[0]}
+  stroke={T.accentBlue}
+  strokeWidth={1.5}
+  strokeDasharray="6 4"
+/>
+
+<ReferenceLine
+  x={testConfig.md[1]}
+  stroke={T.accentBlue}
+  strokeWidth={1.5}
+  strokeDasharray="6 4"
+/>
+
             </ScatterChart>
           </ResponsiveContainer>
         </div>
@@ -496,7 +551,7 @@ function DismantLogo({ size = 32 }) {
 
 function GeneralInfoPanel({
   verbale, setVerbale, cantiere, setCantiere, committente, setCommittente,
-  diametro, setDiametro, dataProva, setDataProva, provaGiorno, setProvaGiorno,
+  diametro, setDiametro, tipoProva, handleTipoProvaChange, dataProva, setDataProva, provaGiorno, setProvaGiorno,
   tratta, setTratta, km, setKm, sezione, setSezione, terra, setTerra,
   strato, setStrato, quota, setQuota, distBordo, setDistBordo, tecnico, setTecnico,
   presenti, setPresenti, fotoProva, setFotoProva, firmaTecnico, setFirmaTecnico
@@ -532,6 +587,7 @@ function GeneralInfoPanel({
             <TextInput label="Verbale N°" value={verbale} onChange={setVerbale} />
             <TextInput label="Data Prova" value={dataProva} onChange={setDataProva} placeholder="GG/MM/AAAA" />
             <TextInput label="Prova N° del giorno" value={provaGiorno} onChange={setProvaGiorno} />
+            <SelectInput label="Tipo di prova" value={tipoProva} onChange={handleTipoProvaChange} options={Object.entries(TEST_TYPES).map(([value, config]) => ({ value, label: config.label }))} />
             <SelectInput label="Diametro Piastra" value={diametro} onChange={setDiametro} options={[{ value: "300", label: "300 mm" }, { value: "600", label: "600 mm" }, { value: "450", label: "450 mm" }]} />
           </div>
 
@@ -678,6 +734,7 @@ function ArchivePanel({ items = [], onOpen, onDuplicate, onDelete, onExport }) {
                 <th style={{ padding: "9px 12px" }}>Salvata il</th>
                 <th style={{ padding: "9px 12px" }}>Data prova</th>
                 <th style={{ padding: "9px 12px" }}>Verbale</th>
+                <th style={{ padding: "9px 12px" }}>Tipo prova</th>
                 <th style={{ padding: "9px 12px" }}>Cantiere</th>
                 <th style={{ padding: "9px 12px" }}>Committente</th>
                 <th style={{ padding: "9px 12px" }}>Esito</th>
@@ -692,6 +749,9 @@ function ArchivePanel({ items = [], onOpen, onDuplicate, onDelete, onExport }) {
                   <td style={{ padding: "9px 12px" }}>{item.savedAt ? new Date(item.savedAt).toLocaleString("it-IT") : "—"}</td>
                   <td style={{ padding: "9px 12px" }}>{item.data?.dataProva || "—"}</td>
                   <td style={{ padding: "9px 12px" }}>{item.data?.verbale || "—"}</td>
+                  <td style={{ padding: "9px 12px" }}>
+                            {TEST_TYPES[item.data?.tipoProva]?.label || "Fondazione"}
+                  </td>
                   <td style={{ padding: "9px 12px" }}>{item.data?.cantiere || "—"}</td>
                   <td style={{ padding: "9px 12px" }}>{item.data?.committente || "—"}</td>
                   <td style={{ padding: "9px 12px", color: item.data?.rapporto === null || item.data?.rapporto === undefined ? T.textMuted : item.data?.provaValida ? T.accent : T.accentRed }}>
@@ -754,6 +814,7 @@ export default function App() {
   const [cantiere, setCantiere]       = useState("");
   const [committente, setCommittente] = useState("");
   const [diametro, setDiametro]       = useState("300");
+  const [tipoProva, setTipoProva]     = useState("fondazione");
   const [tab, setTab]                 = useState("c1");
   const [dataProva, setDataProva]     = useState("");
   const [provaGiorno, setProvaGiorno] = useState("");
@@ -771,12 +832,48 @@ export default function App() {
   const [c1, setC1]                   = useState(INIT_C1);
   const [c2, setC2]                   = useState(INIT_C2);
   const [archive, setArchive] = useState(listTests);
+  const testConfig = TEST_TYPES[tipoProva] || TEST_TYPES.fondazione;
+  const chartMaxX = Math.max(
+  ...testConfig.ciclo1,
+  ...testConfig.ciclo2,
+  testConfig.scarico1,
+  testConfig.scarico2
+);
   const setC1step = (key) => (rows) => setC1((p) => ({ ...p, [key]: rows }));
   const setC2step = (key) => (rows) => setC2((p) => ({ ...p, [key]: rows }));
+  const hasInsertedReadings = () => {
+  const hasC1Readings = Object.values(c1).some((rows) =>
+    rows.some((value) => String(value).trim() !== "")
+  );
+  
+
+  const hasC2Readings = Object.values(c2).some((rows) =>
+    rows.some((value) => String(value).trim() !== "")
+  );
+
+  return hasC1Readings || hasC2Readings;
+};
+const handleTipoProvaChange = (nuovoTipo) => {
+  if (nuovoTipo === tipoProva) return;
+
+  if (hasInsertedReadings()) {
+    const conferma = window.confirm(
+      "Cambiando il tipo di prova verranno eliminate tutte le letture inserite e i risultati calcolati. Continuare?"
+    );
+
+    if (!conferma) return;
+  }
+
+  setC1(INIT_C1);
+  setC2(INIT_C2);
+  setTipoProva(nuovoTipo);
+  setTab("c1");
+};
   
   const chartRef = useRef(null);
   const hiddenChartRef = useRef(null); // Ref per il grafico nascosto fisso (evita bug tab nascoste)
   const [exporting, setExporting] = useState(false);
+  const [storageLoaded, setStorageLoaded] = useState(false);
   useEffect(() => {
   (async () => {
     const savedArchive = await loadServerTests();
@@ -792,10 +889,13 @@ useEffect(() => {
   
 
 useEffect(() => {
-  
   const saved = localStorage.getItem(STORAGE_KEY);
   console.log("CARICAMENTO", saved);
-  if (!saved) return;
+
+  if (!saved) {
+    setStorageLoaded(true);
+    return;
+  }
 
   try {
     const data = JSON.parse(saved);
@@ -804,6 +904,7 @@ useEffect(() => {
     setCantiere(data.cantiere || "");
     setCommittente(data.committente || "");
     setDiametro(data.diametro || "300");
+    setTipoProva(data.tipoProva || "fondazione");
     setDataProva(data.dataProva || "");
     setProvaGiorno(data.provaGiorno || "");
     setTratta(data.tratta || "");
@@ -819,17 +920,21 @@ useEffect(() => {
     setFirmaTecnico(data.firmaTecnico || null);
     setC1(data.c1 || INIT_C1);
     setC2(data.c2 || INIT_C2);
-  } catch {
-    console.error("Errore caricamento dati salvati");
+  } catch (error) {
+    console.error("Errore caricamento dati salvati", error);
+  } finally {
+    setStorageLoaded(true);
   }
 }, []);
 
 useEffect(() => {
+    if (!storageLoaded) return;
   const data = {
     verbale,
     cantiere,
     committente,
     diametro,
+    tipoProva,
     dataProva,
     provaGiorno,
     tratta,
@@ -850,10 +955,12 @@ useEffect(() => {
 console.log("SALVATAGGIO", data);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }, [
+  storageLoaded,
   verbale,
   cantiere,
   committente,
   diametro,
+  tipoProva,
   dataProva,
   provaGiorno,
   tratta,
@@ -873,62 +980,59 @@ console.log("SALVATAGGIO", data);
 
   const { md, mdp, rapporto, chart1, chartScarico1, chart2, chartScarico2, tableRows, rScarico2, sScarico2 } = useMemo(() => {
     const D = parseFloat(diametro) || 300;
-
-    const p1keys = ["p20", "p50", "p150", "p250", "p350", "p450"];
-    const p1vals = [20, 50, 150, 250, 350, 450];
-    const p2keys = ["p50", "p150", "p250", "p350"];
-    const p2vals = [50, 150, 250, 350];
-    const r1 = p1keys.map((k) => lastValid(c1[k]));
-    const r2 = p2keys.map((k) => lastValid(c2[k]));
-    const rScarico1 = lastValid(c1.scarico50);
-    const rScarico2 = lastValid(c2.scarico);
+    const p1vals = testConfig.ciclo1;
+    const p2vals = testConfig.ciclo2;
+    const p1keys = p1vals.map(stepKey);
+    const p2keys = p2vals.map(stepKey);
+    const r1 = p1keys.map((k) => lastValid(c1[k] || []));
+    const r2 = p2keys.map((k) => lastValid(c2[k] || []));
+    const rScarico1 = lastValid(c1.scarico50 || []);
+    const rScarico2 = lastValid(c2.scarico || []);
 
     const zero = r1[0];
     const s1 = r1.map((v) => (v !== null && zero !== null ? Math.abs(v - zero) : null));
-    const sScarico1 = (rScarico1 !== null && zero !== null) ? Math.abs(rScarico1 - zero) : null;
+    const sScarico1 = rScarico1 !== null && zero !== null ? Math.abs(rScarico1 - zero) : null;
     const s2 = r2.map((v) => (v !== null && zero !== null ? Math.abs(v - zero) : null));
-    const sScarico2 = (rScarico2 !== null && zero !== null) ? Math.abs(rScarico2 - zero) : null;
+    const sScarico2 = rScarico2 !== null && zero !== null ? Math.abs(rScarico2 - zero) : null;
 
     const s1clean = s1.map((v) => v ?? 0);
     const s2clean = s2.map((v) => v ?? 0);
-
-    const def025c1 = interp(250, p1vals, s1clean);
-    const def035c1 = interp(350, p1vals, s1clean);
-    const ds1 = Math.abs(def035c1 - def025c1);
-
-    const def025c2 = interp(250, p2vals, s2clean);
-    const def035c2 = interp(350, p2vals, s2clean);
-    const ds2 = Math.abs(def035c2 - def025c2);
+    const [mdFrom, mdTo] = testConfig.md;
+    const [mdpFrom, mdpTo] = testConfig.mdp;
+    const ds1 = Math.abs(interp(mdTo, p1vals, s1clean) - interp(mdFrom, p1vals, s1clean));
+    const ds2 = Math.abs(interp(mdpTo, p2vals, s2clean) - interp(mdpFrom, p2vals, s2clean));
+    const deltaP1 = (mdTo - mdFrom) / 1000;
+    const deltaP2 = (mdpTo - mdpFrom) / 1000;
 
     const hasC1 = r1.some((v) => v !== null);
     const hasC2 = r2.some((v) => v !== null);
-
-    const md  = ds1 > 0 && hasC1 ? (0.10 / ds1) * D : null;
-    const mdp = ds2 > 0 && hasC2 ? (0.10 / ds2) * D : null;
+    const md = ds1 > 0 && hasC1 ? (deltaP1 / ds1) * D : null;
+    const mdp = ds2 > 0 && hasC2 ? (deltaP2 / ds2) * D : null;
     const rapporto = md !== null && mdp !== null && mdp > 0 ? md / mdp : null;
 
     const chart1 = hasC1 ? p1vals.map((p, i) => s1[i] !== null ? { x: p, y: s1[i] } : null).filter(Boolean) : [];
-    const lastC1 = s1[5];
-    const chartScarico1 = (lastC1 !== null && sScarico1 !== null) ? [{ x: 450, y: lastC1 }, { x: 50, y: sScarico1 }] : [];
-    const chart2 = hasC2 ? [ ...(sScarico1 !== null ? [{ x: 50, y: sScarico1 }] : []), ...p2vals.map((p, i) => s2[i] !== null ? { x: p, y: s2[i] } : null).filter(Boolean) ] : [];
+    const lastC1 = s1[s1.length - 1];
+    const chartScarico1 = lastC1 !== null && sScarico1 !== null ? [{ x: p1vals[p1vals.length - 1], y: lastC1 }, { x: testConfig.scarico1, y: sScarico1 }] : [];
+    const chart2 = hasC2 ? [ ...(sScarico1 !== null ? [{ x: testConfig.scarico1, y: sScarico1 }] : []), ...p2vals.map((p, i) => s2[i] !== null ? { x: p, y: s2[i] } : null).filter(Boolean) ] : [];
     const lastC2 = s2[s2.length - 1];
-    const chartScarico2 = (lastC2 !== null && sScarico2 !== null) ? [{ x: 350, y: lastC2 }, { x: 20, y: sScarico2 }] : [];
+    const chartScarico2 = lastC2 !== null && sScarico2 !== null ? [{ x: p2vals[p2vals.length - 1], y: lastC2 }, { x: testConfig.scarico2, y: sScarico2 }] : [];
 
-    const allP = [20, 50, 150, 250, 350, 450];
-    const tableRows = allP.map((p, i) => {
+    const allP = [...new Set([...p1vals, ...p2vals])].sort((a, b) => a - b);
+    const tableRows = allP.map((p) => {
+      const i1 = p1vals.indexOf(p);
       const i2 = p2vals.indexOf(p);
       return {
         p,
-        r1: r1[i],
-        s1: s1[i],
+        r1: i1 >= 0 ? r1[i1] : null,
+        s1: i1 >= 0 ? s1[i1] : null,
         r2: i2 >= 0 ? r2[i2] : null,
         s2: i2 >= 0 ? s2[i2] : null,
-        isRef: p === 250 || p === 350,
+        isRef: testConfig.md.includes(p) || testConfig.mdp.includes(p),
       };
     });
 
     return { md, mdp, rapporto, chart1, chartScarico1, chart2, chartScarico2, tableRows, rScarico2, sScarico2 };
-  }, [diametro, c1, c2]);
+  }, [diametro, c1, c2, testConfig]);
 
   const provaValida = rapporto !== null && rapporto < 1;
   const rapportoColor = rapporto === null ? T.textMuted : provaValida ? T.accent : T.accentRed;
@@ -1002,7 +1106,7 @@ const exportPDF = useCallback(async (preview = false) => {
       const plotW = w - 20;
       const plotH = h - 20;
 
-      const maxX = 500;
+      const maxX = chartMaxX;
       const maxY = Math.max(...allPoints.map((p) => p.y), 1) + 0.5;
 
       pdf.setDrawColor(225, 225, 225);
@@ -1063,7 +1167,12 @@ const exportPDF = useCallback(async (preview = false) => {
       pdf.text("Cedimento [mm]", x + 4.5, plotY + plotH / 2, { angle: 90 });
 
       pdf.text("0", plotX, plotY + plotH + 3);
-      pdf.text("500", plotX + plotW, plotY + plotH + 3, { align: "right" });
+      pdf.text(
+  String(chartMaxX),
+  plotX + plotW,
+  plotY + plotH + 3,
+  { align: "right" }
+);
       pdf.text(maxY.toFixed(1), plotX - 2, plotY + 1.5, { align: "right" });
 
       pdf.setFontSize(5.2);
@@ -1105,13 +1214,23 @@ const exportPDF = useCallback(async (preview = false) => {
     pdf.text("Procedura interna DISMAT - IO 07-11-B", ML + 23, 23.5);
 
     pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(8);
-    pdf.text("MINUTA DI PROVA", PW - ML, 12, { align: "right" });
-    pdf.setFontSize(7);
-    pdf.text("PROVA DI CARICO SU PIASTRA", PW - ML, 17, { align: "right" });
+pdf.setFontSize(8);
+pdf.text("MINUTA DI PROVA", PW - ML, 12, { align: "right" });
 
-    pdf.setDrawColor(60, 60, 60);
-    pdf.line(ML, 29, PW - ML, 29);
+pdf.setFontSize(7);
+pdf.text("PROVA DI CARICO SU PIASTRA", PW - ML, 17, { align: "right" });
+
+pdf.setFont("helvetica", "normal");
+pdf.setFontSize(6.5);
+pdf.text(
+  `TIPO DI PROVA: ${tipoProva.toUpperCase()}`,
+  PW - ML,
+  21,
+  { align: "right" }
+);
+
+pdf.setDrawColor(60, 60, 60);
+pdf.line(ML, 29, PW - ML, 29);
 
     // DATI GENERALI + FOTO
     let y = 34;
@@ -1185,26 +1304,68 @@ if (fotoProva) {
 
     // TABELLA
     y = 108;
-    let ty = section(ML, y, 82, "TABELLA LETTURE STABILIZZATE");
+    let ty = section(
+  ML,
+  y,
+  82,
+  `TABELLA LETTURE - ${testConfig.label.toUpperCase()}`
+);
 
-    const tx = ML;
-    const col = [18, 16, 16, 16, 16];
-    const heads = ["kPa", "L1", "s1", "L2", "s2"];
+const tx = ML;
+const col = [18, 16, 16, 16, 16];
+const heads = ["kPa", "Lett.", "s", "Lett.", "s"];
 
-    pdf.setFillColor(245, 245, 245);
-    pdf.rect(tx, ty, 82, 6, "F");
+// Prima riga: intestazioni dei due cicli
+pdf.setFillColor(232, 236, 241);
+pdf.rect(tx, ty, 82, 6, "F");
 
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(5.8);
-    pdf.setTextColor(40, 40, 40);
+pdf.setDrawColor(200, 200, 200);
+pdf.rect(tx, ty, col[0], 6);
+pdf.rect(tx + col[0], ty, col[1] + col[2], 6);
+pdf.rect(tx + col[0] + col[1] + col[2], ty, col[3] + col[4], 6);
 
-    let cx = tx;
-    heads.forEach((head, i) => {
-      pdf.text(head, cx + 1.5, ty + 4);
-      cx += col[i];
-    });
+pdf.setFont("helvetica", "bold");
+pdf.setFontSize(5.8);
+pdf.setTextColor(40, 40, 40);
 
-    ty += 6;
+pdf.text("CARICO", tx + col[0] / 2, ty + 4, {
+  align: "center",
+});
+
+pdf.text(
+  "1° CICLO",
+  tx + col[0] + (col[1] + col[2]) / 2,
+  ty + 4,
+  { align: "center" }
+);
+
+pdf.text(
+  "2° CICLO",
+  tx + col[0] + col[1] + col[2] + (col[3] + col[4]) / 2,
+  ty + 4,
+  { align: "center" }
+);
+
+ty += 6;
+
+// Seconda riga: nomi delle colonne
+pdf.setFillColor(245, 245, 245);
+pdf.rect(tx, ty, 82, 6, "F");
+
+let cx = tx;
+
+heads.forEach((head, i) => {
+  pdf.setDrawColor(210, 210, 210);
+  pdf.rect(cx, ty, col[i], 6);
+
+  pdf.text(head, cx + col[i] / 2, ty + 4, {
+    align: "center",
+  });
+
+  cx += col[i];
+});
+
+ty += 6;
 
     tableRows.forEach(({ p, r1, s1: s1Val, r2, s2: s2Val }) => {
       pdf.setDrawColor(210, 210, 210);
@@ -1238,9 +1399,19 @@ if (fotoProva) {
     pdf.setFontSize(5.7);
     pdf.setTextColor(0, 0, 0);
     pdf.text("Md = (Δp / Δs) · D", ML + 1.5, ny + 1);
-    pdf.text("Intervallo di calcolo: 0,25 - 0,35 MPa", ML + 1.5, ny + 5);
-    pdf.text("Prova valida se Md/Md' < 1", ML + 1.5, ny + 9);
-    pdf.text("Norma: CNR 146/92", ML + 1.5, ny + 13);
+    pdf.text(
+  `Intervallo Md: ${testConfig.md[0]} - ${testConfig.md[1]} kPa`,
+  ML + 1.5,
+  ny + 5
+);
+
+pdf.text(
+  `Intervallo Md': ${testConfig.mdp[0]} - ${testConfig.mdp[1]} kPa`,
+  ML + 1.5,
+  ny + 9
+);
+    pdf.text("Prova valida se Md/Md' < 1", ML + 1.5, ny + 13);
+    pdf.text("Norma: CNR 146/92", ML + 1.5, ny + 17);
 
     // GRAFICO
     const chartX = ML + 88;
@@ -1310,6 +1481,9 @@ if (fotoProva) {
     setExporting(false);
   }
 }, [
+  chartMaxX,
+  tipoProva,
+  testConfig,
   committente,
   cantiere,
   verbale,
@@ -1343,6 +1517,7 @@ function currentRecordData(extra = {}) {
     cantiere,
     committente,
     diametro,
+    tipoProva,
     dataProva,
     provaGiorno,
     tratta,
@@ -1384,6 +1559,7 @@ function openRecord(record) {
   setCantiere(d.cantiere || "");
   setCommittente(d.committente || "");
   setDiametro(d.diametro || "300");
+  setTipoProva(d.tipoProva || "fondazione");
   setDataProva(d.dataProva || "");
   setProvaGiorno(d.provaGiorno || "");
   setTratta(d.tratta || "");
@@ -1448,7 +1624,8 @@ function exportRecord(record) {
       <FixedChartContainer 
         chart1={chart1} chartScarico1={chartScarico1} 
         chart2={chart2} chartScarico2={chartScarico2} 
-        innerRef={hiddenChartRef} 
+        innerRef={hiddenChartRef}  testConfig={testConfig}
+        chartMaxX={chartMaxX}
       />
 
       <header
@@ -1594,7 +1771,9 @@ function exportRecord(record) {
         cantiere={cantiere} setCantiere={setCantiere}
         committente={committente} setCommittente={setCommittente}
         diametro={diametro} setDiametro={setDiametro}
+        tipoProva={tipoProva} 
         dataProva={dataProva} setDataProva={setDataProva}
+        handleTipoProvaChange={handleTipoProvaChange}
         provaGiorno={provaGiorno} setProvaGiorno={setProvaGiorno}
         tratta={tratta} setTratta={setTratta}
         km={km} setKm={setKm}
@@ -1678,13 +1857,10 @@ function exportRecord(record) {
               Inserisci le letture del comparatore (mm) per ogni gradino. Ogni cella è una misurazione temporale (minuto 1…10). Il badge <span style={{ color: T.accent }}>STABILE</span> appare quando le ultime 3 letture hanno scarto ≤ 0.02 mm.
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
-              <StepTable label="Carico iniziale" kpa={20} rows={c1.p20} onChange={setC1step("p20")} color={T.cycle1} />
-              <StepTable kpa={50} rows={c1.p50} onChange={setC1step("p50")} color={T.cycle1} />
-              <StepTable kpa={150} rows={c1.p150} onChange={setC1step("p150")} color={T.cycle1} />
-              <StepTable kpa={250} rows={c1.p250} onChange={setC1step("p250")} color={T.cycle1} />
-              <StepTable kpa={350} rows={c1.p350} onChange={setC1step("p350")} color={T.cycle1} />
-              <StepTable kpa={450} rows={c1.p450} onChange={setC1step("p450")} color={T.cycle1} />
-              <StepTable label="Scarico →" kpa={50} rows={c1.scarico50} onChange={setC1step("scarico50")} color={T.accentBlue} threshold={0.05} />
+              {testConfig.ciclo1.map((kpa, index) => (
+                <StepTable key={kpa} label={index === 0 ? "Carico iniziale" : undefined} kpa={kpa} rows={c1[stepKey(kpa)] || EMPTY_ROWS()} onChange={setC1step(stepKey(kpa))} color={T.cycle1} />
+              ))}
+              <StepTable label="Scarico →" kpa={testConfig.scarico1} rows={c1.scarico50} onChange={setC1step("scarico50")} color={T.accentBlue} threshold={0.05} />
             </div>
           </div>
         )}
@@ -1692,14 +1868,13 @@ function exportRecord(record) {
         {tab === "c2" && (
           <div>
             <div style={{ fontSize: 11, color: T.textMuted, marginBottom: 14, lineHeight: 1.5 }}>
-              2° ciclo di carico (50 → 350 kPa) + scarico finale a 20 kPa.
+              2° ciclo di carico ({testConfig.ciclo2[0]} → {testConfig.ciclo2[testConfig.ciclo2.length - 1]} kPa) + scarico finale a {testConfig.scarico2} kPa.
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
-              <StepTable kpa={50} rows={c2.p50} onChange={setC2step("p50")} color={T.cycle2} />
-              <StepTable kpa={150} rows={c2.p150} onChange={setC2step("p150")} color={T.cycle2} />
-              <StepTable kpa={250} rows={c2.p250} onChange={setC2step("p250")} color={T.cycle2} />
-              <StepTable kpa={350} rows={c2.p350} onChange={setC2step("p350")} color={T.cycle2} />
-              <StepTable label="Scarico" kpa={20} rows={c2.scarico} onChange={setC2step("scarico")} color={T.accentOrange} />
+              {testConfig.ciclo2.map((kpa) => (
+                <StepTable key={kpa} kpa={kpa} rows={c2[stepKey(kpa)] || EMPTY_ROWS()} onChange={setC2step(stepKey(kpa))} color={T.cycle2} />
+              ))}
+              <StepTable label="Scarico" kpa={testConfig.scarico2} rows={c2.scarico} onChange={setC2step("scarico")} color={T.accentOrange} />
             </div>
           </div>
         )}
@@ -1707,8 +1882,8 @@ function exportRecord(record) {
         {tab === "results" && (
           <div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 10, marginBottom: 24 }}>
-              <ResultCard label="Md — 1° Ciclo" value={md !== null ? md.toFixed(2) : "—"} unit="MPa" color={T.cycle1} sub="Intervallo 0.25–0.35 MPa" />
-              <ResultCard label="Md' — 2° Ciclo" value={mdp !== null ? mdp.toFixed(2) : "—"} unit="MPa" color={T.cycle2} sub="Intervallo 0.25–0.35 MPa" />
+              <ResultCard label="Md — 1° Ciclo" value={md !== null ? md.toFixed(2) : "—"} unit="MPa" color={T.cycle1} sub={`Intervallo ${testConfig.md[0]}–${testConfig.md[1]} kPa`} />
+              <ResultCard label="Md' — 2° Ciclo" value={mdp !== null ? mdp.toFixed(2) : "—"} unit="MPa" color={T.cycle2} sub={`Intervallo ${testConfig.mdp[0]}–${testConfig.mdp[1]} kPa`} />
               <ResultCard label="Rapporto Md / Md'" value={rapporto !== null ? rapporto.toFixed(3) : "—"} unit="—" color={rapportoColor} highlight={rapporto !== null ? rapportoColor : undefined} sub={rapporto === null ? "In attesa dati" : provaValida ? "✓ Prova VALIDA (< 1)" : "✗ Prova NON VALIDA (≥ 1)"} />
             </div>
             <div ref={chartRef} style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "14px 10px", marginBottom: 20 }}>
@@ -1734,15 +1909,27 @@ function exportRecord(record) {
                   <ResponsiveContainer width="100%" height="100%">
                     <ScatterChart margin={{ top: 5, right: 5, bottom: 5, left: -25 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#30363d" />
-                      <XAxis type="number" dataKey="x" name="Carico" unit="kPa" domain={[0, 500]} stroke={T.textMuted} tickLine={false} />
+                      <XAxis type="number" dataKey="x" name="Carico" unit="kPa" domain={[0, chartMaxX]} stroke={T.textMuted} tickLine={false} />
                       <YAxis type="number" dataKey="y" name="Cedimento" unit="mm" domain={["dataMax + 0.5", 0]} stroke={T.textMuted} tickLine={false} />
                       <Tooltip content={<CustomTooltip />} />
                       <Scatter name="1° Ciclo" data={chart1} line={{ stroke: T.cycle1, strokeWidth: 2 }} fill={T.cycle1} shape="circle" />
                       <Scatter name="Scarico C1" data={chartScarico1} line={{ stroke: T.cycle1, strokeWidth: 1.5, strokeDasharray: "4 4" }} fill="none" shape="none" />
                       <Scatter name="2° Ciclo" data={chart2} line={{ stroke: T.cycle2, strokeWidth: 2 }} fill={T.cycle2} shape="circle" />
                       <Scatter name="Scarico C2" data={chartScarico2} line={{ stroke: T.cycle2, strokeWidth: 1.5, strokeDasharray: "4 4" }} fill="none" shape="none" />
-                      <ReferenceLine x={250} stroke={`${T.accentBlue}25`} strokeDasharray="3 3" />
-                      <ReferenceLine x={350} stroke={`${T.accentBlue}25`} strokeDasharray="3 3" />
+                      <ReferenceLine
+  x={testConfig.md[0]}
+  stroke={T.accentBlue}
+  strokeWidth={1.5}
+  strokeDasharray="6 4"
+/>
+
+<ReferenceLine
+  x={testConfig.md[1]}
+  stroke={T.accentBlue}
+  strokeWidth={1.5}
+  strokeDasharray="6 4"
+/>
+
                     </ScatterChart>
                   </ResponsiveContainer>
                 </div>
