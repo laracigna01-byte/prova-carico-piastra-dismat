@@ -1,5 +1,5 @@
-import { jsPDF } from "jspdf";
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import { exportReport } from "./pdf/exportReport";
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, ReferenceLine,
@@ -424,17 +424,16 @@ const FixedChartContainer = ({
   return (
     <div style={{ position: "absolute", left: "-9999px", top: "-9999px" }}>
       <div ref={innerRef} style={{ width: "650px", height: "300px", background: "#161b22", padding: "20px" }}>
-        <div style={{ color: "#fff", fontFamily: "sans-serif", fontSize: "14px", marginBottom: "10px", fontWeight: "bold" }}>Diagramma Cedimento — Carico</div>
+        <div style={{ color: "#fff", fontFamily: "sans-serif", fontSize: "14px", marginBottom: "10px", fontWeight: "bold" }}>GRAFICO CARICO - SPOSTAMENTO</div>
         <div style={{ width: "100%", height: "240px", fontSize: 10, fontFamily: "monospace" }}>
           <ResponsiveContainer width="100%" height="100%">
             <ScatterChart margin={{ top: 5, right: 20, bottom: 5, left: -25 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#30363d" />
               <XAxis type="number" dataKey="x" name="Carico" unit="kPa" domain={[0, chartMaxX]} stroke={T.textMuted} tickLine={false} />
-              <YAxis type="number" dataKey="y" name="Cedimento" unit="mm" domain={["dataMax + 0.5", 0]} stroke={T.textMuted} tickLine={false} />
+              <YAxis type="number" dataKey="y" name="Spostamento" unit="mm" domain={[0, "dataMax + 0.5"]} reversed={true} stroke={T.textMuted} tickLine={false} />
               <Scatter name="1° Ciclo" data={chart1} line={{ stroke: T.cycle1, strokeWidth: 2 }} fill={T.cycle1} shape="circle" />
               <Scatter name="Scarico C1" data={chartScarico1} line={{ stroke: T.cycle1, strokeWidth: 1.5, strokeDasharray: "4 4" }} fill="none" shape="none" />
               <Scatter name="2° Ciclo" data={chart2} line={{ stroke: T.cycle2, strokeWidth: 2 }} fill={T.cycle2} shape="circle" />
-              <Scatter name="Scarico C2" data={chartScarico2} line={{ stroke: T.cycle2, strokeWidth: 1.5, strokeDasharray: "4 4" }} fill="none" shape="none" />
               <ReferenceLine
   x={testConfig.md[0]}
   stroke={T.accentBlue}
@@ -890,30 +889,41 @@ export default function App() {
     setC2((p) => ({ ...p, [firstC2Key]: rows }));
   };
 
+ 
   useEffect(() => {
-    const autoValue = lastValid(c1.scarico50 || []);
-    if (autoValue === null || autoFillFirstC2Ref.current) return;
+  const autoValue = lastValid(c1.scarico50 || []);
 
-    setC2((prev) => {
-      const currentRows = prev[firstC2Key] || EMPTY_ROWS();
-      const currentValue = currentRows[0];
-      const shouldSync =
-        currentValue === "" ||
-        currentValue === String(autoValue) ||
-        currentValue === String(lastAutoFilledFirstC2Ref.current);
+  // Aspetta che sia stata inserita almeno una lettura nello scarico C1.
+  if (autoValue === null) return;
 
-      if (!shouldSync) return prev;
+  // Se l’utente ha già modificato manualmente il primo gradino C2,
+  // non deve essere sovrascritto.
+  if (autoFillFirstC2Ref.current) return;
 
-      const nextRows = [...currentRows];
-      nextRows[0] = String(autoValue);
+  const nextValue = String(autoValue);
 
-      if (currentValue === String(autoValue)) return prev;
+  setC2((prev) => {
+    const currentRows = prev[firstC2Key] || EMPTY_ROWS();
+    const currentValue = currentRows[0];
 
-      lastAutoFilledFirstC2Ref.current = String(autoValue);
-      return { ...prev, [firstC2Key]: nextRows };
-    });
-  }, [c1.scarico50, firstC2Key]);
+    if (currentValue === nextValue) {
+      return prev;
+    }
 
+    const nextRows = [...currentRows];
+
+    // La prima lettura del primo gradino C2 coincide
+    // con l’ultima lettura dello scarico C1.
+    nextRows[0] = nextValue;
+
+    lastAutoFilledFirstC2Ref.current = nextValue;
+
+    return {
+      ...prev,
+      [firstC2Key]: nextRows,
+    };
+  });
+}, [c1.scarico50, firstC2Key]);
   const hasInsertedReadings = () => {
   const hasC1Readings = Object.values(c1).some((rows) =>
     rows.some((value) => String(value).trim() !== "")
@@ -1112,491 +1122,84 @@ console.log("SALVATAGGIO", data);
   const provaValida = rapporto !== null && rapporto < 1;
   const rapportoColor = rapporto === null ? T.textMuted : provaValida ? T.accent : T.accentRed;
 
-const exportPDF = useCallback(async (preview = false) => {
-  setExporting(true);
+  const exportPDF = useCallback(async (preview = false) => {
+    setExporting(true);
 
-  try {
-    const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
-
-    const PW = 210;
-    const PH = 297;
-
-// Area utile richiesta: 19 × 19 cm
-const CONTENT_X = 10;
-const CONTENT_Y = 8;
-const CONTENT_W = 190;
-const CONTENT_H = 190;
-
-// Manteniamo questi nomi per non rompere il resto del PDF
-const ML = CONTENT_X;
-const CW = CONTENT_W;
-
-    function section(x, y, w, title) {
-      pdf.setFillColor(235, 238, 242);
-      pdf.rect(x, y, w, 5.5, "F");
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(6.8);
-      pdf.setTextColor(20, 20, 20);
-      pdf.text(title, x + 1.5, y + 3.8);
-      return y + 7;
-    }
-
-    function cell(x, y, w, h, label, value) {
-      pdf.setDrawColor(185, 185, 185);
-      pdf.rect(x, y, w, h);
-
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(5.4);
-      pdf.setTextColor(90, 90, 90);
-      pdf.text(label, x + 1.3, y + 3);
-
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(6.5);
-      pdf.setTextColor(0, 0, 0);
-      pdf.text(String(value || "—"), x + 1.3, y + 7.1, { maxWidth: w - 2.5 });
-    }
-
-    function drawPdfChart(x, y, w, h) {
-      pdf.setFillColor(255, 255, 255);
-      pdf.rect(x, y, w, h, "F");
-      pdf.setDrawColor(170, 170, 170);
-      pdf.rect(x, y, w, h);
-
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(6.5);
-      pdf.setTextColor(20, 20, 20);
-      pdf.text("Diagramma cedimento - carico", x + 2, y + 4.5);
-
-      const allPoints = [
-        ...chart1,
-        ...chartScarico1,
-        ...chart2,
-        ...chartScarico2,
-      ].filter((p) => p && Number.isFinite(p.x) && Number.isFinite(p.y));
-
-      if (!allPoints.length) {
-        pdf.setFont("helvetica", "normal");
-        pdf.setFontSize(7);
-        pdf.setTextColor(90, 90, 90);
-        pdf.text("Grafico disponibile dopo inserimento letture.", x + w / 2, y + h / 2, {
-          align: "center",
-        });
-        return;
-      }
-
-      const plotX = x + 13;
-      const plotY = y + 11;
-      const plotW = w - 20;
-      const plotH = h - 20;
-
-      const maxX = chartMaxX;
-      const maxY = Math.max(...allPoints.map((p) => p.y), 1) + 0.5;
-
-      pdf.setDrawColor(225, 225, 225);
-      for (let i = 1; i <= 4; i++) {
-        const gx = plotX + (plotW / 5) * i;
-        const gy = plotY + (plotH / 5) * i;
-        pdf.line(gx, plotY, gx, plotY + plotH);
-        pdf.line(plotX, gy, plotX + plotW, gy);
-      }
-
-      pdf.setDrawColor(70, 70, 70);
-      pdf.line(plotX, plotY + plotH, plotX + plotW, plotY + plotH);
-      pdf.line(plotX, plotY, plotX, plotY + plotH);
-
-      function px(p) {
-        return plotX + (p.x / maxX) * plotW;
-      }
-
-      function py(p) {
-        return plotY + (p.y / maxY) * plotH;
-      }
-
-      function drawSeries(points, color, dashed = false) {
-        if (!points.length) return;
-
-        pdf.setDrawColor(...color);
-        pdf.setFillColor(...color);
-
-        if (dashed) pdf.setLineDashPattern([2, 2], 0);
-        else pdf.setLineDashPattern([], 0);
-
-        let prev = null;
-
-        points.forEach((p) => {
-          const cx = px(p);
-          const cy = py(p);
-
-          if (prev) pdf.line(prev.x, prev.y, cx, cy);
-
-          if (!dashed) pdf.circle(cx, cy, 1.1, "F");
-
-          prev = { x: cx, y: cy };
-        });
-
-        pdf.setLineDashPattern([], 0);
-      }
-
-      drawSeries(chart1, [40, 99, 180], false);
-      drawSeries(chartScarico1, [40, 99, 180], true);
-      drawSeries(chart2, [210, 110, 35], false);
-      drawSeries(chartScarico2, [210, 110, 35], true);
-
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(4.8);
-      pdf.setTextColor(70, 70, 70);
-
-      pdf.text("Carico [kPa]", plotX + plotW / 2, y + h - 3, { align: "center" });
-      pdf.text("Cedimento [mm]", x + 4.5, plotY + plotH / 2, { angle: 90 });
-
-      pdf.text("0", plotX, plotY + plotH + 3);
-      pdf.text(
-  String(chartMaxX),
-  plotX + plotW,
-  plotY + plotH + 3,
-  { align: "right" }
-);
-      pdf.text(maxY.toFixed(1), plotX - 2, plotY + 1.5, { align: "right" });
-
-      pdf.setFontSize(5.2);
-      pdf.setTextColor(40, 99, 180);
-      pdf.text("1° ciclo", x + w - 34, y + 5);
-      pdf.setTextColor(210, 110, 35);
-      pdf.text("2° ciclo", x + w - 18, y + 5);
-    }
-
-    // SFONDO
-    pdf.setFillColor(255, 255, 255);
-    pdf.rect(0, 0, PW, PH, "F");
-
-    // HEADER
     try {
-      const logo = await fetch("/logo-dismat.jpg")
-        .then((r) => r.blob())
-        .then(
-          (blob) =>
-            new Promise((resolve) => {
-              const reader = new FileReader();
-              reader.onloadend = () => resolve(reader.result);
-              reader.readAsDataURL(blob);
-            })
-        );
-
-      pdf.addImage(logo, "JPEG", ML, 8, 18, 18);
-    } catch {}
-
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(10.5);
-    pdf.setTextColor(0, 0, 0);
-    pdf.text("L A B O R A T O R I O   D I S M A T", ML + 23, 12);
-
-    pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(6.2);
-    pdf.text("Sperimentazione sulle Strutture e sui Materiali da Costruzione", ML + 23, 16);
-    pdf.text("CNR 146/92 - Prova di carico su piastra - Determinazione dei moduli di deformazione", ML + 23, 19.8);
-    pdf.text("Procedura interna DISMAT - IO 07-11-B", ML + 23, 23.5);
-
-    pdf.setFont("helvetica", "bold");
-pdf.setFontSize(8);
-pdf.text("MINUTA DI PROVA", PW - ML, 12, { align: "right" });
-
-pdf.setFontSize(7);
-pdf.text("PROVA DI CARICO SU PIASTRA", PW - ML, 17, { align: "right" });
-
-pdf.setFont("helvetica", "normal");
-pdf.setFontSize(6.5);
-pdf.text(
-  `STRATO: ${testConfig.label || "Fondazione"}`,
-  PW - ML,
-  21,
-  { align: "right" }
-);
-
-pdf.setDrawColor(60, 60, 60);
-pdf.line(ML, 29, PW - ML, 29);
-
-    // DATI GENERALI + FOTO
-    let y = 34;
-    const leftW = 112;
-    const rightX = ML + leftW + 6;
-    const rightW = CW - leftW - 6;
-
-    let gy = section(ML, y, leftW, "DATI GENERALI");
-
-    const h = 9.2;
-    const w2 = leftW / 2;
-
-    cell(ML, gy, w2, h, "N. prova", verbale);
-    cell(ML + w2, gy, w2, h, "Data", dataProva);
-    gy += h;
-
-    cell(ML, gy, w2, h, "Cantiere", cantiere);
-    cell(ML + w2, gy, w2, h, "Committente", committente);
-    gy += h;
-
-    cell(ML, gy, w2, h, "Km", km || "—");
-    cell(ML + w2, gy, w2, h, "Sezione / quota", `${sezione || "—"} ${quota || ""}`);
-    gy += h;
-
-    cell(ML, gy, w2, h, "Strato", testConfig.label || "—");
-    cell(ML + w2, gy, w2, h, "Diametro piastra", `${diametro || "—"} mm`);
-    gy += h;
-
-    cell(ML, gy, w2, h, "Tecnico esecutore", tecnico);
-    cell(ML + w2, gy, w2, h, "Presenti", presenti);
-    gy += h;
-
-   let fy = section(rightX, y, rightW, "FOTO PROVA");
-
-const photoH = 43;
-
-pdf.setDrawColor(185, 185, 185);
-pdf.rect(rightX, fy, rightW, photoH);
-
-if (fotoProva) {
-  try {
-    pdf.addImage(fotoProva, "JPEG", rightX + 1.5, fy + 1.5, rightW - 3, photoH - 3);
-      } catch {
-        pdf.setFontSize(7);
-        pdf.text("Foto non leggibile", rightX + rightW / 2, fy + 23, { align: "center" });
-      }
-    } else {
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(7);
-      pdf.setTextColor(90, 90, 90);
-      pdf.text("Foto prova non inserita", rightX + rightW / 2, fy + photoH / 2, { align: "center" });
+      await exportReport(
+        {
+          chartMaxX,
+          tipoProva,
+          testConfig,
+          committente,
+          cantiere,
+          verbale,
+          dataProva,
+          provaGiorno,
+          tratta,
+          km,
+          sezione,
+          quota,
+          distBordo,
+          tecnico,
+          presenti,
+          diametro,
+          terra,
+          strato,
+          md,
+          mdp,
+          rapporto,
+          provaValida,
+          tableRows,
+          fotoProva,
+          firmaTecnico,
+          chart1,
+          chartScarico1,
+          chart2,
+          chartScarico2,
+        },
+        preview
+      );
+    } catch (err) {
+      console.error(err);
+      alert(
+        "Errore nella generazione del PDF: " +
+          (err && err.message ? err.name + " - " + err.message : String(err))
+      );
+    } finally {
+      setExporting(false);
     }
-
-    // RISULTATI
-    y = 88;
-    let ry = section(ML, y, CW, "RISULTATI DELLA PROVA");
-
-    const resW = CW / 3;
-
-    cell(ML, ry, resW, 11, "Md - 1° ciclo", md !== null ? `${md.toFixed(1)} MPa` : "—");
-    cell(ML + resW, ry, resW, 11, "Md' - 2° ciclo", mdp !== null ? `${mdp.toFixed(1)} MPa` : "—");
-    cell(ML + 2 * resW, ry, resW, 11, "Rapporto Md/Md'", rapporto !== null ? rapporto.toFixed(2) : "—");
-
-    // TABELLA
-    y = 108;
-    let ty = section(
-  ML,
-  y,
-  82,
-  `TABELLA LETTURE - ${testConfig.label.toUpperCase()}`
-);
-
-const tx = ML;
-const col = [18, 16, 16, 16, 16];
-const heads = ["kPa", "Lett.", "s", "Lett.", "s"];
-
-// Prima riga: intestazioni dei due cicli
-pdf.setFillColor(232, 236, 241);
-pdf.rect(tx, ty, 82, 6, "F");
-
-pdf.setDrawColor(200, 200, 200);
-pdf.rect(tx, ty, col[0], 6);
-pdf.rect(tx + col[0], ty, col[1] + col[2], 6);
-pdf.rect(tx + col[0] + col[1] + col[2], ty, col[3] + col[4], 6);
-
-pdf.setFont("helvetica", "bold");
-pdf.setFontSize(5.8);
-pdf.setTextColor(40, 40, 40);
-
-pdf.text("CARICO", tx + col[0] / 2, ty + 4, {
-  align: "center",
-});
-
-pdf.text(
-  "1° CICLO",
-  tx + col[0] + (col[1] + col[2]) / 2,
-  ty + 4,
-  { align: "center" }
-);
-
-pdf.text(
-  "2° CICLO",
-  tx + col[0] + col[1] + col[2] + (col[3] + col[4]) / 2,
-  ty + 4,
-  { align: "center" }
-);
-
-ty += 6;
-
-// Seconda riga: nomi delle colonne
-pdf.setFillColor(245, 245, 245);
-pdf.rect(tx, ty, 82, 6, "F");
-
-let cx = tx;
-
-heads.forEach((head, i) => {
-  pdf.setDrawColor(210, 210, 210);
-  pdf.rect(cx, ty, col[i], 6);
-
-  pdf.text(head, cx + col[i] / 2, ty + 4, {
-    align: "center",
-  });
-
-  cx += col[i];
-});
-
-ty += 6;
-
-    tableRows.forEach(({ p, r1, s1: s1Val, r2, s2: s2Val }) => {
-  pdf.setDrawColor(210, 210, 210);
-  pdf.rect(tx, ty, 82, 5);
-
-  const vals = [
-    p,
-    r1 !== null ? r1.toFixed(2) : "—",
-    s1Val !== null ? s1Val.toFixed(3) : "—",
-    r2 !== null ? r2.toFixed(2) : "—",
-    s2Val !== null ? s2Val.toFixed(3) : "—",
-  ];
-
-  pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(5.8);
-  pdf.setTextColor(0, 0, 0);
-
-  cx = tx;
-
-  vals.forEach((v, i) => {
-    pdf.text(
-      String(v),
-      cx + col[i] / 2,
-      ty + 3.5,
-      {
-        align: "center",
-        maxWidth: col[i] - 2,
-      }
-    );
-
-    cx += col[i];
-  });
-
-  ty += 5;
-});
-
-    // FORMULE + NOTE
-    let ny = section(ML, ty + 5, 82, "FORMULE E NOTE");
-
-    pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(5.7);
-    pdf.setTextColor(0, 0, 0);
-    pdf.text("Md = (Δp / Δs) · D", ML + 1.5, ny + 1);
-    pdf.text(
-  `Intervallo Md: ${testConfig.md[0]} - ${testConfig.md[1]} kPa`,
-  ML + 1.5,
-  ny + 5
-);
-
-pdf.text(
-  `Intervallo Md': ${testConfig.mdp[0]} - ${testConfig.mdp[1]} kPa`,
-  ML + 1.5,
-  ny + 9
-);
-    
-    pdf.text("Norma: CNR 146/92", ML + 1.5, ny + 13);
-
-    // GRAFICO
-const chartX = ML;
-const chartY = ny + 22;
-
-const chartW = 190;
-const chartH = 60;
-
-section(chartX, chartY, chartW, "GRAFICO CARICO - CEDIMENTO");
-drawPdfChart(chartX, chartY + 7, chartW, chartH - 7);
-
-    // FIRMA
-    const signY = 224;
-
-    if (firmaTecnico) {
-      try {
-        pdf.addImage(firmaTecnico, "PNG", ML + 4, signY - 22, 62, 18);
-      } catch {
-        // Se la firma non è leggibile, resta comunque la riga firma.
-      }
-    }
-
-    pdf.setDrawColor(180, 180, 180);
-    pdf.line(ML, signY, ML + 72, signY);
-    pdf.line(PW - ML - 72, signY, PW - ML, signY);
-
-    pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(6.5);
-    pdf.setTextColor(60, 60, 60);
-    pdf.text("Il tecnico esecutore", ML, signY + 5);
-    pdf.text("Direzione lavori / Committente", PW - ML - 72, signY + 5);
-
-    // FOOTER
-    pdf.setDrawColor(100, 100, 100);
-    pdf.line(ML, PH - 13, PW - ML, PH - 13);
-
-    pdf.setFontSize(6);
-    pdf.setTextColor(90, 90, 90);
-    pdf.text("DISMAT - CNR 146/92 - Prova di carico su piastra", ML, PH - 8);
-    pdf.text("Pagina 1/1", PW - ML, PH - 8, { align: "right" });
-
-    const filename = `Prova_Piastra_${verbale || "report"}_${
-      (dataProva || "").replace(/[/]/g, "-") || new Date().toISOString().slice(0, 10)
-    }.pdf`;
-
-    const blob = pdf.output("blob");
-    const blobUrl = URL.createObjectURL(blob);
-
-    if (preview) {
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.target = "_blank";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } else {
-      pdf.save(filename);
-    }
-
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
-  } catch (err) {
-    console.error(err);
-    alert(
-      "Errore nella generazione del PDF: " +
-        (err && err.message ? err.name + " - " + err.message : String(err))
-    );
-  } finally {
-    setExporting(false);
-  }
-}, [
-  chartMaxX,
-  tipoProva,
-  testConfig,
-  committente,
-  cantiere,
-  verbale,
-  dataProva,
-  provaGiorno,
-  tratta,
-  km,
-  sezione,
-  quota,
-  distBordo,
-  tecnico,
-  presenti,
-  diametro,
-  terra,
-  strato,
-  md,
-  mdp,
-  rapporto,
-  provaValida,
-  tableRows,
-  fotoProva,
-  firmaTecnico,
-  chart1,
-  chartScarico1,
-  chart2,
-  chartScarico2,
-]);
+  }, [
+    chartMaxX,
+    tipoProva,
+    testConfig,
+    committente,
+    cantiere,
+    verbale,
+    dataProva,
+    provaGiorno,
+    tratta,
+    km,
+    sezione,
+    quota,
+    distBordo,
+    tecnico,
+    presenti,
+    diametro,
+    terra,
+    strato,
+    md,
+    mdp,
+    rapporto,
+    provaValida,
+    tableRows,
+    fotoProva,
+    firmaTecnico,
+    chart1,
+    chartScarico1,
+    chart2,
+    chartScarico2,
+  ]);
 function currentRecordData(extra = {}) {
   return {
     verbale,
@@ -1979,14 +1582,12 @@ function exportRecord(record) {
             <div ref={chartRef} style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "14px 10px", marginBottom: 20 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: T.text }}>Diagramma Cedimento — Carico</div>
-                  <div style={{ fontSize: 10, color: T.textMuted, marginTop: 2 }}>Asse Y invertito (direzione geotecnica)</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: T.text }}>GRAFICO CARICO - SPOSTAMENTO</div>
                 </div>
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                   <LegendDot color={T.cycle1} label="1° Ciclo" />
                   <LegendDot color={T.cycle1} label="Scarico C1" dashed />
                   <LegendDot color={T.cycle2} label="2° Ciclo" />
-                  <LegendDot color={T.cycle2} label="Scarico C2" dashed />
                 </div>
               </div>
 
@@ -2000,12 +1601,11 @@ function exportRecord(record) {
                     <ScatterChart margin={{ top: 5, right: 5, bottom: 5, left: -25 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#30363d" />
                       <XAxis type="number" dataKey="x" name="Carico" unit="kPa" domain={[0, chartMaxX]} stroke={T.textMuted} tickLine={false} />
-                      <YAxis type="number" dataKey="y" name="Cedimento" unit="mm" domain={["dataMax + 0.5", 0]} stroke={T.textMuted} tickLine={false} />
+                      <YAxis type="number" dataKey="y" name="Spostamento" unit="mm" domain={[0, "dataMax + 0.5"]} reversed={true} stroke={T.textMuted} tickLine={false} />
                       <Tooltip content={<CustomTooltip />} />
                       <Scatter name="1° Ciclo" data={chart1} line={{ stroke: T.cycle1, strokeWidth: 2 }} fill={T.cycle1} shape="circle" />
                       <Scatter name="Scarico C1" data={chartScarico1} line={{ stroke: T.cycle1, strokeWidth: 1.5, strokeDasharray: "4 4" }} fill="none" shape="none" />
                       <Scatter name="2° Ciclo" data={chart2} line={{ stroke: T.cycle2, strokeWidth: 2 }} fill={T.cycle2} shape="circle" />
-                      <Scatter name="Scarico C2" data={chartScarico2} line={{ stroke: T.cycle2, strokeWidth: 1.5, strokeDasharray: "4 4" }} fill="none" shape="none" />
                       <ReferenceLine
   x={testConfig.md[0]}
   stroke={T.accentBlue}
