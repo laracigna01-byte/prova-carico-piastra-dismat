@@ -550,11 +550,19 @@ function DismantLogo({ size = 32 }) {
 }
 
 function GeneralInfoPanel({
-  verbale, setVerbale, cantiere, setCantiere, committente, setCommittente,
-  diametro, setDiametro, tipoProva, handleTipoProvaChange, dataProva, setDataProva, provaGiorno, setProvaGiorno,
-  tratta, setTratta, km, setKm, sezione, setSezione, terra, setTerra,
-  strato, setStrato, quota, setQuota, distBordo, setDistBordo, tecnico, setTecnico,
-  presenti, setPresenti, fotoProva, setFotoProva, firmaTecnico, setFirmaTecnico
+ verbale, setVerbale,
+  cantiere, setCantiere,
+  committente, setCommittente,
+  diametro, setDiametro,
+  tipoProva, handleTipoProvaChange,
+  dataProva, setDataProva,
+  km, setKm,
+  sezione, setSezione,
+  quota, setQuota,
+  tecnico, setTecnico,
+  presenti, setPresenti,
+  fotoProva, setFotoProva,
+  firmaTecnico, setFirmaTecnico
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -584,11 +592,39 @@ function GeneralInfoPanel({
       {isOpen && (
         <div style={{ padding: "0 16px 16px 16px", display: "flex", flexDirection: "column", gap: 14 }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}>
-            <TextInput label="Verbale N°" value={verbale} onChange={setVerbale} />
-            <TextInput label="Data Prova" value={dataProva} onChange={setDataProva} placeholder="GG/MM/AAAA" />
-            <TextInput label="Prova N° del giorno" value={provaGiorno} onChange={setProvaGiorno} />
-            <SelectInput label="Tipo di prova" value={tipoProva} onChange={handleTipoProvaChange} options={Object.entries(TEST_TYPES).map(([value, config]) => ({ value, label: config.label }))} />
-            <SelectInput label="Diametro Piastra" value={diametro} onChange={setDiametro} options={[{ value: "300", label: "300 mm" }, { value: "600", label: "600 mm" }, { value: "450", label: "450 mm" }]} />
+           <TextInput
+  label="N. prova"
+  value={verbale}
+  onChange={setVerbale}
+/>
+
+<TextInput
+  label="Data"
+  value={dataProva}
+  onChange={setDataProva}
+  placeholder="GG/MM/AAAA"
+/>
+
+<SelectInput
+  label="Strato"
+  value={tipoProva}
+  onChange={handleTipoProvaChange}
+  options={Object.entries(TEST_TYPES).map(([value, config]) => ({
+    value,
+    label: config.label,
+  }))}
+/>
+
+<SelectInput
+  label="Diametro piastra"
+  value={diametro}
+  onChange={setDiametro}
+  options={[
+    { value: "300", label: "300 mm" },
+    { value: "450", label: "450 mm" },
+    { value: "600", label: "600 mm" },
+  ]}
+/>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
@@ -598,13 +634,22 @@ function GeneralInfoPanel({
 
           <SectionHeader label="Localizzazione e Materiale" step="A" />
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10 }}>
-            <TextInput label="Tratta" value={tratta} onChange={setTratta} />
-            <TextInput label="Km" value={km} onChange={setKm} />
-            <TextInput label="Sezione" value={sezione} onChange={setSezione} />
-            <TextInput label="Quota" value={quota} onChange={setQuota} />
-            <TextInput label="Dist. dal bordo" value={distBordo} onChange={setDistBordo} />
-            <TextInput label="Tipo Terreno" value={terra} onChange={setTerra} />
-            <TextInput label="Strato" value={strato} onChange={setStrato} />
+           <TextInput
+  label="Km"
+  value={km}
+  onChange={setKm}
+/>
+
+<TextInput
+  label="Sezione / Quota"
+  value={`${sezione}${sezione && quota ? " / " : ""}${quota}`}
+  onChange={(value) => {
+    const [nuovaSezione = "", nuovaQuota = ""] = value.split("/");
+
+    setSezione(nuovaSezione.trim());
+    setQuota(nuovaQuota.trim());
+  }}
+/>
           </div>
 
           <SectionHeader label="Personale e Foto" step="B" />
@@ -734,10 +779,9 @@ function ArchivePanel({ items = [], onOpen, onDuplicate, onDelete, onExport }) {
                 <th style={{ padding: "9px 12px" }}>Salvata il</th>
                 <th style={{ padding: "9px 12px" }}>Data prova</th>
                 <th style={{ padding: "9px 12px" }}>Verbale</th>
-                <th style={{ padding: "9px 12px" }}>Tipo prova</th>
+                <th style={{ padding: "9px 12px" }}>Strato</th>
                 <th style={{ padding: "9px 12px" }}>Cantiere</th>
                 <th style={{ padding: "9px 12px" }}>Committente</th>
-                <th style={{ padding: "9px 12px" }}>Esito</th>
                 <th style={{ padding: "9px 12px" }}>Azioni</th>
               </tr>
             </thead>
@@ -754,9 +798,6 @@ function ArchivePanel({ items = [], onOpen, onDuplicate, onDelete, onExport }) {
                   </td>
                   <td style={{ padding: "9px 12px" }}>{item.data?.cantiere || "—"}</td>
                   <td style={{ padding: "9px 12px" }}>{item.data?.committente || "—"}</td>
-                  <td style={{ padding: "9px 12px", color: item.data?.rapporto === null || item.data?.rapporto === undefined ? T.textMuted : item.data?.provaValida ? T.accent : T.accentRed }}>
-                    {item.data?.rapporto === null || item.data?.rapporto === undefined ? "—" : item.data?.provaValida ? "VALIDA" : "NON VALIDA"}
-                  </td>
                   <td style={{ padding: "9px 12px" }}>
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                       <button type="button" onClick={() => onOpen(item)} style={{ background: T.surfaceHigh, color: T.text, border: `1px solid ${T.border}`, borderRadius: 6, padding: "6px 8px", cursor: "pointer" }}>Apri</button>
@@ -812,7 +853,7 @@ export default function App() {
   }, [theme]);
   const [verbale, setVerbale]         = useState("");
   const [cantiere, setCantiere]       = useState("");
-  const [committente, setCommittente] = useState("");
+  const [committente, setCommittente] = useState("Cogen SRL");
   const [diametro, setDiametro]       = useState("300");
   const [tipoProva, setTipoProva]     = useState("fondazione");
   const [tab, setTab]                 = useState("c1");
@@ -833,6 +874,9 @@ export default function App() {
   const [c2, setC2]                   = useState(INIT_C2);
   const [archive, setArchive] = useState(listTests);
   const testConfig = TEST_TYPES[tipoProva] || TEST_TYPES.fondazione;
+  const firstC2Key = stepKey(testConfig.ciclo2[0] || 50);
+  const autoFillFirstC2Ref = useRef(false);
+  const lastAutoFilledFirstC2Ref = useRef(null);
   const chartMaxX = Math.max(
   ...testConfig.ciclo1,
   ...testConfig.ciclo2,
@@ -841,6 +885,35 @@ export default function App() {
 );
   const setC1step = (key) => (rows) => setC1((p) => ({ ...p, [key]: rows }));
   const setC2step = (key) => (rows) => setC2((p) => ({ ...p, [key]: rows }));
+  const setFirstC2Step = (rows) => {
+    autoFillFirstC2Ref.current = true;
+    setC2((p) => ({ ...p, [firstC2Key]: rows }));
+  };
+
+  useEffect(() => {
+    const autoValue = lastValid(c1.scarico50 || []);
+    if (autoValue === null || autoFillFirstC2Ref.current) return;
+
+    setC2((prev) => {
+      const currentRows = prev[firstC2Key] || EMPTY_ROWS();
+      const currentValue = currentRows[0];
+      const shouldSync =
+        currentValue === "" ||
+        currentValue === String(autoValue) ||
+        currentValue === String(lastAutoFilledFirstC2Ref.current);
+
+      if (!shouldSync) return prev;
+
+      const nextRows = [...currentRows];
+      nextRows[0] = String(autoValue);
+
+      if (currentValue === String(autoValue)) return prev;
+
+      lastAutoFilledFirstC2Ref.current = String(autoValue);
+      return { ...prev, [firstC2Key]: nextRows };
+    });
+  }, [c1.scarico50, firstC2Key]);
+
   const hasInsertedReadings = () => {
   const hasC1Readings = Object.values(c1).some((rows) =>
     rows.some((value) => String(value).trim() !== "")
@@ -864,6 +937,8 @@ const handleTipoProvaChange = (nuovoTipo) => {
     if (!conferma) return;
   }
 
+  autoFillFirstC2Ref.current = false;
+  lastAutoFilledFirstC2Ref.current = null;
   setC1(INIT_C1);
   setC2(INIT_C2);
   setTipoProva(nuovoTipo);
@@ -902,7 +977,7 @@ useEffect(() => {
 
     setVerbale(data.verbale || "");
     setCantiere(data.cantiere || "");
-    setCommittente(data.committente || "");
+    setCommittente(data.committente || "Cogen SRL");
     setDiametro(data.diametro || "300");
     setTipoProva(data.tipoProva || "fondazione");
     setDataProva(data.dataProva || "");
@@ -1045,8 +1120,16 @@ const exportPDF = useCallback(async (preview = false) => {
 
     const PW = 210;
     const PH = 297;
-    const ML = 10;
-    const CW = PW - ML * 2;
+
+// Area utile richiesta: 19 × 19 cm
+const CONTENT_X = 10;
+const CONTENT_Y = 8;
+const CONTENT_W = 190;
+const CONTENT_H = 190;
+
+// Manteniamo questi nomi per non rompere il resto del PDF
+const ML = CONTENT_X;
+const CW = CONTENT_W;
 
     function section(x, y, w, title) {
       pdf.setFillColor(235, 238, 242);
@@ -1223,7 +1306,7 @@ pdf.text("PROVA DI CARICO SU PIASTRA", PW - ML, 17, { align: "right" });
 pdf.setFont("helvetica", "normal");
 pdf.setFontSize(6.5);
 pdf.text(
-  `TIPO DI PROVA: ${tipoProva.toUpperCase()}`,
+  `STRATO: ${testConfig.label || "Fondazione"}`,
   PW - ML,
   21,
   { align: "right" }
@@ -1243,19 +1326,19 @@ pdf.line(ML, 29, PW - ML, 29);
     const h = 9.2;
     const w2 = leftW / 2;
 
-    cell(ML, gy, w2, h, "Verbale n.", verbale);
-    cell(ML + w2, gy, w2, h, "Data prova", dataProva);
+    cell(ML, gy, w2, h, "N. prova", verbale);
+    cell(ML + w2, gy, w2, h, "Data", dataProva);
     gy += h;
 
-    cell(ML, gy, w2, h, "Committente", committente);
-    cell(ML + w2, gy, w2, h, "Cantiere", cantiere);
+    cell(ML, gy, w2, h, "Cantiere", cantiere);
+    cell(ML + w2, gy, w2, h, "Committente", committente);
     gy += h;
 
-    cell(ML, gy, w2, h, "Tratta / km", `${tratta || "—"} ${km || ""}`);
+    cell(ML, gy, w2, h, "Km", km || "—");
     cell(ML + w2, gy, w2, h, "Sezione / quota", `${sezione || "—"} ${quota || ""}`);
     gy += h;
 
-    cell(ML, gy, w2, h, "Terreno / strato", `${terra || "—"} ${strato || ""}`);
+    cell(ML, gy, w2, h, "Strato", testConfig.label || "—");
     cell(ML + w2, gy, w2, h, "Diametro piastra", `${diametro || "—"} mm`);
     gy += h;
 
@@ -1288,19 +1371,11 @@ if (fotoProva) {
     y = 88;
     let ry = section(ML, y, CW, "RISULTATI DELLA PROVA");
 
-    const resW = CW / 4;
+    const resW = CW / 3;
 
-    cell(ML, ry, resW, 11, "Md - 1° ciclo", md !== null ? `${md.toFixed(2)} MPa` : "—");
-    cell(ML + resW, ry, resW, 11, "Md' - 2° ciclo", mdp !== null ? `${mdp.toFixed(2)} MPa` : "—");
-    cell(ML + 2 * resW, ry, resW, 11, "Rapporto Md/Md'", rapporto !== null ? rapporto.toFixed(3) : "—");
-    cell(
-      ML + 3 * resW,
-      ry,
-      resW,
-      11,
-      "Esito",
-      rapporto !== null ? (provaValida ? "VALIDA" : "NON VALIDA") : "—"
-    );
+    cell(ML, ry, resW, 11, "Md - 1° ciclo", md !== null ? `${md.toFixed(1)} MPa` : "—");
+    cell(ML + resW, ry, resW, 11, "Md' - 2° ciclo", mdp !== null ? `${mdp.toFixed(1)} MPa` : "—");
+    cell(ML + 2 * resW, ry, resW, 11, "Rapporto Md/Md'", rapporto !== null ? rapporto.toFixed(2) : "—");
 
     // TABELLA
     y = 108;
@@ -1368,29 +1443,39 @@ heads.forEach((head, i) => {
 ty += 6;
 
     tableRows.forEach(({ p, r1, s1: s1Val, r2, s2: s2Val }) => {
-      pdf.setDrawColor(210, 210, 210);
-      pdf.rect(tx, ty, 82, 7);
+  pdf.setDrawColor(210, 210, 210);
+  pdf.rect(tx, ty, 82, 5);
 
-      const vals = [
-        p,
-        r1 !== null ? r1.toFixed(2) : "—",
-        s1Val !== null ? s1Val.toFixed(3) : "—",
-        r2 !== null ? r2.toFixed(2) : "—",
-        s2Val !== null ? s2Val.toFixed(3) : "—",
-      ];
+  const vals = [
+    p,
+    r1 !== null ? r1.toFixed(2) : "—",
+    s1Val !== null ? s1Val.toFixed(3) : "—",
+    r2 !== null ? r2.toFixed(2) : "—",
+    s2Val !== null ? s2Val.toFixed(3) : "—",
+  ];
 
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(5.8);
-      pdf.setTextColor(0, 0, 0);
+  pdf.setFont("helvetica", "normal");
+  pdf.setFontSize(5.8);
+  pdf.setTextColor(0, 0, 0);
 
-      cx = tx;
-      vals.forEach((v, i) => {
-        pdf.text(String(v), cx + 1.3, ty + 4.7, { maxWidth: col[i] - 2 });
-        cx += col[i];
-      });
+  cx = tx;
 
-      ty += 7;
-    });
+  vals.forEach((v, i) => {
+    pdf.text(
+      String(v),
+      cx + col[i] / 2,
+      ty + 3.5,
+      {
+        align: "center",
+        maxWidth: col[i] - 2,
+      }
+    );
+
+    cx += col[i];
+  });
+
+  ty += 5;
+});
 
     // FORMULE + NOTE
     let ny = section(ML, ty + 5, 82, "FORMULE E NOTE");
@@ -1410,17 +1495,18 @@ pdf.text(
   ML + 1.5,
   ny + 9
 );
-    pdf.text("Prova valida se Md/Md' < 1", ML + 1.5, ny + 13);
-    pdf.text("Norma: CNR 146/92", ML + 1.5, ny + 17);
+    
+    pdf.text("Norma: CNR 146/92", ML + 1.5, ny + 13);
 
     // GRAFICO
-    const chartX = ML + 88;
-    const chartY = 108;
-    const chartW = CW - 88;
-    const chartH = 105;
+const chartX = ML;
+const chartY = ny + 22;
 
-    section(chartX, chartY, chartW, "GRAFICO CARICO - CEDIMENTO");
-    drawPdfChart(chartX, chartY + 7, chartW, chartH - 7);
+const chartW = 190;
+const chartH = 60;
+
+section(chartX, chartY, chartW, "GRAFICO CARICO - CEDIMENTO");
+drawPdfChart(chartX, chartY + 7, chartW, chartH - 7);
 
     // FIRMA
     const signY = 224;
@@ -1557,7 +1643,7 @@ function openRecord(record) {
 
   setVerbale(d.verbale || record.id || "");
   setCantiere(d.cantiere || "");
-  setCommittente(d.committente || "");
+  setCommittente(d.committente || "Cogen SRL");
   setDiametro(d.diametro || "300");
   setTipoProva(d.tipoProva || "fondazione");
   setDataProva(d.dataProva || "");
@@ -1663,7 +1749,7 @@ function exportRecord(record) {
           <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
             <Pill label="Md" value={md !== null ? md.toFixed(1) : "—"} unit="MPa" color={T.cycle1} />
             <Pill label="Md'" value={mdp !== null ? mdp.toFixed(1) : "—"} unit="MPa" color={T.cycle2} />
-            <Pill label="Md/Md'" value={rapporto.toFixed(3)} color={rapportoColor} bold />
+            <Pill label="Md/Md'" value={rapporto.toFixed(2)} color={rapportoColor} bold />
           </div>
         )}
         <div
@@ -1774,14 +1860,12 @@ function exportRecord(record) {
         tipoProva={tipoProva} 
         dataProva={dataProva} setDataProva={setDataProva}
         handleTipoProvaChange={handleTipoProvaChange}
-        provaGiorno={provaGiorno} setProvaGiorno={setProvaGiorno}
-        tratta={tratta} setTratta={setTratta}
+        
         km={km} setKm={setKm}
         sezione={sezione} setSezione={setSezione}
-        terra={terra} setTerra={setTerra}
-        strato={strato} setStrato={setStrato}
+        
         quota={quota} setQuota={setQuota}
-        distBordo={distBordo} setDistBordo={setDistBordo}
+  
         tecnico={tecnico} setTecnico={setTecnico}
         presenti={presenti} setPresenti={setPresenti}
         fotoProva={fotoProva} setFotoProva={setFotoProva}
@@ -1871,8 +1955,14 @@ function exportRecord(record) {
               2° ciclo di carico ({testConfig.ciclo2[0]} → {testConfig.ciclo2[testConfig.ciclo2.length - 1]} kPa) + scarico finale a {testConfig.scarico2} kPa.
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
-              {testConfig.ciclo2.map((kpa) => (
-                <StepTable key={kpa} kpa={kpa} rows={c2[stepKey(kpa)] || EMPTY_ROWS()} onChange={setC2step(stepKey(kpa))} color={T.cycle2} />
+              {testConfig.ciclo2.map((kpa, index) => (
+                <StepTable
+                  key={kpa}
+                  kpa={kpa}
+                  rows={c2[stepKey(kpa)] || EMPTY_ROWS()}
+                  onChange={index === 0 ? setFirstC2Step : setC2step(stepKey(kpa))}
+                  color={T.cycle2}
+                />
               ))}
               <StepTable label="Scarico" kpa={testConfig.scarico2} rows={c2.scarico} onChange={setC2step("scarico")} color={T.accentOrange} />
             </div>
@@ -1882,9 +1972,9 @@ function exportRecord(record) {
         {tab === "results" && (
           <div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 10, marginBottom: 24 }}>
-              <ResultCard label="Md — 1° Ciclo" value={md !== null ? md.toFixed(2) : "—"} unit="MPa" color={T.cycle1} sub={`Intervallo ${testConfig.md[0]}–${testConfig.md[1]} kPa`} />
-              <ResultCard label="Md' — 2° Ciclo" value={mdp !== null ? mdp.toFixed(2) : "—"} unit="MPa" color={T.cycle2} sub={`Intervallo ${testConfig.mdp[0]}–${testConfig.mdp[1]} kPa`} />
-              <ResultCard label="Rapporto Md / Md'" value={rapporto !== null ? rapporto.toFixed(3) : "—"} unit="—" color={rapportoColor} highlight={rapporto !== null ? rapportoColor : undefined} sub={rapporto === null ? "In attesa dati" : provaValida ? "✓ Prova VALIDA (< 1)" : "✗ Prova NON VALIDA (≥ 1)"} />
+              <ResultCard label="Md — 1° Ciclo" value={md !== null ? md.toFixed(1) : "—"} unit="MPa" color={T.cycle1} sub={`Intervallo ${testConfig.md[0]}–${testConfig.md[1]} kPa`} />
+              <ResultCard label="Md' — 2° Ciclo" value={mdp !== null ? mdp.toFixed(1) : "—"} unit="MPa" color={T.cycle2} sub={`Intervallo ${testConfig.mdp[0]}–${testConfig.mdp[1]} kPa`} />
+              <ResultCard label="Rapporto Md / Md'" value={rapporto !== null ? rapporto.toFixed(2) : "—"} unit="—" color={rapportoColor} highlight={rapporto !== null ? rapportoColor : undefined} sub={rapporto === null ? "In attesa dati" : undefined} />
             </div>
             <div ref={chartRef} style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "14px 10px", marginBottom: 20 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
