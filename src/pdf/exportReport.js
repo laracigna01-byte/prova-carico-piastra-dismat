@@ -895,7 +895,7 @@ export async function exportReport(data, preview = false) {
     resultsBodyY,
     resultW,
     resultH,
-    "Md' - 2Â° ciclo",
+    "Md' - 2 ciclo",
     mdp !== null && mdp !== undefined
       ? `${Number(mdp).toFixed(1)} MPa`
       : "-",
