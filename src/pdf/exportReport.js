@@ -880,7 +880,7 @@ export async function exportReport(data, preview = false) {
     resultsBodyY,
     resultW,
     resultH,
-    "Md - 1Â° ciclo",
+    "Md - 1 ciclo",
     md !== null && md !== undefined
       ? `${Number(md).toFixed(1)} MPa`
       : "-",
