@@ -1,4 +1,4 @@
-﻿import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { exportReport } from "./pdf/exportReport";
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid,
@@ -16,7 +16,7 @@ import {
 import { LoginGate } from "./security/LoginGate";
 import { useAuth } from "./security/AuthContext";
 
-// â”€â”€â”€ design tokens â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── design tokens ────────────────────────────────────────────────────────────
 const THEMES = {
   dark: {
     bg: "#0d1117",
@@ -55,7 +55,7 @@ const THEMES = {
 };
 
 let T = THEMES.dark;
-// â”€â”€â”€ helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── helpers ──────────────────────────────────────────────────────────────────
 function interp(x, xp, fp) {
   if (x <= xp[0]) return fp[0];
   if (x >= xp[xp.length - 1]) return fp[fp.length - 1];
@@ -83,7 +83,7 @@ function stabilityInfo(rows, threshold = 0.02, minCount = 3) {
   return { stable: delta <= threshold, delta, count: vals.length };
 }
 
-// â”€â”€â”€ configurazioni dei tipi di prova â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── configurazioni dei tipi di prova ────────────────────────────────────────
 const TEST_TYPES = {
   fondazione: {
     label: "Fondazione",
@@ -116,7 +116,7 @@ const TEST_TYPES = {
 
 const stepKey = (kpa) => `p${kpa}`;
 
-// â”€â”€â”€ struttura dati iniziale â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── struttura dati iniziale ─────────────────────────────────────────────────
 const EMPTY_ROWS = () => Array(10).fill("");
 const INIT_C1 = {
   p20:   EMPTY_ROWS(),
@@ -137,7 +137,7 @@ const INIT_C2 = {
   scarico: EMPTY_ROWS(),
 };
 
-// â”€â”€â”€ componente tabella gradino â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── componente tabella gradino ───────────────────────────────────────────────
 function StepTable({ label, kpa, rows, onChange, color, threshold = 0.02 }) {
   const { stable, delta, count } = stabilityInfo(rows, threshold);
   const stab = count >= 3 ? stable : null;
@@ -178,7 +178,7 @@ function StepTable({ label, kpa, rows, onChange, color, threshold = 0.02 }) {
               background: stab ? `${T.accent}20` : `${T.accentYellow}20`,
               color: stab ? T.accent : T.accentYellow,
             }}>
-              {stab ? "âœ“ STABILE" : `Î” ${delta !== null ? delta.toFixed(3) : "â€”"} mm`}
+              {stab ? "✓ STABILE" : `Δ ${delta !== null ? delta.toFixed(3) : "—"} mm`}
             </span>
           )}
         </div>
@@ -224,7 +224,7 @@ function StepTable({ label, kpa, rows, onChange, color, threshold = 0.02 }) {
   );
 }
 
-// â”€â”€â”€ subcomponents â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── subcomponents ────────────────────────────────────────────────────────────
 function TextInput({ label, value, onChange, placeholder }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -402,7 +402,7 @@ function SignatureBox({ label, value, onChange }) {
           }}
         />
         <div style={{ marginTop: 6, fontSize: 10, color: T.textDim }}>
-          Firma con dito, penna touch o mouse. La firma verrÃ  riportata nel PDF.
+          Firma con dito, penna touch o mouse. La firma verrà riportata nel PDF.
         </div>
       </div>
     </div>
@@ -479,7 +479,7 @@ const FixedChartContainer = ({
   />
 
   <Scatter
-    name="1Â° Ciclo"
+    name="1° Ciclo"
     data={chart1}
     line={{
       stroke: T.cycle1,
@@ -502,7 +502,7 @@ const FixedChartContainer = ({
   />
 
   <Scatter
-    name="2Â° Ciclo"
+    name="2° Ciclo"
     data={chart2}
     line={{
       stroke: T.cycle2,
@@ -562,7 +562,7 @@ const CustomTooltip = ({ active, payload }) => {
     <div style={{ background: T.surfaceHigh, border: `1px solid ${T.border}`, borderRadius: 6, padding: "8px 12px", fontSize: 11, fontFamily: "monospace" }}>
       {payload.map((p, i) => (
         <div key={i} style={{ color: p.stroke || T.text }}>
-          {p.name}: {Number(p.payload.x).toFixed(0)} kPa â†’ {Number(p.payload.y).toFixed(3)} mm
+          {p.name}: {Number(p.payload.x).toFixed(0)} kPa → {Number(p.payload.y).toFixed(3)} mm
         </div>
       ))}
     </div>
@@ -661,7 +661,7 @@ function GeneralInfoPanel({
           outline: "none", WebkitTapHighlightColor: "transparent"
         }}
       >
-        <span>{isOpen ? "ðŸ”¼ NASCONDI DATI GENERALI" : "ðŸ”½ MOSTRA DATI GENERALI"}</span>
+        <span>{isOpen ? "🔼 NASCONDI DATI GENERALI" : "🔽 MOSTRA DATI GENERALI"}</span>
         {verbale && <span style={{ fontFamily: "monospace", color: T.accentBlue }}>Verb. {verbale}</span>}
       </button>
 
@@ -739,9 +739,9 @@ function GeneralInfoPanel({
                 padding: "10px", cursor: "pointer", fontSize: 13, color: T.textMuted,
                 WebkitTapHighlightColor: "transparent"
               }}>
-                <span style={{ fontSize: 18 }}>ðŸ“·</span>
+                <span style={{ fontSize: 18 }}>📷</span>
                 <span>{fotoProva ? "Cambia foto" : "Carica foto"}</span>
-                <input type="file" accept="image/*" onChange={handleFoto} style={{ display: "none" }} />
+                <input type="file" accept="image/*" capture="environment" onChange={handleFoto} style={{ display: "none" }} />
               </label>
               {fotoProva && (
                 <div style={{ position: "relative" }}>
@@ -749,7 +749,7 @@ function GeneralInfoPanel({
                   <button
                     onClick={() => setFotoProva(null)}
                     style={{ position: "absolute", top: -6, right: -6, width: 18, height: 18, borderRadius: "50%", background: T.accentRed, border: "none", color: "#fff", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
-                  >âœ•</button>
+                  >✕</button>
                 </div>
               )}
             </div>
@@ -840,7 +840,7 @@ function ArchivePanel({ items = [], onOpen, onDuplicate, onDelete, onExport }) {
 
       {items.length === 0 ? (
         <div style={{ padding: 18, color: T.textMuted, fontSize: 12 }}>
-          Nessuna prova salvata. Usa â€œSalvaâ€ dalla barra in alto dopo aver compilato la scheda.
+          Nessuna prova salvata. Usa “Salva” dalla barra in alto dopo aver compilato la scheda.
         </div>
       ) : filtered.length === 0 ? (
         <div style={{ padding: 18, color: T.textMuted, fontSize: 12 }}>
@@ -865,15 +865,15 @@ function ArchivePanel({ items = [], onOpen, onDuplicate, onDelete, onExport }) {
             <tbody>
               {filtered.map((item) => (
                 <tr key={item.id} style={{ borderTop: `1px solid ${T.border}` }}>
-                  <td style={{ padding: "9px 12px", color: T.accentBlue, fontWeight: 800 }}>{item.id || "â€”"}</td>
-                  <td style={{ padding: "9px 12px" }}>{item.savedAt ? new Date(item.savedAt).toLocaleString("it-IT") : "â€”"}</td>
-                  <td style={{ padding: "9px 12px" }}>{item.data?.dataProva || "â€”"}</td>
-                  <td style={{ padding: "9px 12px" }}>{item.data?.verbale || "â€”"}</td>
+                  <td style={{ padding: "9px 12px", color: T.accentBlue, fontWeight: 800 }}>{item.id || "—"}</td>
+                  <td style={{ padding: "9px 12px" }}>{item.savedAt ? new Date(item.savedAt).toLocaleString("it-IT") : "—"}</td>
+                  <td style={{ padding: "9px 12px" }}>{item.data?.dataProva || "—"}</td>
+                  <td style={{ padding: "9px 12px" }}>{item.data?.verbale || "—"}</td>
                   <td style={{ padding: "9px 12px" }}>
                             {TEST_TYPES[item.data?.tipoProva]?.label || "Fondazione"}
                   </td>
-                  <td style={{ padding: "9px 12px" }}>{item.data?.cantiere || "â€”"}</td>
-                  <td style={{ padding: "9px 12px" }}>{item.data?.committente || "â€”"}</td>
+                  <td style={{ padding: "9px 12px" }}>{item.data?.cantiere || "—"}</td>
+                  <td style={{ padding: "9px 12px" }}>{item.data?.committente || "—"}</td>
                   <td style={{ padding: "9px 12px" }}>
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                       <button type="button" onClick={() => onOpen(item)} style={{ background: T.surfaceHigh, color: T.text, border: `1px solid ${T.border}`, borderRadius: 6, padding: "6px 8px", cursor: "pointer" }}>Apri</button>
@@ -910,7 +910,7 @@ function LogoutButton() {
         minWidth: 92,
       }}
     >
-      ðŸ”’ Esci
+      🔒 Esci
     </button>
   );
 }
@@ -973,7 +973,7 @@ export default function App() {
   // Aspetta che sia stata inserita almeno una lettura nello scarico C1.
   if (autoValue === null) return;
 
-  // Se lâ€™utente ha giÃ  modificato manualmente il primo gradino C2,
+  // Se l’utente ha già modificato manualmente il primo gradino C2,
   // non deve essere sovrascritto.
   if (autoFillFirstC2Ref.current) return;
 
@@ -990,7 +990,7 @@ export default function App() {
     const nextRows = [...currentRows];
 
     // La prima lettura del primo gradino C2 coincide
-    // con lâ€™ultima lettura dello scarico C1.
+    // con l’ultima lettura dello scarico C1.
     nextRows[0] = nextValue;
 
     lastAutoFilledFirstC2Ref.current = nextValue;
@@ -1372,8 +1372,8 @@ function exportRecord(record) {
 
      
   const tabs = [
-    { id: "c1", label: "1Â° Ciclo" },
-    { id: "c2", label: "2Â° Ciclo" },
+    { id: "c1", label: "1° Ciclo" },
+    { id: "c2", label: "2° Ciclo" },
     { id: "results", label: "Risultati" },
     { id: "archive", label: "Archivio" },
   ];
@@ -1422,13 +1422,13 @@ function exportRecord(record) {
   />
         <div>
           <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: "0.06em", color: T.text }}>DISMAT</div>
-          <div style={{ fontSize: 9, color: T.textMuted, letterSpacing: "0.04em" }}>CNR 146/92 Â· Prova di Carico su Piastra</div>
+          <div style={{ fontSize: 9, color: T.textMuted, letterSpacing: "0.04em" }}>CNR 146/92 · Prova di Carico su Piastra</div>
         </div>
         <div style={{ flex: 1 }} />
         {rapporto !== null && (
           <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-            <Pill label="Md" value={md !== null ? md.toFixed(1) : "â€”"} unit="MPa" color={T.cycle1} />
-            <Pill label="Md'" value={mdp !== null ? mdp.toFixed(1) : "â€”"} unit="MPa" color={T.cycle2} />
+            <Pill label="Md" value={md !== null ? md.toFixed(1) : "—"} unit="MPa" color={T.cycle1} />
+            <Pill label="Md'" value={mdp !== null ? mdp.toFixed(1) : "—"} unit="MPa" color={T.cycle2} />
             <Pill label="Md/Md'" value={rapporto.toFixed(2)} color={rapportoColor} bold />
           </div>
         )}
@@ -1456,7 +1456,7 @@ function exportRecord(record) {
     minWidth: 92,
   }}
 >
-  {theme === "dark" ? "â˜€ï¸ Chiaro" : "ðŸŒ™ Scuro"}
+  {theme === "dark" ? "☀️ Chiaro" : "🌙 Scuro"}
 </button>
 <LogoutButton />
 <button
@@ -1509,7 +1509,7 @@ function exportRecord(record) {
               WebkitTapHighlightColor: "transparent",minWidth: 92,
             }}
           >
-            {exporting ? "â³ Generando..." : "â†“ PDF"}
+            {exporting ? "⏳ Generando..." : "↓ PDF"}
           </button>
           <button
   type="button"
@@ -1585,7 +1585,7 @@ function exportRecord(record) {
         color: T.text,
       }}
     >
-      CNR 146/92 Â· Determinazione dei moduli di deformazione Md e Md'
+      CNR 146/92 · Determinazione dei moduli di deformazione Md e Md'
     </div>
   </div>
 
@@ -1596,7 +1596,7 @@ function exportRecord(record) {
       fontWeight: 700,
     }}
   >
-    Procedura interna DISMAT Â· IO 07-11-B
+    Procedura interna DISMAT · IO 07-11-B
   </div>
 </div>
 
@@ -1618,13 +1618,13 @@ function exportRecord(record) {
         {tab === "c1" && (
           <div>
             <div style={{ fontSize: 11, color: T.textMuted, marginBottom: 14, lineHeight: 1.5 }}>
-              Inserisci le letture del comparatore (mm) per ogni gradino. Ogni cella Ã¨ una misurazione temporale (minuto 1â€¦10). Il badge <span style={{ color: T.accent }}>STABILE</span> appare quando le ultime 3 letture hanno scarto â‰¤ 0.02 mm.
+              Inserisci le letture del comparatore (mm) per ogni gradino. Ogni cella è una misurazione temporale (minuto 1…10). Il badge <span style={{ color: T.accent }}>STABILE</span> appare quando le ultime 3 letture hanno scarto ≤ 0.02 mm.
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
               {testConfig.ciclo1.map((kpa, index) => (
                 <StepTable key={kpa} label={index === 0 ? "Carico iniziale" : undefined} kpa={kpa} rows={c1[stepKey(kpa)] || EMPTY_ROWS()} onChange={setC1step(stepKey(kpa))} color={T.cycle1} />
               ))}
-              <StepTable label="Scarico â†’" kpa={testConfig.scarico1} rows={c1.scarico50} onChange={setC1step("scarico50")} color={T.accentBlue} threshold={0.05} />
+              <StepTable label="Scarico →" kpa={testConfig.scarico1} rows={c1.scarico50} onChange={setC1step("scarico50")} color={T.accentBlue} threshold={0.05} />
             </div>
           </div>
         )}
@@ -1632,7 +1632,7 @@ function exportRecord(record) {
         {tab === "c2" && (
           <div>
             <div style={{ fontSize: 11, color: T.textMuted, marginBottom: 14, lineHeight: 1.5 }}>
-              2Â° ciclo di carico ({testConfig.ciclo2[0]} â†’ {testConfig.ciclo2[testConfig.ciclo2.length - 1]} kPa) + scarico finale a {testConfig.scarico2} kPa.
+              2° ciclo di carico ({testConfig.ciclo2[0]} → {testConfig.ciclo2[testConfig.ciclo2.length - 1]} kPa) + scarico finale a {testConfig.scarico2} kPa.
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
               {testConfig.ciclo2.map((kpa, index) => (
@@ -1652,9 +1652,9 @@ function exportRecord(record) {
         {tab === "results" && (
           <div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 10, marginBottom: 24 }}>
-              <ResultCard label="Md â€” 1Â° Ciclo" value={md !== null ? md.toFixed(1) : "â€”"} unit="MPa" color={T.cycle1} sub={`Intervallo ${testConfig.md[0]}â€“${testConfig.md[1]} kPa`} />
-              <ResultCard label="Md' â€” 2Â° Ciclo" value={mdp !== null ? mdp.toFixed(1) : "â€”"} unit="MPa" color={T.cycle2} sub={`Intervallo ${testConfig.mdp[0]}â€“${testConfig.mdp[1]} kPa`} />
-              <ResultCard label="Rapporto Md / Md'" value={rapporto !== null ? rapporto.toFixed(2) : "â€”"} unit="â€”" color={rapportoColor} highlight={rapporto !== null ? rapportoColor : undefined} sub={rapporto === null ? "In attesa dati" : undefined} />
+              <ResultCard label="Md — 1° Ciclo" value={md !== null ? md.toFixed(1) : "—"} unit="MPa" color={T.cycle1} sub={`Intervallo ${testConfig.md[0]}–${testConfig.md[1]} kPa`} />
+              <ResultCard label="Md' — 2° Ciclo" value={mdp !== null ? mdp.toFixed(1) : "—"} unit="MPa" color={T.cycle2} sub={`Intervallo ${testConfig.mdp[0]}–${testConfig.mdp[1]} kPa`} />
+              <ResultCard label="Rapporto Md / Md'" value={rapporto !== null ? rapporto.toFixed(2) : "—"} unit="—" color={rapportoColor} highlight={rapporto !== null ? rapportoColor : undefined} sub={rapporto === null ? "In attesa dati" : undefined} />
             </div>
             <div ref={chartRef} style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "14px 10px", marginBottom: 20 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
@@ -1662,15 +1662,15 @@ function exportRecord(record) {
                   <div style={{ fontSize: 12, fontWeight: 700, color: T.text }}>GRAFICO CARICO - SPOSTAMENTO</div>
                 </div>
                 <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                  <LegendDot color={T.cycle1} label="1Â° Ciclo" />
+                  <LegendDot color={T.cycle1} label="1° Ciclo" />
                   <LegendDot color={T.cycle1} label="Scarico C1" dashed />
-                  <LegendDot color={T.cycle2} label="2Â° Ciclo" />
+                  <LegendDot color={T.cycle2} label="2° Ciclo" />
                 </div>
               </div>
 
               {chart1.length === 0 && chart2.length === 0 && chartScarico1.length === 0 ? (
                 <div style={{ height: 180, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: T.textDim, border: `1px dashed ${T.border}`, borderRadius: 8 }}>
-                  Nessun dato inserito. Il grafico comparirÃ  appena digiti le letture.
+                  Nessun dato inserito. Il grafico comparirà appena digiti le letture.
                 </div>
               ) : (
                 <div style={{ width: "100%", height: 220, fontSize: 10, fontFamily: "monospace" }}>
@@ -1727,7 +1727,7 @@ function exportRecord(record) {
   />
 
   <Scatter
-    name="1Â° Ciclo"
+    name="1° Ciclo"
     data={chart1}
     line={{
       stroke: T.cycle1,
@@ -1750,7 +1750,7 @@ function exportRecord(record) {
   />
 
   <Scatter
-    name="2Â° Ciclo"
+    name="2° Ciclo"
     data={chart2}
     line={{
       stroke: T.cycle2,
@@ -1798,18 +1798,18 @@ function exportRecord(record) {
                     {tableRows.map(({ p, r1, s1: s1Val, r2, s2: s2Val, isRef }) => (
                       <tr key={p} style={{ borderBottom: `1px solid ${T.border}`, background: isRef ? `${T.accentBlue}08` : "transparent" }}>
                         <td style={{ padding: "8px 12px", fontWeight: isRef ? 800 : 400, color: isRef ? T.accentBlue : T.text }}>{p}</td>
-                        <td style={{ padding: "8px 12px", color: T.cycle1 }}>{r1 !== null ? r1.toFixed(2) : "â€”"}</td>
-                        <td style={{ padding: "8px 12px" }}>{s1Val !== null ? s1Val.toFixed(3) : "â€”"}</td>
-                        <td style={{ padding: "8px 12px", color: T.cycle2 }}>{r2 !== null ? r2.toFixed(2) : "â€”"}</td>
-                        <td style={{ padding: "8px 12px" }}>{s2Val !== null ? s2Val.toFixed(3) : "â€”"}</td>
+                        <td style={{ padding: "8px 12px", color: T.cycle1 }}>{r1 !== null ? r1.toFixed(2) : "—"}</td>
+                        <td style={{ padding: "8px 12px" }}>{s1Val !== null ? s1Val.toFixed(3) : "—"}</td>
+                        <td style={{ padding: "8px 12px", color: T.cycle2 }}>{r2 !== null ? r2.toFixed(2) : "—"}</td>
+                        <td style={{ padding: "8px 12px" }}>{s2Val !== null ? s2Val.toFixed(3) : "—"}</td>
                       </tr>
                     ))}
                     <tr style={{ background: T.surfaceHigh }}>
                       <td style={{ padding: "8px 12px", color: T.accentBlue }}>Scarico finale</td>
-                      <td style={{ padding: "8px 12px" }}>â€”</td>
-                      <td style={{ padding: "8px 12px" }}>â€”</td>
-                      <td style={{ padding: "8px 12px", color: T.cycle2 }}>{rScarico2 !== null ? rScarico2.toFixed(2) : "â€”"}</td>
-                      <td style={{ padding: "8px 12px" }}>{sScarico2 !== null ? sScarico2.toFixed(3) : "â€”"}</td>
+                      <td style={{ padding: "8px 12px" }}>—</td>
+                      <td style={{ padding: "8px 12px" }}>—</td>
+                      <td style={{ padding: "8px 12px", color: T.cycle2 }}>{rScarico2 !== null ? rScarico2.toFixed(2) : "—"}</td>
+                      <td style={{ padding: "8px 12px" }}>{sScarico2 !== null ? sScarico2.toFixed(3) : "—"}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1833,4 +1833,3 @@ function exportRecord(record) {
     </div>
     </LoginGate>
   );}
-
