@@ -274,9 +274,9 @@ function SignatureBox({ label, value, onChange }) {
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
     ctx.lineWidth = 2.2;
-    ctx.strokeStyle = T.text;
+    ctx.strokeStyle = "#000000";
 
-    ctx.fillStyle = T.bg;
+    ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, cssWidth, cssHeight);
 
     if (value) {
@@ -345,7 +345,7 @@ function SignatureBox({ label, value, onChange }) {
     const rect = canvas.getBoundingClientRect();
     const ctx = canvas.getContext("2d");
 
-    ctx.fillStyle = T.bg;
+    ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, rect.width, rect.height);
 
     onChange(null);
@@ -427,13 +427,90 @@ const FixedChartContainer = ({
         <div style={{ color: "#fff", fontFamily: "sans-serif", fontSize: "14px", marginBottom: "10px", fontWeight: "bold" }}>GRAFICO CARICO - SPOSTAMENTO</div>
         <div style={{ width: "100%", height: "240px", fontSize: 10, fontFamily: "monospace" }}>
           <ResponsiveContainer width="100%" height="100%">
-            <ScatterChart margin={{ top: 5, right: 20, bottom: 5, left: -25 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#30363d" />
-              <XAxis type="number" dataKey="x" name="Carico" unit="kPa" domain={[0, chartMaxX]} stroke={T.textMuted} tickLine={false} />
-              <YAxis type="number" dataKey="y" name="Spostamento" unit="mm" domain={[0, "dataMax + 0.5"]} reversed={true} stroke={T.textMuted} tickLine={false} />
-              <Scatter name="1° Ciclo" data={chart1} line={{ stroke: T.cycle1, strokeWidth: 2 }} fill={T.cycle1} shape="circle" />
-              <Scatter name="Scarico C1" data={chartScarico1} line={{ stroke: T.cycle1, strokeWidth: 1.5, strokeDasharray: "4 4" }} fill="none" shape="none" />
-              <Scatter name="2° Ciclo" data={chart2} line={{ stroke: T.cycle2, strokeWidth: 2 }} fill={T.cycle2} shape="circle" />
+            <ScatterChart
+  margin={{
+    top: 38,
+    right: 20,
+    bottom: 8,
+    left: 5,
+  }}
+>
+  <CartesianGrid
+    strokeDasharray="3 3"
+    stroke="#30363d"
+  />
+
+  <XAxis
+    type="number"
+    dataKey="x"
+    name="Carico"
+    unit="kPa"
+    domain={[0, chartMaxX]}
+    orientation="top"
+    stroke={T.textMuted}
+    tickLine={false}
+    axisLine={true}
+    label={{
+      value: "Carico [kPa]",
+      position: "top",
+      offset: 14,
+      fill: T.textMuted,
+    }}
+  />
+
+  <YAxis
+    type="number"
+    dataKey="y"
+    name="Spostamento"
+    unit="mm"
+    domain={[0, "dataMax + 0.5"]}
+    reversed={true}
+    stroke={T.textMuted}
+    tickLine={false}
+    axisLine={true}
+    tickFormatter={(value) => Number(value).toFixed(2)}
+    label={{
+      value: "Spostamento [mm]",
+      angle: -90,
+      position: "insideLeft",
+      offset: 10,
+      fill: T.textMuted,
+    }}
+  />
+
+  <Scatter
+    name="1° Ciclo"
+    data={chart1}
+    line={{
+      stroke: T.cycle1,
+      strokeWidth: 2,
+    }}
+    fill={T.cycle1}
+    shape="circle"
+  />
+
+  <Scatter
+    name="Scarico C1"
+    data={chartScarico1}
+    line={{
+      stroke: T.cycle1,
+      strokeWidth: 1.5,
+      strokeDasharray: "4 4",
+    }}
+    fill="none"
+    shape="none"
+  />
+
+  <Scatter
+    name="2° Ciclo"
+    data={chart2}
+    line={{
+      stroke: T.cycle2,
+      strokeWidth: 2,
+    }}
+    fill={T.cycle2}
+    shape="circle"
+  />
               <ReferenceLine
   x={testConfig.md[0]}
   stroke={T.accentBlue}
@@ -1598,14 +1675,90 @@ function exportRecord(record) {
               ) : (
                 <div style={{ width: "100%", height: 220, fontSize: 10, fontFamily: "monospace" }}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <ScatterChart margin={{ top: 5, right: 5, bottom: 5, left: -25 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#30363d" />
-                      <XAxis type="number" dataKey="x" name="Carico" unit="kPa" domain={[0, chartMaxX]} stroke={T.textMuted} tickLine={false} />
-                      <YAxis type="number" dataKey="y" name="Spostamento" unit="mm" domain={[0, "dataMax + 0.5"]} reversed={true} stroke={T.textMuted} tickLine={false} />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Scatter name="1° Ciclo" data={chart1} line={{ stroke: T.cycle1, strokeWidth: 2 }} fill={T.cycle1} shape="circle" />
-                      <Scatter name="Scarico C1" data={chartScarico1} line={{ stroke: T.cycle1, strokeWidth: 1.5, strokeDasharray: "4 4" }} fill="none" shape="none" />
-                      <Scatter name="2° Ciclo" data={chart2} line={{ stroke: T.cycle2, strokeWidth: 2 }} fill={T.cycle2} shape="circle" />
+                    <ScatterChart
+  margin={{
+    top: 38,
+    right: 20,
+    bottom: 8,
+    left: 5,
+  }}
+>
+  <CartesianGrid
+    strokeDasharray="3 3"
+    stroke="#30363d"
+  />
+
+  <XAxis
+    type="number"
+    dataKey="x"
+    name="Carico"
+    unit="kPa"
+    domain={[0, chartMaxX]}
+    orientation="top"
+    stroke={T.textMuted}
+    tickLine={false}
+    axisLine={true}
+    label={{
+      value: "Carico [kPa]",
+      position: "top",
+      offset: 14,
+      fill: T.textMuted,
+    }}
+  />
+
+  <YAxis
+    type="number"
+    dataKey="y"
+    name="Spostamento"
+    unit="mm"
+    domain={[0, "dataMax + 0.5"]}
+    reversed={true}
+    stroke={T.textMuted}
+    tickLine={false}
+    axisLine={true}
+    tickFormatter={(value) => Number(value).toFixed(2)}
+    label={{
+      value: "Spostamento [mm]",
+      angle: -90,
+      position: "insideLeft",
+      offset: 10,
+      fill: T.textMuted,
+    }}
+  />
+
+  <Scatter
+    name="1° Ciclo"
+    data={chart1}
+    line={{
+      stroke: T.cycle1,
+      strokeWidth: 2,
+    }}
+    fill={T.cycle1}
+    shape="circle"
+  />
+
+  <Scatter
+    name="Scarico C1"
+    data={chartScarico1}
+    line={{
+      stroke: T.cycle1,
+      strokeWidth: 1.5,
+      strokeDasharray: "4 4",
+    }}
+    fill="none"
+    shape="none"
+  />
+
+  <Scatter
+    name="2° Ciclo"
+    data={chart2}
+    line={{
+      stroke: T.cycle2,
+      strokeWidth: 2,
+    }}
+    fill={T.cycle2}
+    shape="circle"
+  />
                       <ReferenceLine
   x={testConfig.md[0]}
   stroke={T.accentBlue}

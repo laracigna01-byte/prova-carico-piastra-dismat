@@ -1,4 +1,4 @@
-﻿import { jsPDF } from "jspdf";
+import { jsPDF } from "jspdf";
 
 export async function exportReport(data, preview = false) {
   const pdf = new jsPDF({
@@ -41,7 +41,7 @@ export async function exportReport(data, preview = false) {
   const CONTENT_RIGHT = CONTENT_X + CONTENT_W;
   const CONTENT_BOTTOM = CONTENT_Y + CONTENT_H;
 
-  const layerLabel = String(testConfig?.label || "â€”").toUpperCase();
+  const layerLabel = String(testConfig?.label || "—").toUpperCase();
   const rows = Array.isArray(tableRows) ? tableRows : [];
 
   function section(x, y, w, title, h = 4.8) {
@@ -75,7 +75,7 @@ export async function exportReport(data, preview = false) {
     pdf.setFontSize(valueFontSize);
     pdf.setTextColor(0, 0, 0);
 
-    const safeValue = String(value ?? "â€”");
+    const safeValue = String(value ?? "—");
 
     if (align === "center") {
       pdf.text(safeValue, x + w / 2, y + h - 1.15, {
@@ -140,7 +140,7 @@ export async function exportReport(data, preview = false) {
     );
 
     pdf.text(
-      "1Â° CICLO",
+      "1° CICLO",
       x + cols[0] + (cols[1] + cols[2]) / 2,
       cursor + 2.75,
       {
@@ -149,7 +149,7 @@ export async function exportReport(data, preview = false) {
     );
 
     pdf.text(
-      "2Â° CICLO",
+      "2° CICLO",
       x +
         cols[0] +
         cols[1] +
@@ -197,16 +197,16 @@ export async function exportReport(data, preview = false) {
         p,
         r1 !== null && r1 !== undefined
           ? Number(r1).toFixed(2)
-          : "â€”",
+          : "—",
         s1 !== null && s1 !== undefined
           ? Number(s1).toFixed(3)
-          : "â€”",
+          : "—",
         r2 !== null && r2 !== undefined
           ? Number(r2).toFixed(2)
-          : "â€”",
+          : "—",
         s2 !== null && s2 !== undefined
           ? Number(s2).toFixed(3)
-          : "â€”",
+          : "—",
       ];
 
       values.forEach((value, index) => {
@@ -280,10 +280,10 @@ export async function exportReport(data, preview = false) {
       return;
     }
 
-    const plotX = x + 15;
-    const plotY = y + 12;
-    const plotW = w - 21;
-    const plotH = h - 16;
+    const plotX = x + 12;
+    const plotY = y + 8;
+    const plotW = w - 18;
+    const plotH = h - 14;
 
     const maxX =
       Number.isFinite(chartMaxX) && chartMaxX > 0
@@ -291,72 +291,37 @@ export async function exportReport(data, preview = false) {
         : 1;
 
     const rawMaxY = Math.max(
-      ...allPoints.map(
-        (point) => Number(point.y) || 0
-      ),
+      ...allPoints.map((point) => point.y),
       0
     );
 
     const maxY = Math.max(rawMaxY + 0.1, 0.2);
 
-    const divisionsX = 5;
-    const divisionsY = 5;
-
-    // Titolo dell'asse del carico in alto.
-    pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(4.3);
-    pdf.setTextColor(70, 70, 70);
-
-    pdf.text(
-      "Carico [kPa]",
-      plotX + plotW / 2,
-      y + 7,
-      {
-        align: "center",
-      }
-    );
-
-    // Griglia.
     pdf.setLineWidth(0.15);
     pdf.setDrawColor(225, 225, 225);
 
-    for (let i = 1; i <= divisionsX; i += 1) {
-      const gridX =
-        plotX + (plotW / divisionsX) * i;
+    for (let i = 1; i <= 4; i += 1) {
+      const gx = plotX + (plotW / 5) * i;
+      const gy = plotY + (plotH / 5) * i;
 
       pdf.line(
-        gridX,
+        gx,
         plotY,
-        gridX,
+        gx,
         plotY + plotH
       );
-    }
-
-    for (let i = 1; i <= divisionsY; i += 1) {
-      const gridY =
-        plotY + (plotH / divisionsY) * i;
 
       pdf.line(
         plotX,
-        gridY,
+        gy,
         plotX + plotW,
-        gridY
+        gy
       );
     }
 
-    // Assi.
-    pdf.setLineWidth(0.3);
+    pdf.setLineWidth(0.25);
     pdf.setDrawColor(70, 70, 70);
 
-    // Asse X in alto.
-    pdf.line(
-      plotX,
-      plotY,
-      plotX + plotW,
-      plotY
-    );
-
-    // Asse Y a sinistra.
     pdf.line(
       plotX,
       plotY,
@@ -364,33 +329,23 @@ export async function exportReport(data, preview = false) {
       plotY + plotH
     );
 
+    pdf.line(
+      plotX,
+      plotY + plotH,
+      plotX + plotW,
+      plotY + plotH
+    );
+
     const px = (point) =>
       plotX + (point.x / maxX) * plotW;
 
-    // Zero in alto e spostamenti positivi
-    // crescenti verso il basso.
+    // In jsPDF la Y cresce verso il basso:
+    // 0 in alto, valori maggiori in basso.
     const py = (point) =>
       plotY + (point.y / maxY) * plotH;
 
-    function drawSeries(
-      points,
-      color,
-      dashed = false
-    ) {
-      if (!Array.isArray(points) || !points.length) {
-        return;
-      }
-
-      const validPoints = points.filter(
-        (point) =>
-          point &&
-          Number.isFinite(point.x) &&
-          Number.isFinite(point.y)
-      );
-
-      if (!validPoints.length) {
-        return;
-      }
+    function drawSeries(points, color, dashed = false) {
+      if (!points.length) return;
 
       pdf.setDrawColor(...color);
       pdf.setFillColor(...color);
@@ -403,38 +358,28 @@ export async function exportReport(data, preview = false) {
 
       let previous = null;
 
-      validPoints.forEach((point) => {
-        const currentX = px(point);
-        const currentY = py(point);
+      points.forEach((point) => {
+        const cx = px(point);
+        const cy = py(point);
 
         if (previous) {
           pdf.line(
             previous.x,
             previous.y,
-            currentX,
-            currentY
+            cx,
+            cy
           );
         }
 
         if (dashed) {
-          pdf.circle(
-            currentX,
-            currentY,
-            0.7,
-            "S"
-          );
+          pdf.circle(cx, cy, 0.75, "S");
         } else {
-          pdf.circle(
-            currentX,
-            currentY,
-            0.85,
-            "F"
-          );
+          pdf.circle(cx, cy, 0.9, "F");
         }
 
         previous = {
-          x: currentX,
-          y: currentY,
+          x: cx,
+          y: cy,
         };
       });
 
@@ -442,7 +387,6 @@ export async function exportReport(data, preview = false) {
       pdf.setLineWidth(0.2);
     }
 
-    // Curve invariate.
     drawSeries(
       chart1,
       [40, 99, 180],
@@ -455,6 +399,7 @@ export async function exportReport(data, preview = false) {
       false
     );
 
+    // Disegnato per ultimo così resta visibile.
     drawSeries(
       chartScarico1,
       [20, 115, 220],
@@ -462,61 +407,55 @@ export async function exportReport(data, preview = false) {
     );
 
     pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(3.9);
+    pdf.setFontSize(4.2);
     pdf.setTextColor(70, 70, 70);
 
-    // Valori del carico sopra il grafico.
-    for (let i = 0; i <= divisionsX; i += 1) {
-      const value =
-        (maxX / divisionsX) * i;
+    // Asse Y
+    pdf.text(
+      "0",
+      plotX - 1.5,
+      plotY + 1.2,
+      {
+        align: "right",
+      }
+    );
 
-      const tickX =
-        plotX + (plotW / divisionsX) * i;
+    pdf.text(
+      maxY.toFixed(1),
+      plotX - 1.5,
+      plotY + plotH,
+      {
+        align: "right",
+      }
+    );
 
-      pdf.line(
-        tickX,
-        plotY,
-        tickX,
-        plotY + 1
-      );
+    // Asse X
+    pdf.text(
+      "0",
+      plotX,
+      plotY + plotH + 3.1,
+      {
+        align: "center",
+      }
+    );
 
-      pdf.text(
-        String(Math.round(value)),
-        tickX,
-        plotY - 1.2,
-        {
-          align: "center",
-        }
-      );
-    }
+    pdf.text(
+      String(maxX),
+      plotX + plotW,
+      plotY + plotH + 3.1,
+      {
+        align: "center",
+      }
+    );
 
-    // Spostamenti positivi:
-    // 0,00 in alto e valori crescenti in basso.
-    for (let i = 0; i <= divisionsY; i += 1) {
-      const value =
-        (maxY / divisionsY) * i;
-
-      const tickY =
-        plotY + (plotH / divisionsY) * i;
-
-      pdf.line(
-        plotX - 1,
-        tickY,
-        plotX,
-        tickY
-      );
-
-      pdf.text(
-        value.toFixed(2),
-        plotX - 1.8,
-        tickY + 1,
-        {
-          align: "right",
-        }
-      );
-    }
-
-    pdf.setFontSize(4.1);
+    pdf.text(
+      "Carico [kPa]",
+      plotX + plotW / 2,
+      y + h - 1.6,
+      {
+        align: "center",
+      }
+    );
 
     pdf.text(
       "Spostamento [mm]",
@@ -524,11 +463,9 @@ export async function exportReport(data, preview = false) {
       plotY + plotH / 2,
       {
         angle: 90,
-        align: "center",
       }
     );
 
-    // Legenda.
     pdf.setFontSize(4.4);
 
     pdf.setTextColor(40, 99, 180);
@@ -703,9 +640,9 @@ export async function exportReport(data, preview = false) {
     ],
     [
       "Km",
-      km || "â€”",
+      km || "—",
       "Sezione / Quota",
-      `${sezione || "â€”"}${
+      `${sezione || "—"}${
         quota ? ` / ${quota}` : ""
       }`,
     ],
@@ -713,7 +650,7 @@ export async function exportReport(data, preview = false) {
       "Strato",
       layerLabel,
       "Diametro piastra",
-      `${diametro || "â€”"} mm`,
+      `${diametro || "—"} mm`,
     ],
     [
       "Tecnico esecutore",
@@ -826,16 +763,16 @@ export async function exportReport(data, preview = false) {
   pdf.setTextColor(0, 0, 0);
 
   pdf.text(
-    "Md = (Î”p / Î”s) Â· D",
+    "Md = (Δp / Δs) · D",
     CONTENT_X + 1.2,
     notesBodyY + 2.1
   );
 
   pdf.text(
     `Intervallo Md: ${
-      testConfig?.md?.[0] ?? "â€”"
+      testConfig?.md?.[0] ?? "—"
     } - ${
-      testConfig?.md?.[1] ?? "â€”"
+      testConfig?.md?.[1] ?? "—"
     } kPa`,
     CONTENT_X + 32,
     notesBodyY + 2.1
@@ -843,9 +780,9 @@ export async function exportReport(data, preview = false) {
 
   pdf.text(
     `Intervallo Md': ${
-      testConfig?.mdp?.[0] ?? "â€”"
+      testConfig?.mdp?.[0] ?? "—"
     } - ${
-      testConfig?.mdp?.[1] ?? "â€”"
+      testConfig?.mdp?.[1] ?? "—"
     } kPa`,
     CONTENT_X + 70,
     notesBodyY + 2.1
@@ -880,10 +817,10 @@ export async function exportReport(data, preview = false) {
     resultsBodyY,
     resultW,
     resultH,
-    "Md - 1Â° ciclo",
+    "Md - 1° ciclo",
     md !== null && md !== undefined
       ? `${Number(md).toFixed(1)} MPa`
-      : "â€”",
+      : "—",
     {
       align: "center",
       valueFontSize: 5.5,
@@ -895,10 +832,10 @@ export async function exportReport(data, preview = false) {
     resultsBodyY,
     resultW,
     resultH,
-    "Md' - 2Â° ciclo",
+    "Md' - 2° ciclo",
     mdp !== null && mdp !== undefined
       ? `${Number(mdp).toFixed(1)} MPa`
-      : "â€”",
+      : "—",
     {
       align: "center",
       valueFontSize: 5.5,
@@ -916,7 +853,7 @@ export async function exportReport(data, preview = false) {
     rapporto !== null &&
       rapporto !== undefined
       ? Number(rapporto).toFixed(2)
-      : "â€”",
+      : "—",
     {
       align: "center",
       valueFontSize: 5.5,
@@ -924,7 +861,7 @@ export async function exportReport(data, preview = false) {
   );
 
   // LA TABELLA PARTE SOTTO
-  // IL BLOCCO PIÃ™ BASSO
+  // IL BLOCCO PIÙ BASSO
   cursorY =
     Math.max(
       photoY + photoH,
