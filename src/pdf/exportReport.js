@@ -41,7 +41,7 @@ export async function exportReport(data, preview = false) {
   const CONTENT_RIGHT = CONTENT_X + CONTENT_W;
   const CONTENT_BOTTOM = CONTENT_Y + CONTENT_H;
 
-  const layerLabel = String(testConfig?.label || "â€”").toUpperCase();
+  const layerLabel = String(testConfig?.label || "-").toUpperCase();
   const rows = Array.isArray(tableRows) ? tableRows : [];
 
   function section(x, y, w, title, h = 4.8) {
@@ -75,7 +75,7 @@ export async function exportReport(data, preview = false) {
     pdf.setFontSize(valueFontSize);
     pdf.setTextColor(0, 0, 0);
 
-    const safeValue = String(value ?? "â€”");
+    const safeValue = String(value ?? "-");
 
     if (align === "center") {
       pdf.text(safeValue, x + w / 2, y + h - 1.15, {
@@ -140,7 +140,7 @@ export async function exportReport(data, preview = false) {
     );
 
     pdf.text(
-      "1Â° CICLO",
+      "1 CICLO",
       x + cols[0] + (cols[1] + cols[2]) / 2,
       cursor + 2.75,
       {
@@ -149,7 +149,7 @@ export async function exportReport(data, preview = false) {
     );
 
     pdf.text(
-      "2Â° CICLO",
+      "2 CICLO",
       x +
         cols[0] +
         cols[1] +
@@ -197,16 +197,16 @@ export async function exportReport(data, preview = false) {
         p,
         r1 !== null && r1 !== undefined
           ? Number(r1).toFixed(2)
-          : "â€”",
+          : "-",
         s1 !== null && s1 !== undefined
           ? Number(s1).toFixed(3)
-          : "â€”",
+          : "-",
         r2 !== null && r2 !== undefined
           ? Number(r2).toFixed(2)
-          : "â€”",
+          : "-",
         s2 !== null && s2 !== undefined
           ? Number(s2).toFixed(3)
-          : "â€”",
+          : "-",
       ];
 
       values.forEach((value, index) => {
@@ -534,7 +534,7 @@ export async function exportReport(data, preview = false) {
     pdf.setTextColor(40, 99, 180);
 
     pdf.text(
-      "1° ciclo",
+      "1 CICLO",
       x + w - 36,
       y + 3.6
     );
@@ -548,7 +548,7 @@ export async function exportReport(data, preview = false) {
     pdf.setTextColor(210, 110, 35);
 
     pdf.text(
-      "2° ciclo",
+      "2 CICLO",
       x + w - 2,
       y + 3.6,
       {
@@ -703,9 +703,9 @@ export async function exportReport(data, preview = false) {
     ],
     [
       "Km",
-      km || "â€”",
+      km || "-",
       "Sezione / Quota",
-      `${sezione || "â€”"}${
+      `${sezione || "-"}${
         quota ? ` / ${quota}` : ""
       }`,
     ],
@@ -713,7 +713,7 @@ export async function exportReport(data, preview = false) {
       "Strato",
       layerLabel,
       "Diametro piastra",
-      `${diametro || "â€”"} mm`,
+      `${diametro || "-"} mm`,
     ],
     [
       "Tecnico esecutore",
@@ -826,16 +826,16 @@ export async function exportReport(data, preview = false) {
   pdf.setTextColor(0, 0, 0);
 
   pdf.text(
-    "Md = (Î”p / Î”s) Â· D",
+    "Md = (dp / ds) x D",
     CONTENT_X + 1.2,
     notesBodyY + 2.1
   );
 
   pdf.text(
     `Intervallo Md: ${
-      testConfig?.md?.[0] ?? "â€”"
+      testConfig?.md?.[0] ?? "-"
     } - ${
-      testConfig?.md?.[1] ?? "â€”"
+      testConfig?.md?.[1] ?? "-"
     } kPa`,
     CONTENT_X + 32,
     notesBodyY + 2.1
@@ -843,9 +843,9 @@ export async function exportReport(data, preview = false) {
 
   pdf.text(
     `Intervallo Md': ${
-      testConfig?.mdp?.[0] ?? "â€”"
+      testConfig?.mdp?.[0] ?? "-"
     } - ${
-      testConfig?.mdp?.[1] ?? "â€”"
+      testConfig?.mdp?.[1] ?? "-"
     } kPa`,
     CONTENT_X + 70,
     notesBodyY + 2.1
@@ -883,7 +883,7 @@ export async function exportReport(data, preview = false) {
     "Md - 1Â° ciclo",
     md !== null && md !== undefined
       ? `${Number(md).toFixed(1)} MPa`
-      : "â€”",
+      : "-",
     {
       align: "center",
       valueFontSize: 5.5,
@@ -898,7 +898,7 @@ export async function exportReport(data, preview = false) {
     "Md' - 2Â° ciclo",
     mdp !== null && mdp !== undefined
       ? `${Number(mdp).toFixed(1)} MPa`
-      : "â€”",
+      : "-",
     {
       align: "center",
       valueFontSize: 5.5,
@@ -916,7 +916,7 @@ export async function exportReport(data, preview = false) {
     rapporto !== null &&
       rapporto !== undefined
       ? Number(rapporto).toFixed(2)
-      : "â€”",
+      : "-",
     {
       align: "center",
       valueFontSize: 5.5,
