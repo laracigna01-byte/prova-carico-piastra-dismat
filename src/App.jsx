@@ -15,6 +15,7 @@ import {
 } from "./utils/storage";
 import { LoginGate } from "./security/LoginGate";
 import { useAuth } from "./security/AuthContext";
+import "./App.css";
 
 // ─── design tokens ────────────────────────────────────────────────────────────
 const THEMES = {
@@ -146,14 +147,14 @@ function StepTable({ label, kpa, rows, onChange, color, threshold = 0.02 }) {
   const borderColor = stab === null ? T.border : stab ? T.accent : T.accentYellow;
 
   return (
-    <div style={{
+    <div className="step-table" style={{
       background: T.bg,
       border: `1px solid ${borderColor}`,
       borderRadius: 8,
       overflow: "hidden",
       transition: "border-color 0.2s",
     }}>
-      <div style={{
+      <div className="step-head" style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
         padding: "7px 10px",
         background: T.surfaceHigh,
@@ -184,7 +185,7 @@ function StepTable({ label, kpa, rows, onChange, color, threshold = 0.02 }) {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 1, background: T.border }}>
+      <div className="step-grid" style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 1, background: T.border }}>
         {rows.map((val, i) => (
           <div key={i} style={{ background: T.bg, display: "flex", flexDirection: "column", alignItems: "center", padding: "4px 2px", gap: 2 }}>
             <span style={{ fontSize: 8, color: T.textDim, fontFamily: "monospace" }}>{i + 1}</span>
@@ -227,7 +228,7 @@ function StepTable({ label, kpa, rows, onChange, color, threshold = 0.02 }) {
 // ─── subcomponents ────────────────────────────────────────────────────────────
 function TextInput({ label, value, onChange, placeholder }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+    <div className="field" style={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <label style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", color: T.textMuted, textTransform: "uppercase" }}>{label}</label>
       <input type="text" value={value} placeholder={placeholder || ""} onChange={(e) => onChange(e.target.value)}
         style={{ background: T.bg, border: `1px solid ${T.border}`, borderRadius: 6, color: T.text, fontSize: 16, padding: "6px 10px", outline: "none" }}
@@ -239,7 +240,7 @@ function TextInput({ label, value, onChange, placeholder }) {
 
 function SelectInput({ label, value, onChange, options }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+    <div className="field" style={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <label style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", color: T.textMuted, textTransform: "uppercase" }}>{label}</label>
       <select value={value} onChange={(e) => onChange(e.target.value)}
         style={{ background: T.bg, border: `1px solid ${T.border}`, borderRadius: 6, color: T.text, fontFamily: "monospace", fontSize: 16, padding: "6px 10px", outline: "none", cursor: "pointer", appearance: "none" }}>
@@ -352,7 +353,7 @@ function SignatureBox({ label, value, onChange }) {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+    <div className="signature-box" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
         <label style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", color: T.textMuted, textTransform: "uppercase" }}>
           {label}
@@ -535,7 +536,7 @@ const FixedChartContainer = ({
 
 function SectionHeader({ label, step, color }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "14px 0 8px" }}>
+    <div className="section-header" style={{ display: "flex", alignItems: "center", gap: 10, margin: "14px 0 8px" }}>
       <div style={{ width: 20, height: 20, borderRadius: "50%", background: color || T.accentBlue, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 800, color: "#000", flexShrink: 0 }}>{step}</div>
       <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.12em", color: T.textMuted, textTransform: "uppercase" }}>{label}</span>
       <div style={{ flex: 1, height: 1, background: T.border }} />
@@ -545,7 +546,7 @@ function SectionHeader({ label, step, color }) {
 
 function ResultCard({ label, value, unit, color, sub, highlight }) {
   return (
-    <div style={{ background: T.surface, border: `2px solid ${highlight || T.border}`, borderRadius: 8, padding: "12px 14px", display: "flex", flexDirection: "column", gap: 4 }}>
+    <div className="result-card" style={{ background: T.surface, border: `2px solid ${highlight || T.border}`, borderRadius: 8, padding: "12px 14px", display: "flex", flexDirection: "column", gap: 4 }}>
       <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", color: T.textMuted, textTransform: "uppercase" }}>{label}</span>
       <div style={{ display: "flex", alignItems: "baseline", gap: 5 }}>
         <span style={{ fontFamily: "monospace", fontSize: 24, fontWeight: 700, color, lineHeight: 1 }}>{value}</span>
@@ -640,7 +641,7 @@ function GeneralInfoPanel({
   fotoProva, setFotoProva,
   firmaTecnico, setFirmaTecnico
 }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   const handleFoto = async (e) => {
     const file = e.target.files?.[0];
@@ -651,8 +652,9 @@ function GeneralInfoPanel({
   };
 
   return (
-    <div style={{ background: T.surface, borderBottom: `1px solid ${T.border}`, transition: "all 0.2s" }}>
+    <div className="panel piastra-info-panel" style={{ background: T.surface, transition: "all 0.2s" }}>
       <button
+        className="panel-toggle"
         onClick={() => setIsOpen(!isOpen)}
         style={{
           width: "100%", background: "none", border: "none", padding: "12px 16px",
@@ -661,13 +663,13 @@ function GeneralInfoPanel({
           outline: "none", WebkitTapHighlightColor: "transparent"
         }}
       >
-        <span>{isOpen ? "🔼 NASCONDI DATI GENERALI" : "🔽 MOSTRA DATI GENERALI"}</span>
-        {verbale && <span style={{ fontFamily: "monospace", color: T.accentBlue }}>Verb. {verbale}</span>}
+        <span className="panel-toggle-title">{isOpen ? "Nascondi dati prova" : "Mostra dati prova"}</span>
+        {verbale && <span className="panel-report" style={{ fontFamily: "monospace", color: T.accentBlue }}>Verb. {verbale}</span>}
       </button>
 
       {isOpen && (
-        <div style={{ padding: "0 16px 16px 16px", display: "flex", flexDirection: "column", gap: 14 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}>
+        <div className="panel-body" style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <div className="grid small" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10 }}>
            <TextInput
   label="N. prova"
   value={verbale}
@@ -703,13 +705,13 @@ function GeneralInfoPanel({
 />
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
+          <div className="grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
             <TextInput label="Cantiere" value={cantiere} onChange={setCantiere} />
             <TextInput label="Committente" value={committente} onChange={setCommittente} />
           </div>
 
           <SectionHeader label="Localizzazione e Materiale" step="A" />
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10 }}>
+          <div className="grid small" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10 }}>
            <TextInput
   label="Km"
   value={km}
@@ -729,11 +731,11 @@ function GeneralInfoPanel({
           </div>
 
           <SectionHeader label="Personale e Foto" step="B" />
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10 }}>
+          <div className="grid small" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10 }}>
             <TextInput label="Tecnico Esecutore" value={tecnico} onChange={setTecnico} />
             <TextInput label="Presenti" value={presenti} onChange={setPresenti} />
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 10 }}>
-              <label style={{
+              <label className="photo-drop" style={{
                 flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 background: T.surfaceHigh, border: `1px solid ${T.border}`, borderRadius: 6,
                 padding: "10px", cursor: "pointer", fontSize: 13, color: T.textMuted,
@@ -768,8 +770,17 @@ function GeneralInfoPanel({
 }
 
 
-function ArchivePanel({ items = [], onOpen, onDuplicate, onDelete, onExport }) {
+function ArchivePanel({
+  items = [],
+  onOpen,
+  onDuplicate,
+  onDelete,
+  onExport,
+  onExportBackup,
+  onImportBackup,
+}) {
   const [query, setQuery] = useState("");
+  const importInputRef = useRef(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -806,8 +817,8 @@ function ArchivePanel({ items = [], onOpen, onDuplicate, onDelete, onExport }) {
   }
 
   return (
-    <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, overflow: "hidden" }}>
-      <div style={{ padding: "12px 14px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+    <div className="table-box archive" style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, overflow: "hidden" }}>
+      <div className="archive-head" style={{ padding: "12px 14px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
         <div>
           <div style={{ fontSize: 12, fontWeight: 800, color: T.text }}>Archivio prove</div>
           <div style={{ fontSize: 10, color: T.textMuted, marginTop: 2 }}>
@@ -815,7 +826,24 @@ function ArchivePanel({ items = [], onOpen, onDuplicate, onDelete, onExport }) {
           </div>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+        <div className="archive-tools">
+          <button type="button" onClick={onExportBackup} disabled={items.length === 0}>
+            Esporta backup JSON
+          </button>
+          <button type="button" onClick={() => importInputRef.current?.click()}>
+            Importa backup JSON
+          </button>
+          <input
+            ref={importInputRef}
+            type="file"
+            accept="application/json,.json"
+            hidden
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (file) onImportBackup(file);
+              event.target.value = "";
+            }}
+          />
           <input
             type="search"
             value={query}
@@ -875,7 +903,7 @@ function ArchivePanel({ items = [], onOpen, onDuplicate, onDelete, onExport }) {
                   <td style={{ padding: "9px 12px" }}>{item.data?.cantiere || "—"}</td>
                   <td style={{ padding: "9px 12px" }}>{item.data?.committente || "—"}</td>
                   <td style={{ padding: "9px 12px" }}>
-                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    <div className="row-actions" style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                       <button type="button" onClick={() => onOpen(item)} style={{ background: T.surfaceHigh, color: T.text, border: `1px solid ${T.border}`, borderRadius: 6, padding: "6px 8px", cursor: "pointer" }}>Apri</button>
                       <button type="button" onClick={() => onDuplicate(item)} style={{ background: T.surfaceHigh, color: T.text, border: `1px solid ${T.border}`, borderRadius: 6, padding: "6px 8px", cursor: "pointer" }}>Duplica</button>
                       <button type="button" onClick={() => onExport(item)} style={{ background: T.surfaceHigh, color: T.text, border: `1px solid ${T.border}`, borderRadius: 6, padding: "6px 8px", cursor: "pointer" }}>PDF</button>
@@ -897,6 +925,7 @@ function LogoutButton() {
   return (
     <button
       type="button"
+      className="logout-btn"
       onClick={logout}
       style={{
         background: "#d71920",
@@ -932,7 +961,7 @@ export default function App() {
   const [committente, setCommittente] = useState("Cogen SRL");
   const [diametro, setDiametro]       = useState("300");
   const [tipoProva, setTipoProva]     = useState("fondazione");
-  const [tab, setTab]                 = useState("c1");
+  const [tab, setTab]                 = useState("type");
   const [dataProva, setDataProva]     = useState("");
   const [provaGiorno, setProvaGiorno] = useState("");
   const [tratta, setTratta]           = useState("");
@@ -1029,7 +1058,7 @@ const handleTipoProvaChange = (nuovoTipo) => {
   setC1(INIT_C1);
   setC2(INIT_C2);
   setTipoProva(nuovoTipo);
-  setTab("c1");
+  setTab("info");
 };
   
   const chartRef = useRef(null);
@@ -1370,21 +1399,105 @@ function exportRecord(record) {
   window.alert("Prova aperta. Ora puoi generare il PDF dal pulsante in alto.");
 }
 
-     
-  const tabs = [
-    { id: "c1", label: "1° Ciclo" },
-    { id: "c2", label: "2° Ciclo" },
-    { id: "results", label: "Risultati" },
-    { id: "archive", label: "Archivio" },
-  ];
+function exportArchiveBackup() {
+  if (!archive.length) {
+    window.alert("Non ci sono prove salvate da esportare.");
+    return;
+  }
 
+  const backup = {
+    format: "dismat-piastra-archive",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    records: archive,
+  };
+
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {
+    type: "application/json;charset=utf-8",
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  const date = new Date().toISOString().slice(0, 10);
+
+  link.href = url;
+  link.download = `backup-archivio-piastra-${date}.json`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function importArchiveBackup(file) {
+  try {
+    const parsed = JSON.parse(await file.text());
+    const records = Array.isArray(parsed) ? parsed : parsed?.records;
+
+    if (!Array.isArray(records)) {
+      throw new Error("Formato del backup non riconosciuto.");
+    }
+
+    const validRecords = records.filter(
+      (record) =>
+        record &&
+        typeof record.id === "string" &&
+        record.id.trim() &&
+        record.data &&
+        typeof record.data === "object" &&
+        !Array.isArray(record.data)
+    );
+
+    if (!validRecords.length) {
+      throw new Error("Il backup non contiene prove valide.");
+    }
+
+    const confirmed = window.confirm(
+      `Importare ${validRecords.length} prove dal backup? Le prove già presenti non verranno cancellate.`
+    );
+    if (!confirmed) return;
+
+    const merged = new Map(archive.map((record) => [record.id, record]));
+    let added = 0;
+    let updated = 0;
+
+    validRecords.forEach((record) => {
+      const current = merged.get(record.id);
+
+      if (!current) {
+        merged.set(record.id, record);
+        added += 1;
+        return;
+      }
+
+      const currentTime = new Date(current.savedAt || 0).getTime() || 0;
+      const importedTime = new Date(record.savedAt || 0).getTime() || 0;
+
+      if (importedTime > currentTime) {
+        merged.set(record.id, record);
+        updated += 1;
+      }
+    });
+
+    const saved = await syncServerTests([...merged.values()]);
+    setArchive(saved);
+
+    const ignored = records.length - validRecords.length;
+    window.alert(
+      `Backup importato. ${added} prove aggiunte, ${updated} aggiornate` +
+        (ignored ? `, ${ignored} record non validi ignorati.` : ".")
+    );
+  } catch (error) {
+    window.alert(`Impossibile importare il backup: ${error.message}`);
+  }
+}
+
+     
   return (
      
      <LoginGate
     appName="Sistema Gestione Prove DISMAT"
     moduleName="Prova di carico su piastra"
     >
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: T.bg, color: T.text, fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif" }}>
+    <main className={`app-shell piastra-app theme-${theme}`} style={{ minHeight: "100vh", background: T.bg, color: T.text }}>
       
       {/* Container invisibile per consentire ad html2canvas di fotografare il grafico anche se l'utente si trova in un tab differente */}
       <FixedChartContainer 
@@ -1394,145 +1507,82 @@ function exportRecord(record) {
         chartMaxX={chartMaxX}
       />
 
-      <header
-  style={{
-    background: T.surface,
-    borderBottom: `1px solid ${T.border}`,
-    padding: "10px 16px",
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    position: "sticky",
-    top: 0,
-    zIndex: 100,
-    flexWrap: "wrap",
-  }}
-  
->
-  <img
-    src="/logo-dismat.jpg"
-    alt="Laboratorio DISMAT"
-    style={{
-      width: 46,
-      height: 46,
-      borderRadius: 8,
-      objectFit: "cover",
-      background: "#fff",
-    }}
-  />
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: "0.06em", color: T.text }}>DISMAT</div>
-          <div style={{ fontSize: 9, color: T.textMuted, letterSpacing: "0.04em" }}>CNR 146/92 · Prova di Carico su Piastra</div>
-        </div>
-        <div style={{ flex: 1 }} />
-        {rapporto !== null && (
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-            <Pill label="Md" value={md !== null ? md.toFixed(1) : "—"} unit="MPa" color={T.cycle1} />
-            <Pill label="Md'" value={mdp !== null ? mdp.toFixed(1) : "—"} unit="MPa" color={T.cycle2} />
-            <Pill label="Md/Md'" value={rapporto.toFixed(2)} color={rapportoColor} bold />
+      <header className="app-header">
+        <div className="brand">
+          <img src="/logo-dismat.jpg" alt="Laboratorio DISMAT" />
+          <div>
+            <p>LABORATORIO DISMAT</p>
+            <small>Sperimentazione sulle Strutture e sui Materiali da Costruzione</small>
           </div>
-        )}
-        <div
-  style={{
-    display: "flex",
-    gap: 8,
-    flexWrap: "wrap",
-    justifyContent: "flex-end",
-  }}
->
-          <button
-  type="button"
-  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-  style={{
-    background: T.surfaceHigh,
-    color: T.text,
-    border: `1px solid ${T.border}`,
-    borderRadius: 7,
-    padding: "8px 12px",
-    fontSize: 11,
-    fontWeight: 700,
-    cursor: "pointer",
-    whiteSpace: "nowrap",
-    minWidth: 92,
-  }}
->
-  {theme === "dark" ? "☀️ Chiaro" : "🌙 Scuro"}
-</button>
-<LogoutButton />
-<button
-  type="button"
-  onClick={() => {
-    if (window.confirm("Vuoi iniziare una nuova prova? Tutti i dati verranno cancellati.")) {
-      localStorage.removeItem("prova-piastra-dati-v1");
-      window.location.reload();
-    }
-  }}
-  style={{
-    background: T.accentRed,
-    color: "#fff",
-    border: "none",
-    borderRadius: 7,
-    padding: "8px 12px",
-    fontSize: 11,
-    fontWeight: 700,
-    cursor: "pointer",
-    minWidth: 92,
-  }}
->
-  Nuova prova
-</button>
-          <button
-            onClick={() => exportPDF(true)}
-            disabled={exporting}
-            style={{
-              background: exporting ? T.border : T.surfaceHigh,
-              color: exporting ? T.textMuted : T.text,
-              border: `1px solid ${T.border}`, borderRadius: 7,
-              padding: "8px 12px", fontSize: 11, fontWeight: 700,
-              letterSpacing: "0.06em", cursor: exporting ? "default" : "pointer",
-              WebkitTapHighlightColor: "transparent",minWidth: 92,
-            }}
-            
-          >
-            Anteprima
-          </button>
-          <button
-            onClick={() => exportPDF(false)}
-            disabled={exporting}
-            style={{
-              background: exporting ? T.border : `linear-gradient(135deg, ${T.accent}, #2ea043)`,
-              color: exporting ? T.textMuted : "#000",
-              border: "none", borderRadius: 7,
-              padding: "8px 14px", fontSize: 11, fontWeight: 800,
-              letterSpacing: "0.08em", cursor: exporting ? "default" : "pointer",
-              whiteSpace: "nowrap", flexShrink: 0,
-              WebkitTapHighlightColor: "transparent",minWidth: 92,
-            }}
-          >
-            {exporting ? "⏳ Generando..." : "↓ PDF"}
-          </button>
-          <button
-  type="button"
-  onClick={saveCurrent}
-  style={{
-    background: T.surfaceHigh,
-    color: T.text,
-    border: `1px solid ${T.border}`,
-    borderRadius: 7,
-    padding: "8px 12px",
-    fontSize: 11,
-    fontWeight: 700,
-    cursor: "pointer",
-    minWidth: 92,
-  }}
->
-  Salva
-</button>
         </div>
 
+        <div className="header-title">
+          <b>Prova di carico su piastra</b>
+          <span>Acquisizione letture · calcolo Md e Md' · report PDF con foto e grafico</span>
+
+          <div className="header-actions">
+            <button type="button" className="header-btn" onClick={() => setTab("archive")}>
+              Archivio
+            </button>
+
+            <button
+              type="button"
+              className="theme-btn"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            >
+              {theme === "dark" ? "☀️ Passa al chiaro" : "🌙 Passa allo scuro"}
+            </button>
+
+            <LogoutButton />
+          </div>
+        </div>
       </header>
 
-      <GeneralInfoPanel
+      <div className="piastra-content" style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
+        {tab === "type" && (
+          <section className="test-type-page">
+            <div className="workflow-heading">
+              <span>Nuova prova</span>
+              <h2>Scegli il tipo di prova</h2>
+              <p>Seleziona lo strato da verificare. L'app imposterà automaticamente gradini e intervalli di calcolo corretti.</p>
+            </div>
+
+            <div className="test-type-grid">
+              {["fondo_scavo", "rilevato", "fondazione"].map((value, index) => {
+                const config = TEST_TYPES[value];
+                return (
+                  <button
+                    type="button"
+                    key={value}
+                    className={tipoProva === value ? "selected" : ""}
+                    onClick={() => {
+                      if (value === tipoProva) {
+                        setTab("info");
+                      } else {
+                        handleTipoProvaChange(value);
+                      }
+                    }}
+                  >
+                    <span className="type-number">{index + 1}</span>
+                    <strong>{config.label}</strong>
+                    <small>1° ciclo fino a {config.ciclo1[config.ciclo1.length - 1]} kPa</small>
+                    <em>Seleziona e continua</em>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {tab === "info" && (
+          <div className="info-page">
+            <div className="workflow-heading">
+              <span>Passaggio 1 di 4</span>
+              <h2>Dati prova</h2>
+              <p>Compila le informazioni generali, la localizzazione, il personale e la firma del tecnico.</p>
+            </div>
+
+            <GeneralInfoPanel
         verbale={verbale} setVerbale={setVerbale}
         cantiere={cantiere} setCantiere={setCantiere}
         committente={committente} setCommittente={setCommittente}
@@ -1550,8 +1600,18 @@ function exportRecord(record) {
         presenti={presenti} setPresenti={setPresenti}
         fotoProva={fotoProva} setFotoProva={setFotoProva}
         firmaTecnico={firmaTecnico} setFirmaTecnico={setFirmaTecnico}
-      />
+            />
+
+      <section className="summary-strip">
+        <div><span>Strato</span><b>{testConfig.label}</b></div>
+        <div><span>Diametro piastra</span><b>{diametro} mm</b></div>
+        <div><span>N. prova</span><b>{verbale || "—"}</b></div>
+        <div><span>Data</span><b>{dataProva || "—"}</b></div>
+        <div><span>Tecnico</span><b>{tecnico || "—"}</b></div>
+      </section>
+
       <div
+  className="norm-box"
   style={{
     margin: "12px 16px 0",
     background: T.surface,
@@ -1600,41 +1660,80 @@ function exportRecord(record) {
   </div>
 </div>
 
-      <div style={{ background: T.surface, borderBottom: `1px solid ${T.border}`, display: "flex", padding: "0 16px" }}>
-        {tabs.map((t) => (
-          <button key={t.id} onClick={() => setTab(t.id)}
-            style={{
-              background: "none", border: "none", cursor: "pointer", padding: "12px 18px", fontSize: 12, fontWeight: 700,
-              color: tab === t.id ? T.accentBlue : T.textMuted,
-              borderBottom: `2px solid ${tab === t.id ? T.accentBlue : "transparent"}`,
-              transition: "all 0.15s", WebkitTapHighlightColor: "transparent",
-            }}>
-            {t.label}
-          </button>
-        ))}
-      </div>
+            <div className="actions compact-actions">
+              <button
+                type="button"
+                className="danger"
+                onClick={() => {
+                  if (window.confirm("Vuoi iniziare una nuova prova? Tutti i dati verranno cancellati.")) {
+                    localStorage.removeItem("prova-piastra-dati-v1");
+                    window.location.reload();
+                  }
+                }}
+              >
+                Nuova prova
+              </button>
 
-      <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
+              <button type="button" className="ghost" onClick={saveCurrent}>
+                Salva
+              </button>
+            </div>
+
+            <div className="workflow-nav">
+              <button type="button" className="back" onClick={() => setTab("type")}>
+                ← Tipo di prova
+              </button>
+              <button type="button" className="next" onClick={() => setTab("c1")}>
+                Inizia il 1° ciclo →
+              </button>
+            </div>
+          </div>
+        )}
+
         {tab === "c1" && (
-          <div>
-            <div style={{ fontSize: 11, color: T.textMuted, marginBottom: 14, lineHeight: 1.5 }}>
+          <div className="cycle-page">
+            <div className="workflow-heading">
+              <span>Passaggio 2 di 4 · {testConfig.label}</span>
+              <h2>Primo ciclo</h2>
+              <p>Inserisci le letture del comparatore per ogni gradino di carico e per lo scarico finale del ciclo.</p>
+            </div>
+
+            <div className="hint" style={{ fontSize: 11, color: T.textMuted, marginBottom: 14, lineHeight: 1.5 }}>
               Inserisci le letture del comparatore (mm) per ogni gradino. Ogni cella è una misurazione temporale (minuto 1…10). Il badge <span style={{ color: T.accent }}>STABILE</span> appare quando le ultime 3 letture hanno scarto ≤ 0.02 mm.
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
+            <div className="steps" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
               {testConfig.ciclo1.map((kpa, index) => (
                 <StepTable key={kpa} label={index === 0 ? "Carico iniziale" : undefined} kpa={kpa} rows={c1[stepKey(kpa)] || EMPTY_ROWS()} onChange={setC1step(stepKey(kpa))} color={T.cycle1} />
               ))}
               <StepTable label="Scarico →" kpa={testConfig.scarico1} rows={c1.scarico50} onChange={setC1step("scarico50")} color={T.accentBlue} threshold={0.05} />
             </div>
+
+            <div className="workflow-nav three-actions">
+              <button type="button" className="back" onClick={() => setTab("info")}>
+                ← Dati prova
+              </button>
+              <button type="button" className="save-step" onClick={saveCurrent}>
+                Salva
+              </button>
+              <button type="button" className="next" onClick={() => setTab("c2")}>
+                Passa al 2° ciclo →
+              </button>
+            </div>
           </div>
         )}
 
         {tab === "c2" && (
-          <div>
-            <div style={{ fontSize: 11, color: T.textMuted, marginBottom: 14, lineHeight: 1.5 }}>
+          <div className="cycle-page">
+            <div className="workflow-heading">
+              <span>Passaggio 3 di 4 · {testConfig.label}</span>
+              <h2>Secondo ciclo</h2>
+              <p>La prima lettura riprende automaticamente l'ultimo scarico del primo ciclo e rimane modificabile.</p>
+            </div>
+
+            <div className="hint" style={{ fontSize: 11, color: T.textMuted, marginBottom: 14, lineHeight: 1.5 }}>
               2° ciclo di carico ({testConfig.ciclo2[0]} → {testConfig.ciclo2[testConfig.ciclo2.length - 1]} kPa) + scarico finale a {testConfig.scarico2} kPa.
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
+            <div className="steps" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
               {testConfig.ciclo2.map((kpa, index) => (
                 <StepTable
                   key={kpa}
@@ -1646,17 +1745,35 @@ function exportRecord(record) {
               ))}
               <StepTable label="Scarico" kpa={testConfig.scarico2} rows={c2.scarico} onChange={setC2step("scarico")} color={T.accentOrange} />
             </div>
+
+            <div className="workflow-nav three-actions">
+              <button type="button" className="back" onClick={() => setTab("c1")}>
+                ← Primo ciclo
+              </button>
+              <button type="button" className="save-step" onClick={saveCurrent}>
+                Salva
+              </button>
+              <button type="button" className="next" onClick={() => setTab("results")}>
+                Visualizza risultati →
+              </button>
+            </div>
           </div>
         )}
 
         {tab === "results" && (
-          <div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 10, marginBottom: 24 }}>
+          <div className="results-page">
+            <div className="workflow-heading">
+              <span>Passaggio 4 di 4 · {testConfig.label}</span>
+              <h2>Risultati</h2>
+              <p>Controlla moduli, rapporto, grafico e letture stabilizzate prima di salvare o generare il PDF.</p>
+            </div>
+
+            <div className="cards" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 10, marginBottom: 24 }}>
               <ResultCard label="Md — 1° Ciclo" value={md !== null ? md.toFixed(1) : "—"} unit="MPa" color={T.cycle1} sub={`Intervallo ${testConfig.md[0]}–${testConfig.md[1]} kPa`} />
               <ResultCard label="Md' — 2° Ciclo" value={mdp !== null ? mdp.toFixed(1) : "—"} unit="MPa" color={T.cycle2} sub={`Intervallo ${testConfig.mdp[0]}–${testConfig.mdp[1]} kPa`} />
               <ResultCard label="Rapporto Md / Md'" value={rapporto !== null ? rapporto.toFixed(2) : "—"} unit="—" color={rapportoColor} highlight={rapporto !== null ? rapportoColor : undefined} sub={rapporto === null ? "In attesa dati" : undefined} />
             </div>
-            <div ref={chartRef} style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "14px 10px", marginBottom: 20 }}>
+            <div className="chart-box" ref={chartRef} style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, padding: "14px 10px", marginBottom: 20 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
                 <div>
                   <div style={{ fontSize: 12, fontWeight: 700, color: T.text }}>GRAFICO CARICO - SPOSTAMENTO</div>
@@ -1779,8 +1896,8 @@ function exportRecord(record) {
               )}
             </div>
 
-            <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, overflow: "hidden" }}>
-              <div style={{ padding: "12px 14px", borderBottom: `1px solid ${T.border}`, fontSize: 12, fontWeight: 700 }}>
+            <div className="table-box" style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, overflow: "hidden" }}>
+              <div className="table-title" style={{ padding: "12px 14px", borderBottom: `1px solid ${T.border}`, fontSize: 12, fontWeight: 700 }}>
                 Tabella Riepilogativa Letture Stabilizzate
               </div>
               <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
@@ -1816,20 +1933,72 @@ function exportRecord(record) {
               </div>
             </div>
 
+            <div className="actions result-actions">
+              <button
+                type="button"
+                className="danger"
+                onClick={() => {
+                  if (window.confirm("Vuoi iniziare una nuova prova? Tutti i dati verranno cancellati.")) {
+                    localStorage.removeItem("prova-piastra-dati-v1");
+                    window.location.reload();
+                  }
+                }}
+              >
+                Nuova prova
+              </button>
+              <button type="button" className="ghost" onClick={saveCurrent}>
+                Salva
+              </button>
+              <button type="button" className="ghost" onClick={() => exportPDF(true)} disabled={exporting}>
+                Anteprima
+              </button>
+              <button type="button" onClick={() => exportPDF(false)} disabled={exporting}>
+                {exporting ? "Generazione in corso..." : "Genera PDF"}
+              </button>
+            </div>
+
+            <div className="workflow-nav results-nav">
+              <button type="button" className="back" onClick={() => setTab("c2")}>
+                ← Secondo ciclo
+              </button>
+              <button type="button" className="next" onClick={() => setTab("archive")}>
+                Apri archivio →
+              </button>
+            </div>
+
           </div>
         )}
 
         {tab === "archive" && (
-          <ArchivePanel
-            items={archive}
-            onOpen={openRecord}
-            onDuplicate={duplicateRecord}
-            onDelete={(id) => setArchive(deleteTest(id))}
-            onExport={exportRecord}
-          />
+          <div className="archive-page">
+            <div className="workflow-heading">
+              <span>Archivio locale</span>
+              <h2>Prove salvate</h2>
+              <p>Apri, duplica, esporta o elimina le prove memorizzate.</p>
+            </div>
+
+            <ArchivePanel
+              items={archive}
+              onOpen={openRecord}
+              onDuplicate={duplicateRecord}
+              onDelete={(id) => setArchive(deleteTest(id))}
+              onExport={exportRecord}
+              onExportBackup={exportArchiveBackup}
+              onImportBackup={importArchiveBackup}
+            />
+
+            <div className="workflow-nav archive-nav">
+              <button type="button" className="back" onClick={() => setTab("type")}>
+                ← Scegli prova
+              </button>
+              <button type="button" className="next" onClick={() => setTab("info")}>
+                Torna alla prova corrente →
+              </button>
+            </div>
+          </div>
         )}
 
       </div>
-    </div>
+    </main>
     </LoginGate>
   );}
