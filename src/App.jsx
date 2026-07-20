@@ -1399,7 +1399,7 @@ function exportRecord(record) {
   window.alert("Prova aperta. Ora puoi generare il PDF dal pulsante in alto.");
 }
 
-function exportArchiveBackup() {
+async function exportArchiveBackup() {
   if (!archive.length) {
     window.alert("Non ci sono prove salvate da esportare.");
     return;
@@ -1412,15 +1412,56 @@ function exportArchiveBackup() {
     records: archive,
   };
 
-  const blob = new Blob([JSON.stringify(backup, null, 2)], {
+  const json = JSON.stringify(backup, null, 2);
+  const blob = new Blob([json], {
     type: "application/json;charset=utf-8",
   });
+  const date = new Date().toISOString().slice(0, 10);
+  const fileName = `backup-archivio-piastra-${date}.json`;
+
+  // Nelle PWA installate su iPhone l'attributo download degli URL blob
+  // puo essere ignorato. Il pannello nativo di condivisione consente invece
+  // di salvare il backup in File anche quando il dispositivo e offline.
+  const isIOS =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+  if (
+    isIOS &&
+    typeof navigator.share === "function" &&
+    typeof navigator.canShare === "function"
+  ) {
+    const jsonFile = new File([json], fileName, {
+      type: "application/json",
+    });
+    const textFile = new File([json], fileName, {
+      type: "text/plain",
+    });
+    const sharedFile = navigator.canShare({ files: [jsonFile] })
+      ? jsonFile
+      : navigator.canShare({ files: [textFile] })
+        ? textFile
+        : null;
+
+    if (sharedFile) {
+      try {
+        // Su iOS e piu affidabile condividere soltanto il file, senza
+        // aggiungere contemporaneamente titolo, testo o URL.
+        await navigator.share({ files: [sharedFile] });
+        return;
+      } catch (error) {
+        if (error?.name === "AbortError") return;
+        console.warn("Condivisione backup non riuscita, uso il download.", error);
+      }
+    }
+  }
+
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
-  const date = new Date().toISOString().slice(0, 10);
 
   link.href = url;
-  link.download = `backup-archivio-piastra-${date}.json`;
+  link.download = fileName;
+  if (isIOS) link.target = "_blank";
   document.body.appendChild(link);
   link.click();
   link.remove();
