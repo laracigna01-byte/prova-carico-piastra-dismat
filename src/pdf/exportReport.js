@@ -44,56 +44,60 @@ export async function exportReport(data, preview = false) {
   const layerLabel = String(testConfig?.label || "-").toUpperCase();
   const rows = Array.isArray(tableRows) ? tableRows : [];
 
-  function section(x, y, w, title, h = 4.8) {
+  function section(x, y, w, title, h = 5.2) {
     pdf.setFillColor(235, 238, 242);
     pdf.setDrawColor(205, 208, 212);
     pdf.rect(x, y, w, h, "FD");
 
     pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(5.4);
+    pdf.setFontSize(6.8);
     pdf.setTextColor(25, 25, 25);
-    pdf.text(title, x + 1.2, y + 3.15);
+    pdf.text(title, x + 1.2, y + 3.55);
 
     return y + h;
   }
 
   function cell(x, y, w, h, label, value, options = {}) {
-    const { align = "left", valueFontSize = 5.2 } = options;
+    const {
+      align = "left",
+      valueFontSize = 6.8,
+      valueFontStyle = "normal",
+    } = options;
 
     pdf.setDrawColor(188, 188, 188);
     pdf.rect(x, y, w, h);
 
     pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(4.2);
+    pdf.setFontSize(5.3);
     pdf.setTextColor(90, 90, 90);
 
-    pdf.text(String(label || ""), x + 1, y + 2, {
+    pdf.text(String(label || ""), x + 1, y + 2.15, {
       maxWidth: w - 2,
     });
 
-    pdf.setFont("helvetica", "normal");
+    pdf.setFont("helvetica", valueFontStyle);
     pdf.setFontSize(valueFontSize);
     pdf.setTextColor(0, 0, 0);
 
     const safeValue = String(value ?? "-");
 
     if (align === "center") {
-      pdf.text(safeValue, x + w / 2, y + h - 1.15, {
+      pdf.text(safeValue, x + w / 2, y + h - 1.05, {
         align: "center",
         maxWidth: w - 2,
       });
     } else {
-      pdf.text(safeValue, x + 1, y + h - 1.15, {
+      pdf.text(safeValue, x + 1, y + h - 1.05, {
         maxWidth: w - 2,
       });
     }
   }
 
   function drawTable(x, y, w) {
-    const titleH = 4.8;
-    const groupH = 4.1;
-    const headH = 4.1;
-    const rowH = 3.35;
+    const titleH = 5.2;
+    const groupH = 4.8;
+    const headH = 4.8;
+    const rowH = 4.1;
 
     const cols = [20, 42, 42, 42, 44];
     const heads = ["kPa", "Lett.", "s", "Lett.", "s"];
@@ -127,13 +131,13 @@ export async function exportReport(data, preview = false) {
     );
 
     pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(4.4);
+    pdf.setFontSize(6);
     pdf.setTextColor(35, 35, 35);
 
     pdf.text(
       "CARICO",
       x + cols[0] / 2,
-      cursor + 2.75,
+      cursor + 3.2,
       {
         align: "center",
       }
@@ -142,7 +146,7 @@ export async function exportReport(data, preview = false) {
     pdf.text(
       "1 CICLO",
       x + cols[0] + (cols[1] + cols[2]) / 2,
-      cursor + 2.75,
+      cursor + 3.2,
       {
         align: "center",
       }
@@ -155,7 +159,7 @@ export async function exportReport(data, preview = false) {
         cols[1] +
         cols[2] +
         (cols[3] + cols[4]) / 2,
-      cursor + 2.75,
+      cursor + 3.2,
       {
         align: "center",
       }
@@ -175,7 +179,7 @@ export async function exportReport(data, preview = false) {
       pdf.text(
         head,
         cx + cols[index] / 2,
-        cursor + 2.7,
+        cursor + 3.2,
         {
           align: "center",
         }
@@ -187,7 +191,7 @@ export async function exportReport(data, preview = false) {
     cursor += headH;
 
     pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(4.15);
+    pdf.setFontSize(6.7);
     pdf.setTextColor(0, 0, 0);
 
     rows.forEach(({ p, r1, s1, r2, s2 }) => {
@@ -221,7 +225,7 @@ export async function exportReport(data, preview = false) {
         pdf.text(
           String(value),
           cx + cols[index] / 2,
-          cursor + 2.25,
+          cursor + 2.8,
           {
             align: "center",
             maxWidth: cols[index] - 1.5,
@@ -243,7 +247,7 @@ export async function exportReport(data, preview = false) {
     pdf.rect(x, y, w, h, "FD");
 
     pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(5.4);
+    pdf.setFontSize(6.8);
     pdf.setTextColor(20, 20, 20);
 
     pdf.text(
@@ -280,10 +284,10 @@ export async function exportReport(data, preview = false) {
       return;
     }
 
-    const plotX = x + 15;
-    const plotY = y + 12;
-    const plotW = w - 21;
-    const plotH = h - 16;
+    const plotX = x + 17;
+    const plotY = y + 13.2;
+    const plotW = w - 23;
+    const plotH = h - 18.5;
 
     const maxX =
       Number.isFinite(chartMaxX) && chartMaxX > 0
@@ -304,13 +308,13 @@ export async function exportReport(data, preview = false) {
 
     // Titolo dell'asse del carico in alto.
     pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(4.3);
+    pdf.setFontSize(6.2);
     pdf.setTextColor(70, 70, 70);
 
     pdf.text(
       "Carico [kPa]",
       plotX + plotW / 2,
-      y + 7,
+      y + 7.8,
       {
         align: "center",
       }
@@ -462,7 +466,7 @@ export async function exportReport(data, preview = false) {
     );
 
     pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(3.9);
+    pdf.setFontSize(6.4);
     pdf.setTextColor(70, 70, 70);
 
     // Valori del carico sopra il grafico.
@@ -483,7 +487,7 @@ export async function exportReport(data, preview = false) {
       pdf.text(
         String(Math.round(value)),
         tickX,
-        plotY - 1.2,
+        plotY - 1.35,
         {
           align: "center",
         }
@@ -509,14 +513,14 @@ export async function exportReport(data, preview = false) {
       pdf.text(
         value.toFixed(2),
         plotX - 1.8,
-        tickY + 1,
+        tickY + 0.85,
         {
           align: "right",
         }
       );
     }
 
-    pdf.setFontSize(4.1);
+    pdf.setFontSize(6.2);
 
     pdf.text(
       "Spostamento [mm]",
@@ -529,7 +533,7 @@ export async function exportReport(data, preview = false) {
     );
 
     // Legenda.
-    pdf.setFontSize(4.4);
+    pdf.setFontSize(6);
 
     pdf.setTextColor(40, 99, 180);
 
@@ -591,7 +595,7 @@ export async function exportReport(data, preview = false) {
   }
 
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(8.6);
+  pdf.setFontSize(9.4);
   pdf.setTextColor(0, 0, 0);
 
   pdf.text(
@@ -601,7 +605,7 @@ export async function exportReport(data, preview = false) {
   );
 
   pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(4.9);
+  pdf.setFontSize(5.8);
 
   pdf.text(
     "Sperimentazione sulle Strutture e sui Materiali da Costruzione",
@@ -622,7 +626,7 @@ export async function exportReport(data, preview = false) {
   );
 
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(6.2);
+  pdf.setFontSize(7);
 
   pdf.text(
     "MINUTA DI PROVA",
@@ -634,7 +638,7 @@ export async function exportReport(data, preview = false) {
   );
 
   pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(5.1);
+  pdf.setFontSize(6);
 
   pdf.text(
     "PROVA DI CARICO SU PIASTRA",
@@ -685,7 +689,7 @@ export async function exportReport(data, preview = false) {
     "FOTO PROVA"
   );
 
-  const dataRowH = 5;
+  const dataRowH = 6;
   const halfW = leftW / 2;
 
   const generalRows = [
@@ -747,7 +751,7 @@ export async function exportReport(data, preview = false) {
   });
 
   const photoY = dataBodyY;
-  const photoH = 56;
+  const photoH = 46;
 
   pdf.setDrawColor(185, 185, 185);
   pdf.setFillColor(255, 255, 255);
@@ -778,7 +782,7 @@ export async function exportReport(data, preview = false) {
         photoH - 2
       );
     } catch {
-      pdf.setFontSize(5.2);
+      pdf.setFontSize(6.2);
 
       pdf.text(
         "Foto non leggibile",
@@ -791,7 +795,7 @@ export async function exportReport(data, preview = false) {
     }
   } else {
     pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(5.2);
+    pdf.setFontSize(6.2);
     pdf.setTextColor(90, 90, 90);
 
     pdf.text(
@@ -822,13 +826,13 @@ export async function exportReport(data, preview = false) {
   );
 
   pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(4.3);
+  pdf.setFontSize(5.5);
   pdf.setTextColor(0, 0, 0);
 
   pdf.text(
     "Md = (dp / ds) x D",
     CONTENT_X + 1.2,
-    notesBodyY + 2.1
+    notesBodyY + 2.6
   );
 
   pdf.text(
@@ -838,7 +842,7 @@ export async function exportReport(data, preview = false) {
       testConfig?.md?.[1] ?? "-"
     } kPa`,
     CONTENT_X + 32,
-    notesBodyY + 2.1
+    notesBodyY + 2.6
   );
 
   pdf.text(
@@ -848,20 +852,20 @@ export async function exportReport(data, preview = false) {
       testConfig?.mdp?.[1] ?? "-"
     } kPa`,
     CONTENT_X + 70,
-    notesBodyY + 2.1
+    notesBodyY + 2.6
   );
 
   pdf.text(
     "Norma: CNR 146/92",
     CONTENT_X + 106,
-    notesBodyY + 2.1
+    notesBodyY + 2.6
   );
 
-  cursorY = notesBodyY + 4.7;
+  cursorY = notesBodyY + 5.2;
 
   // RISULTATI COMPATTI
   // SOTTO FORMULE E NOTE
-  const RESULT_W = 70;
+  const RESULT_W = 76;
 
   const resultsBodyY = section(
     CONTENT_X,
@@ -870,8 +874,8 @@ export async function exportReport(data, preview = false) {
     "RISULTATI"
   );
 
-  const resultH = 7;
-  const resultW = 18;
+  const resultH = 8.5;
+  const resultW = 20;
   const resultGap = 2;
   const resultsRowX = CONTENT_X + 4;
 
@@ -886,7 +890,8 @@ export async function exportReport(data, preview = false) {
       : "-",
     {
       align: "center",
-      valueFontSize: 5.5,
+      valueFontSize: 8.5,
+      valueFontStyle: "bold",
     }
   );
 
@@ -901,7 +906,8 @@ export async function exportReport(data, preview = false) {
       : "-",
     {
       align: "center",
-      valueFontSize: 5.5,
+      valueFontSize: 8.5,
+      valueFontStyle: "bold",
     }
   );
 
@@ -919,7 +925,8 @@ export async function exportReport(data, preview = false) {
       : "-",
     {
       align: "center",
-      valueFontSize: 5.5,
+      valueFontSize: 8.5,
+      valueFontStyle: "bold",
     }
   );
 
@@ -955,25 +962,30 @@ export async function exportReport(data, preview = false) {
     CONTENT_BOTTOM - 5
   );
 
+  const signatureLabelX = CONTENT_X;
+  const signatureX = CONTENT_X + 28;
+  const signatureW = 44;
+  const signatureH = 9;
+
   if (firmaTecnico) {
     try {
       pdf.setFillColor(255, 255, 255);
 
       pdf.rect(
-        CONTENT_X + 3,
-        signatureLineY - 8,
-        42,
-        9,
+        signatureX,
+        signatureLineY - signatureH,
+        signatureW,
+        signatureH,
         "F"
       );
 
       pdf.addImage(
         firmaTecnico,
         "PNG",
-        CONTENT_X + 3,
-        signatureLineY - 8,
-        42,
-        9
+        signatureX,
+        signatureLineY - signatureH,
+        signatureW,
+        signatureH
       );
     } catch {
       // Firma non leggibile.
@@ -983,22 +995,22 @@ export async function exportReport(data, preview = false) {
   pdf.setDrawColor(175, 175, 175);
 
   pdf.line(
-    CONTENT_X,
+    signatureX,
     signatureLineY,
-    CONTENT_X + 72,
+    signatureX + signatureW,
     signatureLineY
   );
 
  
 
   pdf.setFont("helvetica", "normal");
-  pdf.setFontSize(5);
+  pdf.setFontSize(6);
   pdf.setTextColor(55, 55, 55);
 
   pdf.text(
-    "Il tecnico esecutore",
-    CONTENT_X,
-    signatureLineY + 3.1
+    "Tecnico esecutore",
+    signatureLabelX,
+    signatureLineY - 2.6
   );
 
  
@@ -1024,7 +1036,7 @@ export async function exportReport(data, preview = false) {
     PH - 13
   );
 
-  pdf.setFontSize(5.2);
+  pdf.setFontSize(6);
   pdf.setTextColor(90, 90, 90);
 
   pdf.text(
