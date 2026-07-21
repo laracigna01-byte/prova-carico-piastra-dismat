@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+﻿import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { exportReport } from "./pdf/exportReport";
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid,
@@ -1169,7 +1169,22 @@ console.log("SALVATAGGIO", data);
   c2,
 ]);
 
-  const { md, mdp, rapporto, chart1, chartScarico1, chart2, chartScarico2, tableRows, rScarico2, sScarico2 } = useMemo(() => {
+  const {
+    md,
+    mdp,
+    rapporto,
+    chart1,
+    chartScarico1,
+    chart2,
+    chartScarico2,
+    tableRows,
+    rScarico1,
+    sScarico1,
+    rInizioC2,
+    sInizioC2,
+    rScarico2,
+    sScarico2,
+  } = useMemo(() => {
     const D = parseFloat(diametro) || 300;
     const p1vals = testConfig.ciclo1;
     const p2vals = testConfig.ciclo2;
@@ -1179,10 +1194,14 @@ console.log("SALVATAGGIO", data);
     const r2 = p2keys.map((k) => lastValid(c2[k] || []));
     const rScarico1 = lastValid(c1.scarico50 || []);
     const rScarico2 = lastValid(c2.scarico || []);
+    const firstC2Rows = c2[p2keys[0]] || [];
+    const firstC2Reading = parseFloat(firstC2Rows[0]);
+    const rInizioC2 = Number.isFinite(firstC2Reading) ? firstC2Reading : null;
 
     const zero = r1[0];
     const s1 = r1.map((v) => (v !== null && zero !== null ? Math.abs(v - zero) : null));
     const sScarico1 = rScarico1 !== null && zero !== null ? Math.abs(rScarico1 - zero) : null;
+    const sInizioC2 = rInizioC2 !== null && zero !== null ? Math.abs(rInizioC2 - zero) : null;
     const s2 = r2.map((v) => (v !== null && zero !== null ? Math.abs(v - zero) : null));
     const sScarico2 = rScarico2 !== null && zero !== null ? Math.abs(rScarico2 - zero) : null;
 
@@ -1222,7 +1241,22 @@ console.log("SALVATAGGIO", data);
       };
     });
 
-    return { md, mdp, rapporto, chart1, chartScarico1, chart2, chartScarico2, tableRows, rScarico2, sScarico2 };
+    return {
+      md,
+      mdp,
+      rapporto,
+      chart1,
+      chartScarico1,
+      chart2,
+      chartScarico2,
+      tableRows,
+      rScarico1,
+      sScarico1,
+      rInizioC2,
+      sInizioC2,
+      rScarico2,
+      sScarico2,
+    };
   }, [diametro, c1, c2, testConfig]);
 
   const provaValida = rapporto !== null && rapporto < 1;
@@ -1962,8 +1996,26 @@ async function importArchiveBackup(file) {
                         <td style={{ padding: "8px 12px" }}>{s2Val !== null ? s2Val.toFixed(3) : "—"}</td>
                       </tr>
                     ))}
+                    <tr style={{ borderBottom: `1px solid ${T.border}`, background: T.surfaceHigh }}>
+                      <td style={{ padding: "8px 12px", color: T.cycle1 }}>
+                        Scarico C1 ({testConfig.scarico1} kPa)
+                      </td>
+                      <td style={{ padding: "8px 12px", color: T.cycle1 }}>{rScarico1 !== null ? rScarico1.toFixed(2) : "—"}</td>
+                      <td style={{ padding: "8px 12px" }}>{sScarico1 !== null ? sScarico1.toFixed(3) : "—"}</td>
+                      <td style={{ padding: "8px 12px" }}>—</td>
+                      <td style={{ padding: "8px 12px" }}>—</td>
+                    </tr>
+                    <tr style={{ borderBottom: `1px solid ${T.border}`, background: `${T.cycle2}08` }}>
+                      <td style={{ padding: "8px 12px", color: T.cycle2 }}>
+                        Inizio C2 ({testConfig.ciclo2[0]} kPa)
+                      </td>
+                      <td style={{ padding: "8px 12px" }}>—</td>
+                      <td style={{ padding: "8px 12px" }}>—</td>
+                      <td style={{ padding: "8px 12px", color: T.cycle2 }}>{rInizioC2 !== null ? rInizioC2.toFixed(2) : "—"}</td>
+                      <td style={{ padding: "8px 12px" }}>{sInizioC2 !== null ? sInizioC2.toFixed(3) : "—"}</td>
+                    </tr>
                     <tr style={{ background: T.surfaceHigh }}>
-                      <td style={{ padding: "8px 12px", color: T.accentBlue }}>Scarico finale</td>
+                      <td style={{ padding: "8px 12px", color: T.accentOrange }}>Scarico finale C2 ({testConfig.scarico2} kPa)</td>
                       <td style={{ padding: "8px 12px" }}>—</td>
                       <td style={{ padding: "8px 12px" }}>—</td>
                       <td style={{ padding: "8px 12px", color: T.cycle2 }}>{rScarico2 !== null ? rScarico2.toFixed(2) : "—"}</td>
