@@ -1,4 +1,4 @@
-﻿import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { exportReport } from "./pdf/exportReport";
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid,
@@ -1996,21 +1996,15 @@ async function importArchiveBackup(file) {
                         <td style={{ padding: "8px 12px" }}>{s2Val !== null ? s2Val.toFixed(3) : "—"}</td>
                       </tr>
                     ))}
-                    <tr style={{ borderBottom: `1px solid ${T.border}`, background: T.surfaceHigh }}>
-                      <td style={{ padding: "8px 12px", color: T.cycle1 }}>
-                        Scarico C1 ({testConfig.scarico1} kPa)
+                    <tr style={{ borderBottom: `1px solid ${T.border}`, background: `${T.cycle2}08` }}>
+                      <td style={{ padding: "8px 12px" }}>
+                        <span style={{ color: T.cycle1 }}>Scarico C1</span>
+                        {" / "}
+                        <span style={{ color: T.cycle2 }}>primo gradino C2</span>
+                        {` (${testConfig.scarico1} kPa)`}
                       </td>
                       <td style={{ padding: "8px 12px", color: T.cycle1 }}>{rScarico1 !== null ? rScarico1.toFixed(2) : "—"}</td>
                       <td style={{ padding: "8px 12px" }}>{sScarico1 !== null ? sScarico1.toFixed(3) : "—"}</td>
-                      <td style={{ padding: "8px 12px" }}>—</td>
-                      <td style={{ padding: "8px 12px" }}>—</td>
-                    </tr>
-                    <tr style={{ borderBottom: `1px solid ${T.border}`, background: `${T.cycle2}08` }}>
-                      <td style={{ padding: "8px 12px", color: T.cycle2 }}>
-                        Inizio C2 ({testConfig.ciclo2[0]} kPa)
-                      </td>
-                      <td style={{ padding: "8px 12px" }}>—</td>
-                      <td style={{ padding: "8px 12px" }}>—</td>
                       <td style={{ padding: "8px 12px", color: T.cycle2 }}>{rInizioC2 !== null ? rInizioC2.toFixed(2) : "—"}</td>
                       <td style={{ padding: "8px 12px" }}>{sInizioC2 !== null ? sInizioC2.toFixed(3) : "—"}</td>
                     </tr>
