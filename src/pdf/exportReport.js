@@ -24,6 +24,8 @@ export async function exportReport(data, preview = false) {
     mdp,
     rapporto,
     tableRows = [],
+    rScarico2 = null,
+    sScarico2 = null,
     fotoProva,
     firmaTecnico,
     chart1 = [],
@@ -194,7 +196,18 @@ export async function exportReport(data, preview = false) {
     pdf.setFontSize(6.7);
     pdf.setTextColor(0, 0, 0);
 
-    rows.forEach(({ p, r1, s1, r2, s2 }) => {
+    const printableRows = [
+      ...rows,
+      {
+        p: `${testConfig?.scarico2 ?? "-"} SC.C2`,
+        r1: null,
+        s1: null,
+        r2: rScarico2,
+        s2: sScarico2,
+      },
+    ];
+
+    printableRows.forEach(({ p, r1, s1, r2, s2 }) => {
       cx = x;
 
       const values = [

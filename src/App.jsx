@@ -1297,6 +1297,8 @@ console.log("SALVATAGGIO", data);
           chartScarico1,
           chart2,
           chartScarico2,
+          rScarico2,
+          sScarico2,
         },
         preview
       );
@@ -1339,6 +1341,8 @@ console.log("SALVATAGGIO", data);
     chartScarico1,
     chart2,
     chartScarico2,
+    rScarico2,
+    sScarico2,
   ]);
 function currentRecordData(extra = {}) {
   return {
