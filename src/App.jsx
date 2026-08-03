@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+﻿import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { exportReport } from "./pdf/exportReport";
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid,
@@ -190,13 +190,15 @@ function StepTable({ label, kpa, rows, onChange, color, threshold = 0.02 }) {
           <div key={i} style={{ background: T.bg, display: "flex", flexDirection: "column", alignItems: "center", padding: "4px 2px", gap: 2 }}>
             <span style={{ fontSize: 8, color: T.textDim, fontFamily: "monospace" }}>{i + 1}</span>
             <input
-              type="number"
+              type="text"
               inputMode="decimal"
-              step="0.01"
+              enterKeyHint="done"
+              autoComplete="off"
+              spellCheck={false}
               value={val}
               onChange={(e) => {
                 const next = [...rows];
-                next[i] = e.target.value;
+                next[i] = e.target.value.replace(/[^0-9.,-]/g, "");
                 onChange(next);
               }}
               style={{
@@ -206,14 +208,13 @@ function StepTable({ label, kpa, rows, onChange, color, threshold = 0.02 }) {
                 borderBottom: val !== "" ? `1px solid ${color}40` : `1px solid ${T.border}`,
                 color: val !== "" ? T.text : T.textDim,
                 fontFamily: "monospace",
-                fontSize: 16,
+                fontSize: 15,
                 textAlign: "center",
                 padding: "2px 0",
                 outline: "none",
                 WebkitAppearance: "none",
                 MozAppearance: "textfield",
-                transform: "scale(0.85)",
-                transformOrigin: "center center",
+                WebkitTapHighlightColor: "transparent",
               }}
               onFocus={(e) => { e.target.style.borderBottomColor = color; }}
               onBlur={(e) => { e.target.style.borderBottomColor = val !== "" ? `${color}40` : T.border; }}
