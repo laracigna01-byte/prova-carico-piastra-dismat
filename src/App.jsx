@@ -67,16 +67,43 @@ function interp(x, xp, fp) {
   return 0;
 }
 
+function parseDecimalValue(value) {
+  if (value === null || value === undefined || value === "") return NaN;
+
+  const text = String(value).trim().replace(/\s/g, "");
+  if (!text) return NaN;
+
+  const hasComma = text.includes(",");
+  const hasDot = text.includes(".");
+
+  if (hasComma && hasDot) {
+    const lastComma = text.lastIndexOf(",");
+    const lastDot = text.lastIndexOf(".");
+
+    if (lastComma > lastDot) {
+      return Number(text.replace(/\./g, "").replace(",", "."));
+    }
+
+    return Number(text.replace(/,/g, ""));
+  }
+
+  if (hasComma) {
+    return Number(text.replace(",", "."));
+  }
+
+  return Number(text);
+}
+
 function lastValid(rows) {
   for (let i = rows.length - 1; i >= 0; i--) {
-    const v = parseFloat(rows[i]);
+    const v = parseDecimalValue(rows[i]);
     if (!isNaN(v)) return v;
   }
   return null;
 }
 
 function stabilityInfo(rows, threshold = 0.02, minCount = 3) {
-  const vals = rows.map((r) => parseFloat(r)).filter((v) => !isNaN(v));
+  const vals = rows.map((r) => parseDecimalValue(r)).filter((v) => !isNaN(v));
   if (vals.length < 2) return { stable: false, delta: null, count: vals.length };
   const last = vals.slice(-minCount);
   if (last.length < 2) return { stable: false, delta: null, count: vals.length };
@@ -1186,7 +1213,7 @@ console.log("SALVATAGGIO", data);
     rScarico2,
     sScarico2,
   } = useMemo(() => {
-    const D = parseFloat(diametro) || 300;
+    const D = parseDecimalValue(diametro) || 300;
     const p1vals = testConfig.ciclo1;
     const p2vals = testConfig.ciclo2;
     const p1keys = p1vals.map(stepKey);
@@ -1196,7 +1223,7 @@ console.log("SALVATAGGIO", data);
     const rScarico1 = lastValid(c1.scarico50 || []);
     const rScarico2 = lastValid(c2.scarico || []);
     const firstC2Rows = c2[p2keys[0]] || [];
-    const firstC2Reading = parseFloat(firstC2Rows[0]);
+    const firstC2Reading = parseDecimalValue(firstC2Rows[0]);
     const rInizioC2 = Number.isFinite(firstC2Reading) ? firstC2Reading : null;
 
     const zero = r1[0];
