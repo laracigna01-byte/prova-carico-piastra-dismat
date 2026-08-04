@@ -1,7 +1,23 @@
 const AUTH_KEY = "dismat_auth";
 
 export function isAuthenticated() {
-  return localStorage.getItem(AUTH_KEY) === "true";
+  try {
+    return localStorage.getItem(AUTH_KEY) === "true" || sessionStorage.getItem(AUTH_KEY) === "true";
+  } catch {
+    return sessionStorage.getItem(AUTH_KEY) === "true";
+  }
+}
+
+function persistAuthentication() {
+  // Su iOS localStorage può essere già pieno a causa di vecchie foto in base64.
+  // Il fallback di sessione permette l'accesso senza cancellare la prova: una
+  // volta aperta, l'app migrerà foto e firma nella memoria IndexedDB.
+  try {
+    localStorage.setItem(AUTH_KEY, "true");
+  } catch (error) {
+    console.warn("Memoria locale piena: accesso salvato per la sessione", error);
+    sessionStorage.setItem(AUTH_KEY, "true");
+  }
 }
 
 export async function login(username, password) {
@@ -9,7 +25,7 @@ export async function login(username, password) {
 
   if (isLocalhost) {
     if (username === "demo" && password === "demo2026") {
-      localStorage.setItem(AUTH_KEY, "true");
+      persistAuthentication();
       return true;
     }
 
@@ -30,7 +46,7 @@ export async function login(username, password) {
     throw new Error(data.message || "Credenziali non valide");
   }
 
-  localStorage.setItem(AUTH_KEY, "true");
+  persistAuthentication();
   return true;
 }
 
