@@ -8,7 +8,6 @@ import {
   listTests,
   saveTest,
   deleteTest,
-  writeTests,
   loadServerTests,
   syncServerTests,
   nextReportId,
@@ -999,14 +998,21 @@ function LogoutButton() {
 
 export default function App() {
     const [theme, setTheme] = useState(() => {
-    return localStorage.getItem("theme") || "dark";
+    try {
+      return localStorage.getItem("theme") || "dark";
+    } catch {
+      return "dark";
+    }
   });
 
   T = THEMES[theme];
 
   useEffect(() => {
-    
-    localStorage.setItem("theme", theme);
+    try {
+      localStorage.setItem("theme", theme);
+    } catch (error) {
+      console.warn("Preferenza tema non salvata", error);
+    }
     document.body.style.background = T.bg;
   }, [theme]);
   const [verbale, setVerbale]         = useState("");
@@ -1126,10 +1132,6 @@ const handleTipoProvaChange = (nuovoTipo) => {
   })();
 }, []);
 
-useEffect(() => {
-  writeTests(archive);
-  syncServerTests(archive);
-}, [archive]);
   const STORAGE_KEY = "prova-piastra-dati-v1";
   
 
@@ -1451,13 +1453,13 @@ function currentRecordData(extra = {}) {
 }
 
 function saveCurrent() {
-  const id = verbale || nextReportId();
+  const id = verbale || nextReportId(archive);
   if (!verbale) setVerbale(id);
 
   const data = currentRecordData({ verbale: id });
   const record = { id, savedAt: new Date().toISOString(), data };
 
-  setArchive(saveTest(record));
+  setArchive(saveTest(record, archive));
   window.alert(`Prova ${id} salvata in archivio.`);
 }
 
@@ -1472,7 +1474,12 @@ async function startNewTest() {
     console.warn("Bozza locale non eliminata", error);
   }
 
-  await clearDraft();
+  const cleared = await clearDraft();
+  if (!cleared) {
+    resettingDraftRef.current = false;
+    window.alert("Non è stato possibile cancellare la bozza. Riprova senza chiudere l'app.");
+    return;
+  }
   window.location.reload();
 }
 
@@ -1505,7 +1512,7 @@ function openRecord(record) {
 }
 
 function duplicateRecord(record) {
-  const newId = nextReportId();
+  const newId = nextReportId(archive);
 
   const duplicatedData = {
     ...(record.data || {}),
@@ -1518,7 +1525,7 @@ function duplicateRecord(record) {
     data: duplicatedData,
   };
 
-  setArchive(saveTest(duplicatedRecord));
+  setArchive(saveTest(duplicatedRecord, archive));
   openRecord(duplicatedRecord);
   window.alert(`Prova duplicata come ${newId}.`);
 }
@@ -2153,7 +2160,7 @@ async function importArchiveBackup(file) {
               items={archive}
               onOpen={openRecord}
               onDuplicate={duplicateRecord}
-              onDelete={(id) => setArchive(deleteTest(id))}
+              onDelete={(id) => setArchive(deleteTest(id, archive))}
               onExport={exportRecord}
               onExportBackup={exportArchiveBackup}
               onImportBackup={importArchiveBackup}

@@ -23,6 +23,15 @@ function sortTests(list) {
   });
 }
 
+function lightSnapshot(list) {
+  return sortTests(list).map((record) => ({
+    ...record,
+    data: record?.data
+      ? { ...record.data, fotoProva: null, firmaTecnico: null }
+      : record?.data,
+  }));
+}
+
 function canUseIndexedDb() {
   return typeof indexedDB !== "undefined";
 }
@@ -130,28 +139,47 @@ async function idbWriteAll(list) {
 
 function writeLocalSnapshot(list) {
   try {
-    localStorage.setItem(KEY, JSON.stringify(sortTests(list)));
+    localStorage.setItem(KEY, JSON.stringify(lightSnapshot(list)));
   } catch {
     // Se foto grandi rendono localStorage troppo piccolo,
     // IndexedDB resta la memoria principale della PWA.
   }
 }
 
-export function nextReportId() {
+export function nextReportId(existingRecords = []) {
   const year = new Date().getFullYear();
-  const raw = localStorage.getItem(COUNTER);
+  let raw;
+  try {
+    raw = localStorage.getItem(COUNTER) || sessionStorage.getItem(COUNTER);
+  } catch {
+    raw = sessionStorage.getItem(COUNTER);
+  }
   const state = safeJsonParse(raw, { year, n: 0 });
-  const n = state.year === year ? state.n + 1 : 1;
+  const maxExisting = (existingRecords || []).reduce((max, record) => {
+    const match = String(record?.id || "").match(new RegExp(`^PIA-${year}-(\\d+)$`));
+    return match ? Math.max(max, Number(match[1]) || 0) : max;
+  }, 0);
+  const previous = state.year === year ? Number(state.n) || 0 : 0;
+  const n = Math.max(previous, maxExisting) + 1;
 
-  localStorage.setItem(COUNTER, JSON.stringify({ year, n }));
+  try {
+    localStorage.setItem(COUNTER, JSON.stringify({ year, n }));
+  } catch {
+    sessionStorage.setItem(COUNTER, JSON.stringify({ year, n }));
+  }
   return `PIA-${year}-${String(n).padStart(3, "0")}`;
 }
 
 export function listTests() {
-  const current = safeJsonParse(localStorage.getItem(KEY), null);
+  let current;
+  let legacy;
+  try {
+    current = safeJsonParse(localStorage.getItem(KEY), null);
+    legacy = safeJsonParse(localStorage.getItem(LEGACY_KEY), []);
+  } catch {
+    return [];
+  }
   if (Array.isArray(current)) return sortTests(current);
-
-  const legacy = safeJsonParse(localStorage.getItem(LEGACY_KEY), []);
 
   if (Array.isArray(legacy) && legacy.length) {
     writeLocalSnapshot(legacy);
@@ -174,6 +202,7 @@ export async function loadServerTests() {
 
   if (local.length) {
     await idbWriteAll(local);
+    writeLocalSnapshot(local);
   }
 
   return local;
@@ -193,8 +222,8 @@ export function writeTests(list) {
   return sorted;
 }
 
-export function saveTest(record) {
-  const list = listTests();
+export function saveTest(record, currentList = null) {
+  const list = Array.isArray(currentList) ? currentList : listTests();
   const idx = list.findIndex((x) => x.id === record.id);
 
   const next =
@@ -210,8 +239,9 @@ export function saveTest(record) {
   return sorted;
 }
 
-export function deleteTest(id) {
-  const next = listTests().filter((x) => x.id !== id);
+export function deleteTest(id, currentList = null) {
+  const list = Array.isArray(currentList) ? currentList : listTests();
+  const next = list.filter((x) => x.id !== id);
 
   writeLocalSnapshot(next);
   idbDelete(id);
