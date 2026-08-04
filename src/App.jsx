@@ -12,6 +12,8 @@ import {
   loadServerTests,
   syncServerTests,
   nextReportId,
+  loadDraft,
+  saveDraft,
 } from "./utils/storage";
 import { LoginGate } from "./security/LoginGate";
 import { useAuth } from "./security/AuthContext";
@@ -599,28 +601,44 @@ const CustomTooltip = ({ active, payload }) => {
 };
 
 // Funzione di compressione immagine per prevenire i crash della memoria su mobile
-function compressImage(file, maxWidth = 1000) {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
+function compressImage(file, maxDimension = 1280) {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+    const cleanup = () => URL.revokeObjectURL(objectUrl);
+
+    img.onload = () => {
+      try {
         const canvas = document.createElement("canvas");
         let width = img.width;
         let height = img.height;
-        if (width > maxWidth) {
-          height = Math.round((height * maxWidth) / width);
-          width = maxWidth;
+        const scale = Math.min(1, maxDimension / Math.max(width, height));
+        if (scale < 1) {
+          width = Math.max(1, Math.round(width * scale));
+          height = Math.max(1, Math.round(height * scale));
         }
         canvas.width = width;
         canvas.height = height;
-        const ctx = canvas.getContext("2d");
+        const ctx = canvas.getContext("2d", { alpha: false });
+        if (!ctx) throw new Error("Canvas non disponibile");
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, width, height);
         ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL("image/jpeg", 0.7)); // Compressione JPEG al 70%
-      };
-      img.src = e.target.result;
+        const compressed = canvas.toDataURL("image/jpeg", 0.68);
+        canvas.width = 1;
+        canvas.height = 1;
+        cleanup();
+        resolve(compressed);
+      } catch (error) {
+        cleanup();
+        reject(error);
+      }
     };
-    reader.readAsDataURL(file);
+    img.onerror = () => {
+      cleanup();
+      reject(new Error("Formato immagine non supportato. Su iPhone scegli una foto JPEG."));
+    };
+    img.src = objectUrl;
   });
 }
 
@@ -673,9 +691,15 @@ function GeneralInfoPanel({
 
   const handleFoto = async (e) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const compressed = await compressImage(file, 1000);
+    if (!file) return;
+    try {
+      const compressed = await compressImage(file);
       setFotoProva(compressed);
+    } catch (error) {
+      console.error("Errore durante la compressione della foto", error);
+      window.alert(error?.message || "Non è stato possibile caricare la foto. Prova a sceglierne un'altra.");
+    } finally {
+      e.target.value = "";
     }
   };
 
@@ -1108,16 +1132,21 @@ useEffect(() => {
   
 
 useEffect(() => {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  console.log("CARICAMENTO", saved);
+  let cancelled = false;
 
-  if (!saved) {
-    setStorageLoaded(true);
-    return;
-  }
+  (async () => {
+    try {
+      const indexedDraft = await loadDraft();
+      let localDraft = null;
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        localDraft = saved ? JSON.parse(saved) : null;
+      } catch (error) {
+        console.warn("Bozza locale non leggibile", error);
+      }
 
-  try {
-    const data = JSON.parse(saved);
+      const data = indexedDraft || localDraft;
+      if (!data || cancelled) return;
 
     setVerbale(data.verbale || "");
     setCantiere(data.cantiere || "");
@@ -1139,11 +1168,14 @@ useEffect(() => {
     setFirmaTecnico(data.firmaTecnico || null);
     setC1(data.c1 || INIT_C1);
     setC2(data.c2 || INIT_C2);
-  } catch (error) {
-    console.error("Errore caricamento dati salvati", error);
-  } finally {
-    setStorageLoaded(true);
-  }
+    } catch (error) {
+      console.error("Errore caricamento dati salvati", error);
+    } finally {
+      if (!cancelled) setStorageLoaded(true);
+    }
+  })();
+
+  return () => { cancelled = true; };
 }, []);
 
 useEffect(() => {
@@ -1171,8 +1203,20 @@ useEffect(() => {
     c2,
   };
 
-console.log("SALVATAGGIO", data);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  // localStorage ha un limite molto basso su iOS: vi salviamo soltanto i dati
+  // leggeri. Foto e firma restano nella bozza IndexedDB, pensata per file grandi.
+  try {
+    const lightData = { ...data, fotoProva: null, firmaTecnico: null };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(lightData));
+  } catch (error) {
+    console.warn("Salvataggio locale non disponibile", error);
+  }
+
+  const timer = window.setTimeout(() => {
+    saveDraft(data).catch((error) => console.warn("Bozza non salvata", error));
+  }, 250);
+
+  return () => window.clearTimeout(timer);
 }, [
   storageLoaded,
   verbale,

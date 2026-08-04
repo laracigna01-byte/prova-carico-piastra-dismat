@@ -2,8 +2,10 @@ const KEY = "piastra_archive_v2";
 const LEGACY_KEY = "piastra_archive_v1";
 const COUNTER = "piastra_counter_v1";
 const DB_NAME = "prova_carico_piastra_db";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE = "tests";
+const DRAFT_STORE = "drafts";
+const DRAFT_ID = "current";
 
 function safeJsonParse(value, fallback) {
   try {
@@ -35,6 +37,9 @@ function openDb() {
       const db = request.result;
       if (!db.objectStoreNames.contains(STORE)) {
         db.createObjectStore(STORE, { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains(DRAFT_STORE)) {
+        db.createObjectStore(DRAFT_STORE, { keyPath: "id" });
       }
     };
 
@@ -212,4 +217,31 @@ export function deleteTest(id) {
   idbDelete(id);
 
   return next;
+}
+
+export async function loadDraft() {
+  const db = await openDb();
+  if (!db || !db.objectStoreNames.contains(DRAFT_STORE)) return null;
+
+  return new Promise((resolve) => {
+    const tx = db.transaction(DRAFT_STORE, "readonly");
+    const request = tx.objectStore(DRAFT_STORE).get(DRAFT_ID);
+    request.onsuccess = () => resolve(request.result?.data || null);
+    request.onerror = () => resolve(null);
+    tx.oncomplete = () => db.close();
+    tx.onerror = () => db.close();
+  });
+}
+
+export async function saveDraft(data) {
+  const db = await openDb();
+  if (!db || !db.objectStoreNames.contains(DRAFT_STORE)) return false;
+
+  return new Promise((resolve) => {
+    const tx = db.transaction(DRAFT_STORE, "readwrite");
+    tx.objectStore(DRAFT_STORE).put({ id: DRAFT_ID, data, updatedAt: Date.now() });
+    tx.oncomplete = () => { db.close(); resolve(true); };
+    tx.onerror = () => { db.close(); resolve(false); };
+    tx.onabort = () => { db.close(); resolve(false); };
+  });
 }
