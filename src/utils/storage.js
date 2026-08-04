@@ -245,3 +245,16 @@ export async function saveDraft(data) {
     tx.onabort = () => { db.close(); resolve(false); };
   });
 }
+
+export async function clearDraft() {
+  const db = await openDb();
+  if (!db || !db.objectStoreNames.contains(DRAFT_STORE)) return false;
+
+  return new Promise((resolve) => {
+    const tx = db.transaction(DRAFT_STORE, "readwrite");
+    tx.objectStore(DRAFT_STORE).delete(DRAFT_ID);
+    tx.oncomplete = () => { db.close(); resolve(true); };
+    tx.onerror = () => { db.close(); resolve(false); };
+    tx.onabort = () => { db.close(); resolve(false); };
+  });
+}

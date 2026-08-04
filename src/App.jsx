@@ -14,6 +14,7 @@ import {
   nextReportId,
   loadDraft,
   saveDraft,
+  clearDraft,
 } from "./utils/storage";
 import { LoginGate } from "./security/LoginGate";
 import { useAuth } from "./security/AuthContext";
@@ -1117,6 +1118,7 @@ const handleTipoProvaChange = (nuovoTipo) => {
   const hiddenChartRef = useRef(null); // Ref per il grafico nascosto fisso (evita bug tab nascoste)
   const [exporting, setExporting] = useState(false);
   const [storageLoaded, setStorageLoaded] = useState(false);
+  const resettingDraftRef = useRef(false);
   useEffect(() => {
   (async () => {
     const savedArchive = await loadServerTests();
@@ -1213,7 +1215,9 @@ useEffect(() => {
   }
 
   const timer = window.setTimeout(() => {
-    saveDraft(data).catch((error) => console.warn("Bozza non salvata", error));
+    if (!resettingDraftRef.current) {
+      saveDraft(data).catch((error) => console.warn("Bozza non salvata", error));
+    }
   }, 250);
 
   return () => window.clearTimeout(timer);
@@ -1455,6 +1459,21 @@ function saveCurrent() {
 
   setArchive(saveTest(record));
   window.alert(`Prova ${id} salvata in archivio.`);
+}
+
+async function startNewTest() {
+  if (!window.confirm("Vuoi iniziare una nuova prova? Tutti i dati verranno cancellati.")) return;
+
+  resettingDraftRef.current = true;
+
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch (error) {
+    console.warn("Bozza locale non eliminata", error);
+  }
+
+  await clearDraft();
+  window.location.reload();
 }
 
 function openRecord(record) {
@@ -1815,12 +1834,7 @@ async function importArchiveBackup(file) {
               <button
                 type="button"
                 className="danger"
-                onClick={() => {
-                  if (window.confirm("Vuoi iniziare una nuova prova? Tutti i dati verranno cancellati.")) {
-                    localStorage.removeItem("prova-piastra-dati-v1");
-                    window.location.reload();
-                  }
-                }}
+                onClick={startNewTest}
               >
                 Nuova prova
               </button>
@@ -2100,12 +2114,7 @@ async function importArchiveBackup(file) {
               <button
                 type="button"
                 className="danger"
-                onClick={() => {
-                  if (window.confirm("Vuoi iniziare una nuova prova? Tutti i dati verranno cancellati.")) {
-                    localStorage.removeItem("prova-piastra-dati-v1");
-                    window.location.reload();
-                  }
-                }}
+                onClick={startNewTest}
               >
                 Nuova prova
               </button>
