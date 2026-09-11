@@ -1016,6 +1016,7 @@ export default function App() {
     document.body.style.background = T.bg;
   }, [theme]);
   const [verbale, setVerbale]         = useState("");
+  const [importedRecordId, setImportedRecordId] = useState("");
   const [cantiere, setCantiere]       = useState("");
   const [committente, setCommittente] = useState("Cogen SRL");
   const [diametro, setDiametro]       = useState("300");
@@ -1453,14 +1454,21 @@ function currentRecordData(extra = {}) {
 }
 
 function saveCurrent() {
-  const id = verbale || nextReportId(archive);
-  if (!verbale) setVerbale(id);
+  const id = importedRecordId || verbale || nextReportId(archive);
+  const visibleVerbale = importedRecordId ? verbale : (verbale || id);
+  if (!importedRecordId && !verbale) setVerbale(visibleVerbale);
 
-  const data = currentRecordData({ verbale: id });
-  const record = { id, savedAt: new Date().toISOString(), data };
+  const data = currentRecordData({ verbale: visibleVerbale });
+  const record = {
+    id,
+    savedAt: new Date().toISOString(),
+    ...(importedRecordId ? { _archiveCopy: true } : {}),
+    data,
+  };
 
   setArchive(saveTest(record, archive));
-  window.alert(`Prova ${id} salvata in archivio.`);
+  if (importedRecordId) setImportedRecordId(id);
+  window.alert(`Prova ${visibleVerbale || id} salvata in archivio.`);
 }
 
 async function startNewTest() {
@@ -1485,8 +1493,10 @@ async function startNewTest() {
 
 function openRecord(record) {
   const d = record.data || {};
+  const isImportedCopy = record._archiveCopy === true || record.id !== (d.verbale || record.id);
 
-  setVerbale(d.verbale || record.id || "");
+  setImportedRecordId(isImportedCopy ? record.id : "");
+  setVerbale(isImportedCopy ? (d.verbale ?? "") : (d.verbale || record.id || ""));
   setCantiere(d.cantiere || "");
   setCommittente(d.committente || "Cogen SRL");
   setDiametro(d.diametro || "300");
@@ -1628,44 +1638,38 @@ async function importArchiveBackup(file) {
     }
 
     const confirmed = window.confirm(
-      `Importare ${validRecords.length} prove dal backup? Le prove già presenti non verranno cancellate.`
+      `Importare ${validRecords.length} prove dal backup? Ogni prova verra aggiunta come nuova copia e nessuna prova gia presente verra sovrascritta.`
     );
     if (!confirmed) return;
 
-    const merged = new Map(archive.map((record) => [record.id, record]));
-    let added = 0;
-    let updated = 0;
+    const importedArchive = [...archive];
 
     validRecords.forEach((record) => {
-      const current = merged.get(record.id);
+      const newId = nextReportId(importedArchive);
+      const importedCopy = {
+        ...record,
+        id: newId,
+        savedAt: record.savedAt || new Date().toISOString(),
+        _archiveCopy: true,
+        data: { ...record.data },
+      };
 
-      if (!current) {
-        merged.set(record.id, record);
-        added += 1;
-        return;
-      }
-
-      const currentTime = new Date(current.savedAt || 0).getTime() || 0;
-      const importedTime = new Date(record.savedAt || 0).getTime() || 0;
-
-      if (importedTime > currentTime) {
-        merged.set(record.id, record);
-        updated += 1;
-      }
+      importedArchive.push(importedCopy);
     });
 
-    const saved = await syncServerTests([...merged.values()]);
+    const saved = await syncServerTests(importedArchive);
     setArchive(saved);
 
     const ignored = records.length - validRecords.length;
     window.alert(
-      `Backup importato. ${added} prove aggiunte, ${updated} aggiornate` +
+      `Backup importato. ${validRecords.length} prove aggiunte come nuove copie` +
         (ignored ? `, ${ignored} record non validi ignorati.` : ".")
     );
   } catch (error) {
     window.alert(`Impossibile importare il backup: ${error.message}`);
   }
 }
+
 
      
   return (
