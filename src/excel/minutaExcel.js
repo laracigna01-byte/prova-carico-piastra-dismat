@@ -60,7 +60,7 @@ function drawingXML(photo,logo){
  const r='xmlns:r="'+REL+'"';
  const coords=(x,y)=>`<xdr:from><xdr:col>${x}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${y}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>`;
  const to=(x,y)=>`<xdr:to><xdr:col>${x}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${y}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to>`;
- const pic=photo?`<xdr:twoCellAnchor editAs="oneCell">${coords(0,17)}${to(12,55)}<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="Foto prova"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId2"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor>`:'';
+ const pic=photo?`<xdr:twoCellAnchor editAs="oneCell">${coords(0,13)}${to(12,55)}<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="Foto prova"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId2"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor>`:'';
  const logoAnchor=logo?`<xdr:twoCellAnchor editAs="oneCell">${coords(0,0)}${to(2,1)}<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="3" name="Logo DISMAT"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId3"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor>`:'';
  const chart=`<xdr:twoCellAnchor editAs="oneCell">${coords(0,39)}${to(12,51)}<xdr:graphicFrame macro=""><xdr:nvGraphicFramePr><xdr:cNvPr id="1" name="Grafico carico spostamento"/><xdr:cNvGraphicFramePr/></xdr:nvGraphicFramePr><xdr:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></xdr:xfrm><a:graphic><a:graphicData uri="${XL_CHART}"><c:chart xmlns:c="${XL_CHART}" r:id="rId1"/></a:graphicData></a:graphic></xdr:graphicFrame><xdr:clientData/></xdr:twoCellAnchor>`;
  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><xdr:wsDr xmlns:xdr="${XL_DRAW}" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" ${r}>${logoAnchor}${pic}</xdr:wsDr>`;
@@ -74,38 +74,33 @@ export function buildMinutaExcel(d){
 
 
 
+
  const main=sheet();main.cols=[[1,13],[2,6],[3,7],[4,9],[5,7],[6,7],[7,13],[8,7],[9,9],[10,8],[11,7],[12,8]];main.drawing=true;main.isMinuta=true;
- // Stessa sequenza del foglio originale "28) PROVA SU PIASTRA": nessuna voce extra.
- for(let row=1;row<=56;row++)main.heights.set(row,13);
- main.heights.set(1,76);
- for(let row=2;row<=4;row++)main.heights.set(row,16);
- main.heights.set(5,7);main.heights.set(6,19);main.heights.set(7,6);
- for(let row=8;row<=12;row++)main.heights.set(row,16);
- main.heights.set(13,4);main.heights.set(14,4);main.heights.set(15,17);
- main.heights.set(16,22);main.heights.set(17,4);
- for(let row=18;row<=55;row++)main.heights.set(row,13);
- main.heights.set(56,3);
+ for(let row=1;row<=56;row++)main.heights.set(row,12);
+ main.heights.set(1,75);
+ for(let row=2;row<=11;row++)main.heights.set(row,16);
+ main.heights.set(5,20);main.heights.set(12,22);main.heights.set(13,4);main.heights.set(56,3);
  const heading="L A B O R A T O R I O\nD I S M A T\nSperimentazione sulle Strutture e sui Materiali da Costruzione\nAutorizzato ai sensi dell'art. 20 Legge 1086/71 con D.M. 415 del 01/12/2020\nc/da Andolina S.S. 122 Km 28 92024  CANICATTI'  (AG)\nPI/CF 04534491008 - Reg. Imprese di Agrigento - Cap. Sociale € 280.300 i.v.\ntel. 0922 859406  - info.dismat@gmail.com - www.dismat.it";
  band(main,1,3,12,heading,11);
+ // Solo le voci del modello "28) PROVA SU PIASTRA" fornito da Cast.
  pairs(main,2,'Rapporto nr.',numeroDoc,'Data:',test.dataDocumento);
  frm(main,2,1,'IF(PARAMETRI!B6="CERTIFICATO DI PROVA","Certificato nr.",IF(PARAMETRI!B6="RAPPORTO DI PROVA","Rapporto nr.","Documento nr."))',tipo==='CERTIFICATO DI PROVA'?'Certificato nr.':tipo==='RAPPORTO DI PROVA'?'Rapporto nr.':'Documento nr.',3);
  pairs(main,3,'Protocollo:',test.protocollo,'Data:',test.dataProtocollo);
  pairs(main,4,'Verb. accettazione nr:',test.verbaleAccettazione,'Data:',test.dataAccettazione);
- if(test.emendamentoNumero){main.heights.set(5,16);pairs(main,5,'Emendamento al cert. nr.:',test.emendamentoNumero,'Data:',test.dataEmendamento);}
- // Campi B6, B8:B12 e B15 effettivamente presenti nella minuta Piastra Cast.
- function single(label,row,value){
-  put(main,row,1,label,3);put(main,row,5,value,4);
-  main.merges.push('A'+row+':D'+row,'E'+row+':L'+row);
+ function single(row,label,value){
+   put(main,row,1,label,3);put(main,row,5,value,4);
+   main.merges.push('A'+row+':D'+row,'E'+row+':L'+row);
  }
- single('Oggetto dei lavori:',6,test.oggettoLavori);
- single('Ubicazione Cantiere:',8,test.ubicazioneCantiere||test.cantiere);
- single('Richiedente:',9,test.richiedente||test.committente);
- single('Direttore dei Lavori:',10,test.direttoreLavori);
- single('Impresa:',11,test.impresa);
- single('Proprietario / Ente appaltante:',12,test.proprietario);
- single('Tecnico esecutore:',15,test.tecnico);
- band(main,16,1,12,tipo,9);frm(main,16,1,'PARAMETRI!B6',tipo,9);
- // Immagine del PDF originale dentro MINUTA: stesso contenuto tecnico che Cast cattura manualmente.
+ single(5,'Oggetto dei lavori:',test.oggettoLavori);
+ single(6,'Ubicazione Cantiere:',test.ubicazioneCantiere||test.cantiere);
+ single(7,'Richiedente:',test.richiedente||test.committente);
+ single(8,'Direttore dei Lavori:',test.direttoreLavori);
+ single(9,'Impresa:',test.impresa);
+ single(10,'Proprietario / Ente appaltante:',test.proprietario);
+ single(11,'Tecnico esecutore:',test.tecnico);
+ band(main,12,1,12,tipo,9);frm(main,12,1,'PARAMETRI!B6',tipo,9);
+ // Il PDF della Piastra è riportato una sola volta, a tutta larghezza
+ // senza ricopiare tabelle, grafico, risultati o inserire nuove date.
  const reading=sheet();reading.width=7;reading.cols=[[1,16],[2,18],[3,16],[4,17],[5,19],[6,19],[7,24]];
  band(reading,1,1,7,test.technicalEdited?'LETTURE DELLA COPIA UFFICIO - VERIFICARE LE CORREZIONI':'LETTURE ORIGINALI IMPORTATE DAL CANTIERE',1);reading.heights.set(1,32);
  ['Ciclo','Fase','Carico (kPa)','Numero lettura','Lettura (mm)','Ultima (mm)','Note'].forEach((t,i)=>put(reading,3,i+1,t,2));let line=4;
