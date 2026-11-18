@@ -1,4 +1,5 @@
-/* Excel minute for DISMAT plate-load tests. No external library or screenshot required. */
+/* Minuta Cast: intestazione originale e screenshot PDF generato automaticamente. */
+import {captureOriginalPlatePdf} from '../office/pdfSnapshot';
 const NS = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
 const REL = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
 const PKG = 'http://schemas.openxmlformats.org/package/2006/relationships';
@@ -59,61 +60,41 @@ function drawingXML(photo,logo){
  const r='xmlns:r="'+REL+'"';
  const coords=(x,y)=>`<xdr:from><xdr:col>${x}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${y}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>`;
  const to=(x,y)=>`<xdr:to><xdr:col>${x}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${y}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to>`;
- const pic=photo?`<xdr:twoCellAnchor editAs="oneCell">${coords(6,23)}${to(12,35)}<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="Foto prova"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId2"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor>`:'';
+ const pic=photo?`<xdr:twoCellAnchor editAs="oneCell">${coords(0,16)}${to(12,56)}<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="Foto prova"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId2"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor>`:'';
  const logoAnchor=logo?`<xdr:twoCellAnchor editAs="oneCell">${coords(0,0)}${to(2,1)}<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="3" name="Logo DISMAT"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId3"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor>`:'';
  const chart=`<xdr:twoCellAnchor editAs="oneCell">${coords(0,39)}${to(12,51)}<xdr:graphicFrame macro=""><xdr:nvGraphicFramePr><xdr:cNvPr id="1" name="Grafico carico spostamento"/><xdr:cNvGraphicFramePr/></xdr:nvGraphicFramePr><xdr:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></xdr:xfrm><a:graphic><a:graphicData uri="${XL_CHART}"><c:chart xmlns:c="${XL_CHART}" r:id="rId1"/></a:graphicData></a:graphic></xdr:graphicFrame><xdr:clientData/></xdr:twoCellAnchor>`;
- return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><xdr:wsDr xmlns:xdr="${XL_DRAW}" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" ${r}>${logoAnchor}${pic}${chart}</xdr:wsDr>`;
+ return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><xdr:wsDr xmlns:xdr="${XL_DRAW}" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" ${r}>${logoAnchor}${pic}</xdr:wsDr>`;
 }
 function rels(items){return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="${PKG}">${items.map(([id,type,target])=>`<Relationship Id="${id}" Type="${type}" Target="${target}"/>`).join('')}</Relationships>`;}
 export function buildMinutaExcel(d){
- const test=d||{}, rows=Array.isArray(test.tableRows)?test.tableRows:[], config=test.testConfig||{}, photo=photoBytes(test.fotoProva),logo=photoBytes(test.logoDataUrl);
+ const test=d||{}, rows=Array.isArray(test.tableRows)?test.tableRows:[], config=test.testConfig||{}, photo=photoBytes(test.reportImage),logo=photoBytes(test.logoDataUrl);
  const numeroDoc=numeric(test.numeroDocumento), soglia=numeric(test.sogliaDocumento)??135000;
  const tipo=numeroDoc===null?'DA DEFINIRE':numeroDoc<soglia?'RAPPORTO DI PROVA':'CERTIFICATO DI PROVA';
 
 
- const main=sheet();main.cols=[[1,12],[2,6],[3,7],[4,6],[5,7],[6,7],[7,12],[8,7],[9,9],[10,8],[11,7],[12,8]];main.drawing=true;main.isMinuta=true;
- // Come il modello dell'architetto: un'unica pagina A4 verticale, logo e intestazione istituzionale, tabella affiancata alla foto e grafico in basso.
- for(let row=1;row<=52;row++)main.heights.set(row,14);
- main.heights.set(1,102);main.heights.set(6,19);main.heights.set(12,18);main.heights.set(13,18);main.heights.set(14,18);
- main.heights.set(17,8);main.heights.set(18,18);main.heights.set(19,19);main.heights.set(20,16);main.heights.set(21,7);
- main.heights.set(22,19);main.heights.set(23,19);
- for(let row=24;row<=35;row++)main.heights.set(row,16);
- main.heights.set(36,16);main.heights.set(37,17);main.heights.set(38,24);main.heights.set(39,19);
- for(let row=40;row<=51;row++)main.heights.set(row,13);
- main.heights.set(52,19);
+
+ const main=sheet();main.cols=[[1,13],[2,6],[3,7],[4,9],[5,7],[6,7],[7,13],[8,7],[9,9],[10,8],[11,7],[12,8]];main.drawing=true;main.isMinuta=true;
+ for(let row=1;row<=58;row++)main.heights.set(row,15);
+ main.heights.set(1,80);main.heights.set(11,23);main.heights.set(12,23);main.heights.set(13,5);main.heights.set(14,17);main.heights.set(15,20);main.heights.set(16,5);
+ for(let row=17;row<=56;row++)main.heights.set(row,12);
+ main.heights.set(57,18);main.heights.set(58,4);
  const heading="L A B O R A T O R I O\nD I S M A T\nSperimentazione sulle Strutture e sui Materiali da Costruzione\nAutorizzato ai sensi dell'art. 20 Legge 1086/71 con D.M. 415 del 01/12/2020\nc/da Andolina S.S. 122 Km 28 92024  CANICATTI'  (AG)\nPI/CF 04534491008 - Reg. Imprese di Agrigento - Cap. Sociale € 280.300 i.v.\ntel. 0922 859406  - info.dismat@gmail.com - www.dismat.it";
  band(main,1,3,12,heading,11);
- pairs(main,2,'Numero documento',numeroDoc,'Data:',test.dataDocumento);
+ pairs(main,2,'Rapporto nr.',numeroDoc,'Data:',test.dataDocumento);
  frm(main,2,1,'IF(PARAMETRI!B6="CERTIFICATO DI PROVA","Certificato nr.",IF(PARAMETRI!B6="RAPPORTO DI PROVA","Rapporto nr.","Documento nr."))',tipo==='CERTIFICATO DI PROVA'?'Certificato nr.':tipo==='RAPPORTO DI PROVA'?'Rapporto nr.':'Documento nr.',3);
  pairs(main,3,'Protocollo:',test.protocollo,'Data:',test.dataProtocollo);
  pairs(main,4,'Verb. accettazione nr:',test.verbaleAccettazione,'Data:',test.dataAccettazione);
- pairs(main,5,'Consegna in Laboratorio:',test.consegnaLaboratorio,'Data:',test.dataConsegna);
- pairs(main,6,'Emendamento al cert. nr:',test.emendamentoNumero,'Data:',test.dataDocumento);
- pairs(main,7,'Oggetto dei lavori:',test.oggettoLavori,'Natura campioni:',test.naturaCampioni);
- pairs(main,8,'Ubicazione Cantiere:',test.ubicazioneCantiere||test.cantiere,'Data prova:',test.dataProva);
- pairs(main,9,'Richiedente:',test.richiedente||test.committente,'ID. PROVA:',test.verbale);
- pairs(main,10,'Direttore dei Lavori:',test.direttoreLavori,'Quota:',test.quota);
- pairs(main,11,'Impresa:',test.impresa,'Strato:',config.label||test.tipoProva);
- pairs(main,12,'Proprietario / Ente appaltante:',test.proprietario,'Diametro piastra:',numeric(test.diametro));
- pairs(main,13,'Direttore Stabilimento/Produzione:',test.direttoreStabilimento,'Tecnico:',test.tecnico);
- pairs(main,14,'Campioni consegnati da:',test.personaConsegnaCampioni,'Presenti:',test.presenti);
- pairs(main,15,'La lettera di richiesta:',test.letteraRichiesta,'Localizzazione:',test.km);
- pairs(main,16,'Tratta:',test.tratta,'Sezione:',test.sezione);
- band(main,18,1,12,tipo,9);frm(main,18,1,'PARAMETRI!B6',tipo,9);
- band(main,19,1,12,'PROVE DI CARICO SU PIASTRA CNR 146',2);
- pairs(main,20,'ID. PROVA:',test.verbale,'Tipologia:',config.label||test.tipoProva);
- band(main,22,1,6,'LETTURE STABILIZZATE',2);band(main,22,7,12,'FOTO DELLA PROVA',2);
- ['Carico kPa','C1 mm','s1 mm','C2 mm','s2 mm'].forEach((h,i)=>put(main,23,i+1,h,2));
- rows.slice(0,12).forEach((r,i)=>{const pos=24+i;[r.p,r.r1,r.s1,r.r2,r.s2].forEach((v,j)=>put(main,pos,j+1,v,typeof v==='number'?7:5));});
- const fin=Math.min(36,24+rows.length);
- put(main,36,1,'Scarico finale',3);put(main,36,2,config.scarico2,7);put(main,36,4,test.rScarico2,7);put(main,36,5,test.sScarico2,7);
- band(main,37,1,12,'RISULTATI · MODULI DI DEFORMAZIONE',2);
- put(main,38,1,'Md (N/mm²)',3);put(main,38,4,numeric(test.md),6);
- put(main,38,7,"Md' (N/mm²)",3);put(main,38,10,numeric(test.mdp),6);
- put(main,38,12,numeric(test.rapporto),6);
- band(main,39,1,12,'GRAFICO CARICO - SPOSTAMENTO',2);
- put(main,52,2,'Il Tecnico',3);
- if(test.technicalEdited)put(main,52,7,'CORREZIONI UFFICIO: '+String(test.notaCorrezioneTecnica||'').slice(0,110),8);
+ pairs(main,5,'Consegna in Laboratorio:',test.consegnaLaboratorio,'Natura campioni:',test.naturaCampioni);
+ if(test.emendamentoNumero)pairs(main,6,'Emendamento nr:',test.emendamentoNumero,'Data:',test.dataEmendamento);
+ pairs(main,7,'Oggetto dei lavori:',test.oggettoLavori,'Data prova:',test.dataProva);
+ pairs(main,8,'Richiedente:',test.richiedente||test.committente,'',null);
+ pairs(main,9,'Direttore dei Lavori:',test.direttoreLavori,'',null);
+ pairs(main,10,'Impresa:',test.impresa,'',null);
+ pairs(main,11,'Proprietario / Ente appaltante:',test.proprietario,'',null);
+ pairs(main,12,'Direttore di Stabilimento/Produzione:',test.direttoreStabilimento,'',null);
+ pairs(main,14,'Persona che consegna i campioni:',test.personaConsegnaCampioni,'Lettera di richiesta:',test.letteraRichiesta);
+ frm(main,15,1,'PARAMETRI!B6',tipo,9);main.merges.push('A15:L15');
+ put(main,57,2,'Lo Sperimentatore',3);put(main,57,9,'Il Direttore del Laboratorio',3);
  const reading=sheet();reading.width=7;reading.cols=[[1,16],[2,18],[3,16],[4,17],[5,19],[6,19],[7,24]];
  band(reading,1,1,7,test.technicalEdited?'LETTURE DELLA COPIA UFFICIO - VERIFICARE LE CORREZIONI':'LETTURE ORIGINALI IMPORTATE DAL CANTIERE',1);reading.heights.set(1,32);
  ['Ciclo','Fase','Carico (kPa)','Numero lettura','Lettura (mm)','Ultima (mm)','Note'].forEach((t,i)=>put(reading,3,i+1,t,2));let line=4;
@@ -132,7 +113,7 @@ export function buildMinutaExcel(d){
  put(param,6,1,'Tipo suggerito',2);frm(param,6,2,'IF(ISNUMBER(B3),IF(B3<B4,"RAPPORTO DI PROVA","CERTIFICATO DI PROVA"),"DA DEFINIRE")',tipo,6);
  band(param,8,1,4,'Modifica il numero in MINUTA!D2 oppure la soglia qui in B4: titolo e intestazione si aggiornano. Verificare prima dell’emissione.',8);
  const sheets=[main,reading,graph,param];
- const book=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="${NS}" xmlns:r="${REL}"><bookViews><workbookView/></bookViews><sheets>${['MINUTA','LETTURE','GRAFICO','PARAMETRI'].map((n,i)=>`<sheet name="${n}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets><definedNames><definedName name="_xlnm.Print_Area" localSheetId="0">MINUTA!$A$1:$L$52</definedName></definedNames><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`;
+ const book=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="${NS}" xmlns:r="${REL}"><bookViews><workbookView/></bookViews><sheets>${['MINUTA','LETTURE','GRAFICO','PARAMETRI'].map((n,i)=>`<sheet name="${n}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets><definedNames><definedName name="_xlnm.Print_Area" localSheetId="0">MINUTA!$A$1:$L$58</definedName></definedNames><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`;
  const parts=[['[Content_Types].xml',`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="${CT}"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>${[...new Set([photo?.ext,logo?.ext].filter(Boolean))].map(ext=>`<Default Extension="${ext}" ContentType="image/${ext==='jpeg'?'jpeg':ext}"/>`).join('')}<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/><Override PartName="/xl/charts/chart1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/></Types>`],
  ['_rels/.rels',rels([['rId1',REL+'/officeDocument','xl/workbook.xml']])],
  ['xl/workbook.xml',book],
@@ -155,4 +136,5 @@ export async function exportMinutaExcel(data){
    reader.onerror=()=>reject(new Error('Lettura logo DISMAT non riuscita.'));
    reader.readAsDataURL(awaitLogoBlob);
  });
- const blob=buildMinutaExcel({...data,logoDataUrl});const url=URL.createObjectURL(blob);const a=document.createElement('a');const name=String(data?.verbale||'senza-numero').replace(/[^A-Za-z0-9_-]/g,'_');a.href=url;a.download=`minuta-piastra-${name}.xlsx`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2500);}
+ const reportImage=await captureOriginalPlatePdf(data);
+ const blob=buildMinutaExcel({...data,logoDataUrl,reportImage});const url=URL.createObjectURL(blob);const a=document.createElement('a');const name=String(data?.verbale||'senza-numero').replace(/[^A-Za-z0-9_-]/g,'_');a.href=url;a.download=`minuta-piastra-${name}.xlsx`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2500);}
