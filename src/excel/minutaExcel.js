@@ -81,7 +81,7 @@ export function buildMinutaExcel(d){
  main.heights.set(36,16);main.heights.set(37,17);main.heights.set(38,24);main.heights.set(39,19);
  for(let row=40;row<=51;row++)main.heights.set(row,13);
  main.heights.set(52,19);
- const heading="L A B O R A T O R I O\\nD I S M A T\\nSperimentazione sulle Strutture e sui Materiali da Costruzione\\nAutorizzato ai sensi dell'art. 20 Legge 1086/71 con D.M. 415 del 01/12/2020\\nc/da Andolina S.S. 122 Km 28 92024  CANICATTI'  (AG)\\nPI/CF 04534491008 - Reg. Imprese di Agrigento - Cap. Sociale € 280.300 i.v.\\ntel. 0922 859406  - info.dismat@gmail.com - www.dismat.it";
+ const heading="L A B O R A T O R I O\nD I S M A T\nSperimentazione sulle Strutture e sui Materiali da Costruzione\nAutorizzato ai sensi dell'art. 20 Legge 1086/71 con D.M. 415 del 01/12/2020\nc/da Andolina S.S. 122 Km 28 92024  CANICATTI'  (AG)\nPI/CF 04534491008 - Reg. Imprese di Agrigento - Cap. Sociale € 280.300 i.v.\ntel. 0922 859406  - info.dismat@gmail.com - www.dismat.it";
  band(main,1,3,12,heading,11);
  pairs(main,2,'Numero documento',numeroDoc,'Data:',test.dataDocumento);
  frm(main,2,1,'IF(PARAMETRI!B6="CERTIFICATO DI PROVA","Certificato nr.",IF(PARAMETRI!B6="RAPPORTO DI PROVA","Rapporto nr.","Documento nr."))',tipo==='CERTIFICATO DI PROVA'?'Certificato nr.':tipo==='RAPPORTO DI PROVA'?'Rapporto nr.':'Documento nr.',3);
