@@ -34,7 +34,7 @@ function xmlSheet(s){
  const merged=s.merges.length?`<mergeCells count="${s.merges.length}">${s.merges.map(x=>`<mergeCell ref="${x}"/>`).join('')}</mergeCells>`:'';
  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="${NS}" xmlns:r="${REL}"><sheetViews><sheetView workbookViewId="0" showGridLines="0"/></sheetViews><sheetFormatPr defaultRowHeight="18"/><cols>${widths}</cols><sheetData>${data}</sheetData>${merged}<pageMargins left="0.25" right="0.25" top="0.5" bottom="0.5" header="0.15" footer="0.15"/><pageSetup orientation="landscape" paperSize="9" fitToWidth="1" fitToHeight="1"/>${s.drawing?'<drawing r:id="rId1"/>':''}</worksheet>`;
 }
-const styles=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="${NS}"><fonts count="6"><font><sz val="10"/><name val="Aptos"/></font><font><b/><color rgb="FFFFFFFF"/><sz val="16"/><name val="Aptos Display"/></font><font><b/><color rgb="FF302E2A"/><sz val="10"/></font><font><color rgb="FF786F61"/><sz val="9"/></font><font><color rgb="FF965B34"/><sz val="10"/></font><font><b/><color rgb="FF4A3611"/><sz val="11"/></font></fonts><fills count="5"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF302E2A"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFF3F0E8"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFF2D7"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="hair"><color rgb="FFD4CDBF"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="9"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center"/></xf><xf numFmtId="0" fontId="2" fillId="3" borderId="1" xfId="0"/><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="4" fillId="0" borderId="1" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"/><xf numFmtId="2" fontId="5" fillId="4" borderId="1" xfId="0"/><xf numFmtId="2" fontId="0" fillId="0" borderId="1" xfId="0"/><xf numFmtId="0" fontId="3" fillId="3" borderId="0" xfId="0" applyAlignment="1"><alignment wrapText="1"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+const styles=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="${NS}"><fonts count="8"><font><sz val="10"/><name val="Aptos"/></font><font><b/><color rgb="FFFFFFFF"/><sz val="16"/><name val="Aptos Display"/></font><font><b/><color rgb="FF302E2A"/><sz val="10"/></font><font><color rgb="FF786F61"/><sz val="9"/></font><font><color rgb="FF965B34"/><sz val="10"/></font><font><b/><color rgb="FF4A3611"/><sz val="11"/></font><font><b/><color rgb="FF26201B"/><sz val="21"/><name val="Aptos Display"/></font><font><color rgb="FF3B352E"/><sz val="10"/><name val="Aptos"/></font></fonts><fills count="5"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF302E2A"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFF3F0E8"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFF2D7"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="hair"><color rgb="FFD4CDBF"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="11"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center"/></xf><xf numFmtId="0" fontId="2" fillId="3" borderId="1" xfId="0"/><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="4" fillId="0" borderId="1" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"/><xf numFmtId="2" fontId="5" fillId="4" borderId="1" xfId="0"/><xf numFmtId="2" fontId="0" fillId="0" borderId="1" xfId="0"/><xf numFmtId="0" fontId="3" fillId="3" borderId="0" xfId="0" applyAlignment="1"><alignment wrapText="1"/></xf><xf numFmtId="0" fontId="6" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="7" fillId="0" borderId="0" xfId="0"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
 function crctable(){let a=[];for(let n=0;n<256;n++){let c=n;for(let j=0;j<8;j++)c=c&1?0xEDB88320^(c>>>1):c>>>1;a[n]=c>>>0}return a;}const CRC=crctable();
 function checksum(bytes){let c=0xFFFFFFFF;for(const b of bytes)c=CRC[(c^b)&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
 function set16(a,pos,n){a[pos]=n&255;a[pos+1]=(n>>>8)&255;}
@@ -59,9 +59,9 @@ function drawingXML(photo,logo){
  const r='xmlns:r="'+REL+'"';
  const coords=(x,y)=>`<xdr:from><xdr:col>${x}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${y}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>`;
  const to=(x,y)=>`<xdr:to><xdr:col>${x}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${y}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to>`;
- const pic=photo?`<xdr:twoCellAnchor editAs="oneCell">${coords(6,21)}${to(12,33)}<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="Foto prova"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId2"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor>`:'';
- const logoAnchor=logo?`<xdr:twoCellAnchor editAs="oneCell">${coords(0,0)}${to(2,3)}<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="3" name="Logo DISMAT"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId3"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor>`:'';
- const chart=`<xdr:twoCellAnchor editAs="oneCell">${coords(0,35)}${to(12,55)}<xdr:graphicFrame macro=""><xdr:nvGraphicFramePr><xdr:cNvPr id="1" name="Grafico carico spostamento"/><xdr:cNvGraphicFramePr/></xdr:nvGraphicFramePr><xdr:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></xdr:xfrm><a:graphic><a:graphicData uri="${XL_CHART}"><c:chart xmlns:c="${XL_CHART}" r:id="rId1"/></a:graphicData></a:graphic></xdr:graphicFrame><xdr:clientData/></xdr:twoCellAnchor>`;
+ const pic=photo?`<xdr:twoCellAnchor editAs="oneCell">${coords(6,35)}${to(12,49)}<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="Foto prova"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId2"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor>`:'';
+ const logoAnchor=logo?`<xdr:twoCellAnchor editAs="oneCell">${coords(0,0)}${to(2,8)}<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="3" name="Logo DISMAT"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId3"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor>`:'';
+ const chart=`<xdr:twoCellAnchor editAs="oneCell">${coords(0,53)}${to(12,77)}<xdr:graphicFrame macro=""><xdr:nvGraphicFramePr><xdr:cNvPr id="1" name="Grafico carico spostamento"/><xdr:cNvGraphicFramePr/></xdr:nvGraphicFramePr><xdr:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></xdr:xfrm><a:graphic><a:graphicData uri="${XL_CHART}"><c:chart xmlns:c="${XL_CHART}" r:id="rId1"/></a:graphicData></a:graphic></xdr:graphicFrame><xdr:clientData/></xdr:twoCellAnchor>`;
  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><xdr:wsDr xmlns:xdr="${XL_DRAW}" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" ${r}>${logoAnchor}${pic}${chart}</xdr:wsDr>`;
 }
 function rels(items){return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="${PKG}">${items.map(([id,type,target])=>`<Relationship Id="${id}" Type="${type}" Target="${target}"/>`).join('')}</Relationships>`;}
@@ -69,26 +69,43 @@ export function buildMinutaExcel(d){
  const test=d||{}, rows=Array.isArray(test.tableRows)?test.tableRows:[], config=test.testConfig||{}, photo=photoBytes(test.fotoProva),logo=photoBytes(test.logoDataUrl);
  const numeroDoc=numeric(test.numeroDocumento), soglia=numeric(test.sogliaDocumento)??135000;
  const tipo=numeroDoc===null?'DA DEFINIRE':numeroDoc<soglia?'RAPPORTO DI PROVA':'CERTIFICATO DI PROVA';
- const main=sheet();main.cols=[[1,20],[2,12],[3,17],[4,14],[5,14],[6,12],[7,18],[8,14],[9,16],[10,14],[11,14],[12,13]];main.drawing=true;
- band(main,1,3,12,'LABORATORIO DISMAT   ·   MINUTA PROVA DI CARICO SU PIASTRA',1);main.heights.set(1,34);
- band(main,2,3,12,'CNR 146/92   |   Compilazione automatica dai dati di prova   |   Documento interno da verificare',8);main.heights.set(2,25);
- put(main,4,1,'Tipo documento:',3);frm(main,4,3,'PARAMETRI!B6',tipo,2);put(main,4,7,'N. documento:',3);put(main,4,9,numeroDoc,4);main.merges.push('C4:F4','I4:L4');main.heights.set(4,26);
- pairs(main,6,'Verbale / Prova',test.verbale,'Data prova',test.dataProva);
- pairs(main,7,'Cantiere',test.cantiere,'Committente',test.committente);
- pairs(main,8,'Lavori',test.oggettoLavori,'Direttore lavori',test.direttoreLavori);
- pairs(main,9,'Impresa',test.impresa,'Proprietario/Ente',test.proprietario);
- pairs(main,10,'Tratta',test.tratta,'Km',test.km);
- pairs(main,11,'Sezione',test.sezione,'Quota',test.quota);
- pairs(main,12,'Strato',config.label||test.strato||test.tipoProva,'Terreno',test.terra);
- pairs(main,13,'Diametro piastra (mm)',numeric(test.diametro),'Tecnico',test.tecnico);
- pairs(main,14,'Presenti',test.presenti,'Distanza bordo',test.distBordo);
- band(main,16,1,12,'RISULTATI PROVA',2);put(main,17,1,'Md - 1° ciclo (N/mm²)',3);put(main,18,1,numeric(test.md),6);put(main,17,4,"Md' - 2° ciclo (N/mm²)",3);put(main,18,4,numeric(test.mdp),6);put(main,17,7,"Rapporto Md/Md'",3);put(main,18,7,numeric(test.rapporto),6);
- band(main,20,1,6,'LETTURE STABILIZZATE',2);band(main,20,7,12,'FOTO DELLA PROVA',2);
- ['Carico (kPa)','Lett. C1 (mm)','s1 (mm)','Lett. C2 (mm)','s2 (mm)'].forEach((h,i)=>put(main,21,i+1,h,2));
- rows.forEach((r,i)=>{const pos=22+i;[r.p,r.r1,r.s1,r.r2,r.s2].forEach((v,j)=>put(main,pos,j+1,v,typeof v==='number'?7:5));});
- let fin=22+rows.length;put(main,fin,1,'Scarico finale C2',2);put(main,fin,2,config.scarico2,5);put(main,fin,4,test.rScarico2,7);put(main,fin,5,test.sScarico2,7);
- band(main,34,1,12,'GRAFICO CARICO - SPOSTAMENTO (modificabile in Excel)',2);
- put(main,57,1,'Foglio LETTURE: letture originali. Foglio GRAFICO: dati del grafico editabili. Foglio PARAMETRI: numero e soglia.',8);
+ const main=sheet();main.cols=[[1,23],[2,14],[3,20],[4,17],[5,17],[6,15],[7,22],[8,14],[9,19],[10,16],[11,16],[12,17]];main.drawing=true;
+ // Intestazione: diciture recuperate dalla minuta originale 66985 - cosedil milena.xls.
+ band(main,1,3,12,'L A B O R A T O R I O',9);main.heights.set(1,30);
+ band(main,2,3,12,'D I S M A T',9);main.heights.set(2,30);
+ band(main,3,3,12,'Sperimentazione sulle Strutture e sui Materiali da Costruzione',10);
+ band(main,4,3,12,"Autorizzato ai sensi dell'art. 20 Legge 1086/71 con D.M. 415 del 01/12/2020",10);
+ band(main,5,3,12,"c/da Andolina S.S. 122 Km 28 92024  CANICATTI'  (AG)",10);
+ band(main,6,3,12,'PI/CF 04534491008 - Reg. Imprese di Agrigento - Cap. Sociale € 280.300 i.v.',10);
+ band(main,7,3,12,'tel. 0922 859406  - info.dismat@gmail.com - www.dismat.it',10);main.heights.set(7,23);
+ pairs(main,9,'Documento',tipo==='CERTIFICATO DI PROVA'?'Certificato nr.':tipo==='RAPPORTO DI PROVA'?'Rapporto nr.':'Da definire','Numero documento',numeroDoc);
+ pairs(main,10,'Protocollo',test.protocollo,'Data',test.dataProtocollo);
+ pairs(main,11,'Verb. accettazione nr.',test.verbaleAccettazione,'Data',test.dataAccettazione);
+ pairs(main,12,'Consegna in Laboratorio',test.consegnaLaboratorio,'Data',test.dataConsegna);
+ pairs(main,13,'Emendamento al cert. nr.',test.emendamentoNumero,'Data documento',test.dataDocumento);
+ pairs(main,14,'Oggetto dei lavori:',test.oggettoLavori,'Tipo di prova:',config.label||test.tipoProva);
+ pairs(main,15,'Ubicazione Cantiere:',test.cantiere,'Data della prova:',test.dataProva);
+ pairs(main,16,'Richiedente:',test.committente,'ID PROVA:',test.verbale);
+ pairs(main,17,'Direttore dei Lavori:',test.direttoreLavori,'Quota:',test.quota);
+ pairs(main,18,'Impresa:',test.impresa,'Strato:',config.label||test.tipoProva);
+ pairs(main,19,'Proprietario / Ente appaltante:',test.proprietario,'Diametro piastra:',numeric(test.diametro));
+ pairs(main,20,'Tecnico esecutore:',test.tecnico,'Presenti:',test.presenti);
+ band(main,22,1,12,tipo,9);main.heights.set(22,32);
+ band(main,23,1,12,'PROVE DI CARICO SU PIASTRA CNR 146',2);main.heights.set(23,27);
+ band(main,24,1,12,"Determinazione dei moduli di deformazione Md ed Md' mediante prova di carico a doppio ciclo con piastra circolare",8);main.heights.set(24,26);
+ pairs(main,26,'Tratta:',test.tratta,'Km:',test.km);
+ pairs(main,27,'Sezione:',test.sezione,'Distanza bordo:',test.distBordo);
+ pairs(main,28,'Terreno:',test.terra,'Firma tecnico:',test.firmaTecnico?'Presente':'Non presente');
+ band(main,30,1,12,'RISULTATI PROVA',2);
+ put(main,31,1,'Md - 1° ciclo (N/mm²)',3);put(main,32,1,numeric(test.md),6);
+ put(main,31,4,"Md' - 2° ciclo (N/mm²)",3);put(main,32,4,numeric(test.mdp),6);
+ put(main,31,7,"Rapporto Md/Md'",3);put(main,32,7,numeric(test.rapporto),6);
+ band(main,34,1,6,'LETTURE STABILIZZATE',2);band(main,34,7,12,'FOTO DELLA PROVA',2);
+ ['Carico (kPa)','Lett. C1 (mm)','s1 (mm)','Lett. C2 (mm)','s2 (mm)'].forEach((h,i)=>put(main,35,i+1,h,2));
+ rows.forEach((r,i)=>{const pos=36+i;[r.p,r.r1,r.s1,r.r2,r.s2].forEach((v,j)=>put(main,pos,j+1,v,typeof v==='number'?7:5));});
+ let fin=36+rows.length;put(main,fin,1,'Scarico finale C2',2);put(main,fin,2,config.scarico2,5);put(main,fin,4,test.rScarico2,7);put(main,fin,5,test.sScarico2,7);
+ band(main,52,1,12,'GRAFICO CARICO - SPOSTAMENTO (modificabile in Excel)',2);
+ put(main,79,1,'LETTURE: rilevazioni originali · GRAFICO: dati editabili · PARAMETRI: numero e soglia documento.',8);
  const reading=sheet();reading.width=7;reading.cols=[[1,16],[2,18],[3,16],[4,17],[5,19],[6,19],[7,24]];
  band(reading,1,1,7,'LETTURE ORIGINALI INSERITE NELL’APP',1);reading.heights.set(1,32);
  ['Ciclo','Fase','Carico (kPa)','Numero lettura','Lettura (mm)','Ultima (mm)','Note'].forEach((t,i)=>put(reading,3,i+1,t,2));let line=4;
