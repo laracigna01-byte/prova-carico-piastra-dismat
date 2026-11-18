@@ -1,6 +1,5 @@
 ﻿import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { exportReport } from "./pdf/exportReport";
-import { exportMinutaExcel } from "./excel/minutaExcel";
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, ReferenceLine,
@@ -677,11 +676,6 @@ function GeneralInfoPanel({
  verbale, setVerbale,
   cantiere, setCantiere,
   committente, setCommittente,
-  oggettoLavori, setOggettoLavori,
-  direttoreLavori, setDirettoreLavori,
-  impresa, setImpresa,
-  proprietario, setProprietario,
-  numeroDocumento, setNumeroDocumento,
   diametro, setDiametro,
   tipoProva, handleTipoProvaChange,
   dataProva, setDataProva,
@@ -766,14 +760,6 @@ function GeneralInfoPanel({
           <div className="grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
             <TextInput label="Cantiere" value={cantiere} onChange={setCantiere} />
             <TextInput label="Committente" value={committente} onChange={setCommittente} />
-          </div>
-          <SectionHeader label="Dati amministrativi minuta Excel" step="D" />
-          <div className="grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 10 }}>
-            <TextInput label="Oggetto dei lavori" value={oggettoLavori} onChange={setOggettoLavori} />
-            <TextInput label="Direttore dei lavori" value={direttoreLavori} onChange={setDirettoreLavori} />
-            <TextInput label="Impresa" value={impresa} onChange={setImpresa} />
-            <TextInput label="Proprietario / Ente appaltante" value={proprietario} onChange={setProprietario} />
-            <TextInput label="Numero documento (rapporto / certificato)" value={numeroDocumento} onChange={setNumeroDocumento} />
           </div>
 
           <SectionHeader label="Localizzazione e Materiale" step="A" />
@@ -1033,11 +1019,6 @@ export default function App() {
   const [importedRecordId, setImportedRecordId] = useState("");
   const [cantiere, setCantiere]       = useState("");
   const [committente, setCommittente] = useState("Cogen SRL");
-  const [oggettoLavori, setOggettoLavori] = useState("");
-  const [direttoreLavori, setDirettoreLavori] = useState("");
-  const [impresa, setImpresa] = useState("");
-  const [proprietario, setProprietario] = useState("");
-  const [numeroDocumento, setNumeroDocumento] = useState("");
   const [diametro, setDiametro]       = useState("300");
   const [tipoProva, setTipoProva]     = useState("fondazione");
   const [tab, setTab]                 = useState("type");
@@ -1175,11 +1156,6 @@ useEffect(() => {
     setVerbale(data.verbale || "");
     setCantiere(data.cantiere || "");
     setCommittente(data.committente || "Cogen SRL");
-    setOggettoLavori(data.oggettoLavori || "");
-    setDirettoreLavori(data.direttoreLavori || "");
-    setImpresa(data.impresa || "");
-    setProprietario(data.proprietario || "");
-    setNumeroDocumento(data.numeroDocumento || "");
     setDiametro(data.diametro || "300");
     setTipoProva(data.tipoProva || "fondazione");
     setDataProva(data.dataProva || "");
@@ -1213,11 +1189,6 @@ useEffect(() => {
     verbale,
     cantiere,
     committente,
-    oggettoLavori,
-    direttoreLavori,
-    impresa,
-    proprietario,
-    numeroDocumento,
     diametro,
     tipoProva,
     dataProva,
@@ -1258,11 +1229,6 @@ useEffect(() => {
   verbale,
   cantiere,
   committente,
-  oggettoLavori,
-  direttoreLavori,
-  impresa,
-  proprietario,
-  numeroDocumento,
   diametro,
   tipoProva,
   dataProva,
@@ -1372,20 +1338,6 @@ useEffect(() => {
     };
   }, [diametro, c1, c2, testConfig]);
 
-  const exportExcel = () => {
-    try {
-      exportMinutaExcel({
-        ...currentRecordData(),
-        numeroDocumento,
-        sogliaDocumento: 135000,
-        testConfig, tableRows, chart1, chartScarico1, chart2, chartScarico2,
-        rScarico2, sScarico2, md, mdp, rapporto,
-      });
-    } catch (error) {
-      console.error("Esportazione Excel fallita:", error);
-      window.alert("Errore durante l'esportazione Excel: " + (error?.message || String(error)));
-    }
-  };
   const provaValida = rapporto !== null && rapporto < 1;
   const rapportoColor = rapporto === null ? T.textMuted : provaValida ? T.accent : T.accentRed;
 
@@ -1476,11 +1428,6 @@ function currentRecordData(extra = {}) {
     verbale,
     cantiere,
     committente,
-    oggettoLavori,
-    direttoreLavori,
-    impresa,
-    proprietario,
-    numeroDocumento,
     diametro,
     tipoProva,
     dataProva,
@@ -1552,11 +1499,6 @@ function openRecord(record) {
   setVerbale(isImportedCopy ? (d.verbale ?? "") : (d.verbale || record.id || ""));
   setCantiere(d.cantiere || "");
   setCommittente(d.committente || "Cogen SRL");
-  setOggettoLavori(d.oggettoLavori || "");
-  setDirettoreLavori(d.direttoreLavori || "");
-  setImpresa(d.impresa || "");
-  setProprietario(d.proprietario || "");
-  setNumeroDocumento(d.numeroDocumento || "");
   setDiametro(d.diametro || "300");
   setTipoProva(d.tipoProva || "fondazione");
   setDataProva(d.dataProva || "");
@@ -1825,11 +1767,6 @@ async function importArchiveBackup(file) {
         verbale={verbale} setVerbale={setVerbale}
         cantiere={cantiere} setCantiere={setCantiere}
         committente={committente} setCommittente={setCommittente}
-        oggettoLavori={oggettoLavori} setOggettoLavori={setOggettoLavori}
-        direttoreLavori={direttoreLavori} setDirettoreLavori={setDirettoreLavori}
-        impresa={impresa} setImpresa={setImpresa}
-        proprietario={proprietario} setProprietario={setProprietario}
-        numeroDocumento={numeroDocumento} setNumeroDocumento={setNumeroDocumento}
         diametro={diametro} setDiametro={setDiametro}
         tipoProva={tipoProva} 
         dataProva={dataProva} setDataProva={setDataProva}
@@ -2197,9 +2134,6 @@ async function importArchiveBackup(file) {
               </button>
               <button type="button" className="ghost" onClick={() => exportPDF(true)} disabled={exporting}>
                 Anteprima
-              </button>
-              <button type="button" className="ghost" onClick={exportExcel} disabled={exporting}>
-                Genera Excel
               </button>
               <button type="button" onClick={() => exportPDF(false)} disabled={exporting}>
                 {exporting ? "Generazione in corso..." : "Genera PDF"}
