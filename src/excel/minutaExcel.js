@@ -19,9 +19,9 @@ function frm(s,row,col,formula,cached,style=0) {
  s.cells.set(`${co(col)}${row}`,{row,col,formula,cached,style,type:'f'});
 }
 function band(s,row,from,to,label,style=2){put(s,row,from,label,style);s.merges.push(`${co(from)}${row}:${co(to)}${row}`);}
-function pairs(s,row,l1,v1,l2,v2){put(s,row,1,l1,3);put(s,row,3,v1,4);put(s,row,7,l2,3);put(s,row,9,v2,4);for(const [a,b] of [[1,2],[3,6],[7,8],[9,12]])s.merges.push(`${co(a)}${row}:${co(b)}${row}`);s.heights.set(row,30);}
+function pairs(s,row,l1,v1,l2,v2){put(s,row,1,l1,3);put(s,row,4,v1,4);put(s,row,7,l2,3);put(s,row,10,v2,4);for(const [a,b] of [[1,3],[4,6],[7,9],[10,12]])s.merges.push(`${co(a)}${row}:${co(b)}${row}`);if(!s.heights.has(row))s.heights.set(row,15);}
 function xmlSheet(s){
- const grouped=new Map();for(const c of s.cells.values()){if(!grouped.has(c.row))grouped.set(c.row,[]);grouped.get(c.row).push(c)}
+ const grouped=new Map();for(const c of s.cells.values()){if(!grouped.has(c.row))grouped.set(c.row,[]);grouped.get(c.row).push(c)}for(const row of s.heights.keys())if(!grouped.has(row))grouped.set(row,[]);
  const data=[...grouped.entries()].sort((a,b)=>a[0]-b[0]).map(([row,cells])=>{
   const inner=cells.sort((a,b)=>a.col-b.col).map(c=>{
    const ref=`${co(c.col)}${c.row}`;
@@ -32,7 +32,7 @@ function xmlSheet(s){
  }).join('');
  const widths=(s.cols.length?s.cols:Array.from({length:s.width},(_,i)=>[i+1,14])).map(([i,w])=>`<col min="${i}" max="${i}" width="${w}" customWidth="1"/>`).join('');
  const merged=s.merges.length?`<mergeCells count="${s.merges.length}">${s.merges.map(x=>`<mergeCell ref="${x}"/>`).join('')}</mergeCells>`:'';
- return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="${NS}" xmlns:r="${REL}"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><sheetViews><sheetView workbookViewId="0" showGridLines="0"/></sheetViews><sheetFormatPr defaultRowHeight="21"/><cols>${widths}</cols><sheetData>${data}</sheetData>${merged}<printOptions horizontalCentered="1"/><pageMargins left="0.35" right="0.35" top="0.42" bottom="0.42" header="0.15" footer="0.15"/><pageSetup orientation="landscape" paperSize="9" fitToWidth="1" fitToHeight="0"/>${s.drawing?'<drawing r:id="rId1"/>':''}</worksheet>`;
+ return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="${NS}" xmlns:r="${REL}"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><sheetViews><sheetView workbookViewId="0" showGridLines="0"/></sheetViews><sheetFormatPr defaultRowHeight="${s.isMinuta?14:21}"/><cols>${widths}</cols><sheetData>${data}</sheetData>${merged}<printOptions horizontalCentered="1"/><pageMargins left="0.35" right="0.35" top="0.42" bottom="0.42" header="0.15" footer="0.15"/><pageSetup orientation="${s.isMinuta?'portrait':'landscape'}" paperSize="9" fitToWidth="1" fitToHeight="${s.isMinuta?1:0}"/>${s.drawing?'<drawing r:id="rId1"/>':''}</worksheet>`;
 }
 const styles=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="${NS}"><numFmts count="1"><numFmt numFmtId="164" formatCode="0.000"/></numFmts><fonts count="8"><font><sz val="10"/><name val="Aptos"/></font><font><b/><color rgb="FFFFFFFF"/><sz val="16"/><name val="Aptos Display"/></font><font><b/><color rgb="FF302E2A"/><sz val="10"/></font><font><color rgb="FF786F61"/><sz val="9"/></font><font><color rgb="FF965B34"/><sz val="10"/></font><font><b/><color rgb="FF4A3611"/><sz val="11"/></font><font><b/><color rgb="FF26201B"/><sz val="21"/><name val="Aptos Display"/></font><font><color rgb="FF3B352E"/><sz val="10"/><name val="Aptos"/></font></fonts><fills count="5"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF302E2A"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFF3F0E8"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFF2D7"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="hair"><color rgb="FFD4CDBF"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="12"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center"/></xf><xf numFmtId="0" fontId="2" fillId="3" borderId="1" xfId="0"/><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="4" fillId="0" borderId="1" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"/><xf numFmtId="164" fontId="5" fillId="4" borderId="1" xfId="0"/><xf numFmtId="2" fontId="0" fillId="0" borderId="1" xfId="0"/><xf numFmtId="0" fontId="3" fillId="3" borderId="0" xfId="0" applyAlignment="1"><alignment wrapText="1"/></xf><xf numFmtId="0" fontId="6" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="7" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="7" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
 function crctable(){let a=[];for(let n=0;n<256;n++){let c=n;for(let j=0;j<8;j++)c=c&1?0xEDB88320^(c>>>1):c>>>1;a[n]=c>>>0}return a;}const CRC=crctable();
@@ -59,9 +59,9 @@ function drawingXML(photo,logo){
  const r='xmlns:r="'+REL+'"';
  const coords=(x,y)=>`<xdr:from><xdr:col>${x}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${y}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>`;
  const to=(x,y)=>`<xdr:to><xdr:col>${x}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${y}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to>`;
- const pic=photo?`<xdr:twoCellAnchor editAs="oneCell">${coords(6,29)}${to(12,45)}<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="Foto prova"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId2"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor>`:'';
+ const pic=photo?`<xdr:twoCellAnchor editAs="oneCell">${coords(6,23)}${to(12,35)}<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="Foto prova"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId2"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor>`:'';
  const logoAnchor=logo?`<xdr:twoCellAnchor editAs="oneCell">${coords(0,0)}${to(2,1)}<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="3" name="Logo DISMAT"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId3"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor>`:'';
- const chart=`<xdr:twoCellAnchor editAs="oneCell">${coords(0,48)}${to(12,70)}<xdr:graphicFrame macro=""><xdr:nvGraphicFramePr><xdr:cNvPr id="1" name="Grafico carico spostamento"/><xdr:cNvGraphicFramePr/></xdr:nvGraphicFramePr><xdr:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></xdr:xfrm><a:graphic><a:graphicData uri="${XL_CHART}"><c:chart xmlns:c="${XL_CHART}" r:id="rId1"/></a:graphicData></a:graphic></xdr:graphicFrame><xdr:clientData/></xdr:twoCellAnchor>`;
+ const chart=`<xdr:twoCellAnchor editAs="oneCell">${coords(0,39)}${to(12,51)}<xdr:graphicFrame macro=""><xdr:nvGraphicFramePr><xdr:cNvPr id="1" name="Grafico carico spostamento"/><xdr:cNvGraphicFramePr/></xdr:nvGraphicFramePr><xdr:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></xdr:xfrm><a:graphic><a:graphicData uri="${XL_CHART}"><c:chart xmlns:c="${XL_CHART}" r:id="rId1"/></a:graphicData></a:graphic></xdr:graphicFrame><xdr:clientData/></xdr:twoCellAnchor>`;
  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><xdr:wsDr xmlns:xdr="${XL_DRAW}" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" ${r}>${logoAnchor}${pic}${chart}</xdr:wsDr>`;
 }
 function rels(items){return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="${PKG}">${items.map(([id,type,target])=>`<Relationship Id="${id}" Type="${type}" Target="${target}"/>`).join('')}</Relationships>`;}
@@ -70,46 +70,50 @@ export function buildMinutaExcel(d){
  const numeroDoc=numeric(test.numeroDocumento), soglia=numeric(test.sogliaDocumento)??135000;
  const tipo=numeroDoc===null?'DA DEFINIRE':numeroDoc<soglia?'RAPPORTO DI PROVA':'CERTIFICATO DI PROVA';
 
- const main=sheet();main.cols=[[1,18],[2,12],[3,13],[4,11],[5,13],[6,9],[7,18],[8,11],[9,15],[10,11],[11,11],[12,13]];main.drawing=true;
- // Identico testo istituzionale della prima cella del modello "1) intestazione ok".
- const heading="L A B O R A T O R I O\nD I S M A T\nSperimentazione sulle Strutture e sui Materiali da Costruzione\nAutorizzato ai sensi dell'art. 20 Legge 1086/71 con D.M. 415 del 01/12/2020\nc/da Andolina S.S. 122 Km 28 92024  CANICATTI'  (AG)\nPI/CF 04534491008 - Reg. Imprese di Agrigento - Cap. Sociale € 280.300 i.v.\ntel. 0922 859406  - info.dismat@gmail.com - www.dismat.it";
- band(main,1,3,12,heading,11);main.heights.set(1,131);
- // Identita, dati amministrativi e diciture della minuta architetto.
- pairs(main,3,'Documento nr.',numeroDoc,'Data:',test.dataDocumento);
- frm(main,3,1,'IF(PARAMETRI!B6="CERTIFICATO DI PROVA","Certificato nr.",IF(PARAMETRI!B6="RAPPORTO DI PROVA","Rapporto nr.","Documento nr."))',tipo==='CERTIFICATO DI PROVA'?'Certificato nr.':tipo==='RAPPORTO DI PROVA'?'Rapporto nr.':'Documento nr.',3);
- pairs(main,4,'Protocollo:',test.protocollo,'Data:',test.dataProtocollo);
- pairs(main,5,'Verb. accettazione nr:',test.verbaleAccettazione,'Data:',test.dataAccettazione);
- pairs(main,6,'Consegna in Laboratorio:',test.consegnaLaboratorio,'Data:',test.dataConsegna);
- pairs(main,7,'Emendamento al cert. nr:',test.emendamentoNumero,'Data:',test.dataDocumento);
- pairs(main,8,'Oggetto dei lavori:',test.oggettoLavori,'Natura dei campioni:',test.naturaCampioni);
- pairs(main,9,'Ubicazione Cantiere:',test.ubicazioneCantiere||test.cantiere,'Data della prova:',test.dataProva);
- pairs(main,10,'Richiedente:',test.richiedente||test.committente,'ID. PROVA:',test.verbale);
- pairs(main,11,'Direttore dei Lavori:',test.direttoreLavori,'Quota:',test.quota);
- pairs(main,12,'Impresa:',test.impresa,'Strato:',config.label||test.tipoProva);
- pairs(main,13,'Proprietario / Ente appaltante:',test.proprietario,'Diametro piastra:',numeric(test.diametro));
- pairs(main,14,'Direttore Stabilimento/Produzione:',test.direttoreStabilimento,'Tecnico esecutore:',test.tecnico);
- pairs(main,15,'Persona che consegna i campioni:',test.personaConsegnaCampioni,'Presenti:',test.presenti);
- pairs(main,16,'La lettera di richiesta:',test.letteraRichiesta,'Localizzazione:',test.km);
- band(main,18,1,12,tipo,9);main.heights.set(18,33);
- frm(main,18,1,'PARAMETRI!B6',tipo,9);
- band(main,19,1,12,'PROVE DI CARICO SU PIASTRA CNR 146',2);main.heights.set(19,31);
- band(main,20,1,12,"Determinazione dei moduli di deformazione Md ed Md' mediante prova di carico a doppio ciclo con piastra circolare",8);main.heights.set(20,30);
- pairs(main,22,'Tratta:',test.tratta,'Km:',test.km);
- pairs(main,23,'Sezione:',test.sezione,'Distanza dal bordo:',test.distBordo);
- pairs(main,24,'Terreno:',test.terra,'Tipologia:',config.label||test.tipoProva);
- band(main,26,1,12,'RISULTATI PROVA',2);main.heights.set(26,29);
- put(main,27,1,'Md - 1° ciclo (N/mm²)',3);put(main,28,1,numeric(test.md),6);
- put(main,27,4,"Md' - 2° ciclo (N/mm²)",3);put(main,28,4,numeric(test.mdp),6);
- put(main,27,7,"Rapporto Md/Md'",3);put(main,28,7,numeric(test.rapporto),6);
- main.heights.set(28,34);
- band(main,30,1,6,'LETTURE STABILIZZATE',2);band(main,30,7,12,'FOTO DELLA PROVA',2);main.heights.set(30,29);
- ['Carico [kPa]','C1 [mm]','s1 [mm]','C2 [mm]','s2 [mm]'].forEach((h,i)=>put(main,31,i+1,h,2));main.heights.set(31,30);
- rows.forEach((r,i)=>{const pos=32+i;[r.p,r.r1,r.s1,r.r2,r.s2].forEach((v,j)=>put(main,pos,j+1,v,typeof v==='number'?7:5));main.heights.set(pos,24);});
- const fin=32+rows.length;
- put(main,fin,1,'Scarico C2',2);put(main,fin,2,config.scarico2,5);put(main,fin,4,test.rScarico2,7);put(main,fin,5,test.sScarico2,7);main.heights.set(fin,25);
- band(main,48,1,12,'GRAFICO CARICO - SPOSTAMENTO (modificabile in Excel)',2);main.heights.set(48,30);
- put(main,73,1,'LETTURE: misure della prova · GRAFICO: dati modificabili · PARAMETRI: soglia documento.',8);
- if(test.technicalEdited)band(main,74,1,12,'CORREZIONI TECNICHE UFFICIO - Motivo: '+String(test.notaCorrezioneTecnica||'non specificato').slice(0,210),8);
+
+ const main=sheet();main.cols=[[1,12],[2,6],[3,7],[4,6],[5,7],[6,7],[7,12],[8,7],[9,9],[10,8],[11,7],[12,8]];main.drawing=true;main.isMinuta=true;
+ // Come il modello dell'architetto: un'unica pagina A4 verticale, logo e intestazione istituzionale, tabella affiancata alla foto e grafico in basso.
+ for(let row=1;row<=52;row++)main.heights.set(row,14);
+ main.heights.set(1,102);main.heights.set(6,19);main.heights.set(12,18);main.heights.set(13,18);main.heights.set(14,18);
+ main.heights.set(17,8);main.heights.set(18,18);main.heights.set(19,19);main.heights.set(20,16);main.heights.set(21,7);
+ main.heights.set(22,19);main.heights.set(23,19);
+ for(let row=24;row<=35;row++)main.heights.set(row,16);
+ main.heights.set(36,16);main.heights.set(37,17);main.heights.set(38,24);main.heights.set(39,19);
+ for(let row=40;row<=51;row++)main.heights.set(row,13);
+ main.heights.set(52,19);
+ const heading="L A B O R A T O R I O\\nD I S M A T\\nSperimentazione sulle Strutture e sui Materiali da Costruzione\\nAutorizzato ai sensi dell'art. 20 Legge 1086/71 con D.M. 415 del 01/12/2020\\nc/da Andolina S.S. 122 Km 28 92024  CANICATTI'  (AG)\\nPI/CF 04534491008 - Reg. Imprese di Agrigento - Cap. Sociale € 280.300 i.v.\\ntel. 0922 859406  - info.dismat@gmail.com - www.dismat.it";
+ band(main,1,3,12,heading,11);
+ pairs(main,2,'Numero documento',numeroDoc,'Data:',test.dataDocumento);
+ frm(main,2,1,'IF(PARAMETRI!B6="CERTIFICATO DI PROVA","Certificato nr.",IF(PARAMETRI!B6="RAPPORTO DI PROVA","Rapporto nr.","Documento nr."))',tipo==='CERTIFICATO DI PROVA'?'Certificato nr.':tipo==='RAPPORTO DI PROVA'?'Rapporto nr.':'Documento nr.',3);
+ pairs(main,3,'Protocollo:',test.protocollo,'Data:',test.dataProtocollo);
+ pairs(main,4,'Verb. accettazione nr:',test.verbaleAccettazione,'Data:',test.dataAccettazione);
+ pairs(main,5,'Consegna in Laboratorio:',test.consegnaLaboratorio,'Data:',test.dataConsegna);
+ pairs(main,6,'Emendamento al cert. nr:',test.emendamentoNumero,'Data:',test.dataDocumento);
+ pairs(main,7,'Oggetto dei lavori:',test.oggettoLavori,'Natura campioni:',test.naturaCampioni);
+ pairs(main,8,'Ubicazione Cantiere:',test.ubicazioneCantiere||test.cantiere,'Data prova:',test.dataProva);
+ pairs(main,9,'Richiedente:',test.richiedente||test.committente,'ID. PROVA:',test.verbale);
+ pairs(main,10,'Direttore dei Lavori:',test.direttoreLavori,'Quota:',test.quota);
+ pairs(main,11,'Impresa:',test.impresa,'Strato:',config.label||test.tipoProva);
+ pairs(main,12,'Proprietario / Ente appaltante:',test.proprietario,'Diametro piastra:',numeric(test.diametro));
+ pairs(main,13,'Direttore Stabilimento/Produzione:',test.direttoreStabilimento,'Tecnico:',test.tecnico);
+ pairs(main,14,'Campioni consegnati da:',test.personaConsegnaCampioni,'Presenti:',test.presenti);
+ pairs(main,15,'La lettera di richiesta:',test.letteraRichiesta,'Localizzazione:',test.km);
+ pairs(main,16,'Tratta:',test.tratta,'Sezione:',test.sezione);
+ band(main,18,1,12,tipo,9);frm(main,18,1,'PARAMETRI!B6',tipo,9);
+ band(main,19,1,12,'PROVE DI CARICO SU PIASTRA CNR 146',2);
+ pairs(main,20,'ID. PROVA:',test.verbale,'Tipologia:',config.label||test.tipoProva);
+ band(main,22,1,6,'LETTURE STABILIZZATE',2);band(main,22,7,12,'FOTO DELLA PROVA',2);
+ ['Carico kPa','C1 mm','s1 mm','C2 mm','s2 mm'].forEach((h,i)=>put(main,23,i+1,h,2));
+ rows.slice(0,12).forEach((r,i)=>{const pos=24+i;[r.p,r.r1,r.s1,r.r2,r.s2].forEach((v,j)=>put(main,pos,j+1,v,typeof v==='number'?7:5));});
+ const fin=Math.min(36,24+rows.length);
+ put(main,36,1,'Scarico finale',3);put(main,36,2,config.scarico2,7);put(main,36,4,test.rScarico2,7);put(main,36,5,test.sScarico2,7);
+ band(main,37,1,12,'RISULTATI · MODULI DI DEFORMAZIONE',2);
+ put(main,38,1,'Md (N/mm²)',3);put(main,38,4,numeric(test.md),6);
+ put(main,38,7,"Md' (N/mm²)",3);put(main,38,10,numeric(test.mdp),6);
+ put(main,38,12,numeric(test.rapporto),6);
+ band(main,39,1,12,'GRAFICO CARICO - SPOSTAMENTO',2);
+ put(main,52,2,'Il Tecnico',3);
+ if(test.technicalEdited)put(main,52,7,'CORREZIONI UFFICIO: '+String(test.notaCorrezioneTecnica||'').slice(0,110),8);
  const reading=sheet();reading.width=7;reading.cols=[[1,16],[2,18],[3,16],[4,17],[5,19],[6,19],[7,24]];
  band(reading,1,1,7,test.technicalEdited?'LETTURE DELLA COPIA UFFICIO - VERIFICARE LE CORREZIONI':'LETTURE ORIGINALI IMPORTATE DAL CANTIERE',1);reading.heights.set(1,32);
  ['Ciclo','Fase','Carico (kPa)','Numero lettura','Lettura (mm)','Ultima (mm)','Note'].forEach((t,i)=>put(reading,3,i+1,t,2));let line=4;
@@ -123,12 +127,12 @@ export function buildMinutaExcel(d){
  ['C1: carico','C1: spost.','Scarico 1: carico','Scarico 1: spost.','C2: carico','C2: spost.','Scarico 2: carico','Scarico 2: spost.'].forEach((x,i)=>put(graph,2,i+1,x,2));
  [test.chart1,test.chartScarico1,test.chart2,test.chartScarico2].forEach((values,k)=>{(values||[]).forEach((p,i)=>{put(graph,i+3,k*2+1,numeric(p.x),7);put(graph,i+3,k*2+2,numeric(p.y),7);});});
  const param=sheet();param.cols=[[1,30],[2,28],[3,24],[4,18]];band(param,1,1,4,'PARAMETRI AMMINISTRATIVI',1);param.heights.set(1,32);
- put(param,3,1,'Numero documento (MINUTA!C3)',3);frm(param,3,2,'IF(ISNUMBER(MINUTA!C3),MINUTA!C3,"")',numeroDoc??'',4);
+ put(param,3,1,'Numero documento (MINUTA!D2)',3);frm(param,3,2,'IF(ISNUMBER(MINUTA!D2),MINUTA!D2,"")',numeroDoc??'',4);
  put(param,4,1,'Soglia (modificabile)',3);put(param,4,2,soglia,4);
  put(param,6,1,'Tipo suggerito',2);frm(param,6,2,'IF(ISNUMBER(B3),IF(B3<B4,"RAPPORTO DI PROVA","CERTIFICATO DI PROVA"),"DA DEFINIRE")',tipo,6);
- band(param,8,1,4,'Modifica il numero in MINUTA!C3 oppure la soglia qui in B4: tipo documento e intestazione si aggiornano. Verificare prima dell’emissione.',8);
+ band(param,8,1,4,'Modifica il numero in MINUTA!D2 oppure la soglia qui in B4: titolo e intestazione si aggiornano. Verificare prima dell’emissione.',8);
  const sheets=[main,reading,graph,param];
- const book=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="${NS}" xmlns:r="${REL}"><bookViews><workbookView/></bookViews><sheets>${['MINUTA','LETTURE','GRAFICO','PARAMETRI'].map((n,i)=>`<sheet name="${n}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`;
+ const book=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="${NS}" xmlns:r="${REL}"><bookViews><workbookView/></bookViews><sheets>${['MINUTA','LETTURE','GRAFICO','PARAMETRI'].map((n,i)=>`<sheet name="${n}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets><definedNames><definedName name="_xlnm.Print_Area" localSheetId="0">MINUTA!$A$1:$L$52</definedName></definedNames><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`;
  const parts=[['[Content_Types].xml',`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="${CT}"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>${[...new Set([photo?.ext,logo?.ext].filter(Boolean))].map(ext=>`<Default Extension="${ext}" ContentType="image/${ext==='jpeg'?'jpeg':ext}"/>`).join('')}<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/><Override PartName="/xl/charts/chart1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/></Types>`],
  ['_rels/.rels',rels([['rId1',REL+'/officeDocument','xl/workbook.xml']])],
  ['xl/workbook.xml',book],
