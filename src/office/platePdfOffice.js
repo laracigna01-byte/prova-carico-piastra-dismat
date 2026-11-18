@@ -1067,4 +1067,6 @@ export async function createOfficePlatePdf(data) {
     }
   );
 
-  // Identico contenuto tecnico del PDF dei ragazzi, senza download o modifiche alla loro app.\n  return pdf.output("arraybuffer");\n}\n
+  // Identico contenuto tecnico del PDF dei ragazzi, senza download o modifiche alla loro app.
+  return pdf.output("arraybuffer");
+}
