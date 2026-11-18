@@ -24,20 +24,22 @@ const CANTIERE_FIELDS=[
 const FIELDS=[
  ['numeroDocumento','Numero rapporto / certificato'],
  ['dataDocumento','Data documento'],
+ ['naturaCampioni','Natura dei campioni'],
  ['protocollo','Protocollo'],
  ['dataProtocollo','Data protocollo'],
- ['verbaleAccettazione','Verb. accettazione nr.'],
+ ['verbaleAccettazione','Verbale di accettazione'],
  ['dataAccettazione','Data accettazione'],
- ['consegnaLaboratorio','Consegna in Laboratorio'],
- ['dataConsegna','Data consegna'],
- ['emendamentoNumero','Emendamento al cert. nr.'],
+ ['consegnaLaboratorio','Consegna in laboratorio'],
+ ['emendamentoNumero','Emendamento (solo se presente)'],
+ ['dataEmendamento','Data emendamento (solo se presente)'],
  ['oggettoLavori','Oggetto dei lavori'],
- ['ubicazioneCantiere','Ubicazione Cantiere (se diversa)'],
  ['richiedente','Richiedente'],
- ['letteraRichiesta','Lettera di richiesta'],
- ['direttoreLavori','Direttore dei Lavori'],
+ ['direttoreLavori','Direttore dei lavori'],
  ['impresa','Impresa'],
- ['proprietario','Proprietario / Ente appaltante']
+ ['proprietario','Proprietario / Ente appaltante'],
+ ['direttoreStabilimento','Direttore di stabilimento / produzione'],
+ ['personaConsegnaCampioni','Persona che consegna i campioni'],
+ ['letteraRichiesta','Lettera di richiesta']
 ];
 function displayNumber(n,digits=2){return typeof n==='number'&&Number.isFinite(n)?n.toLocaleString('it-IT',{minimumFractionDigits:digits,maximumFractionDigits:digits}):'—'}
 function OfficeContent(){
@@ -164,7 +166,7 @@ function OfficeContent(){
       <aside className="office-sidebar">
         <div className="office-section-caption">AREA RISERVATA ALL’ELABORAZIONE</div>
         <h1>Minute e rapporti</h1>
-        <p>Importa il JSON dei tecnici. Correggi i dati nella copia ufficio, completa le intestazioni e genera la minuta modificabile.</p>
+        <p>Importa il JSON dei tecnici, completa soltanto i campi presenti nella minuta originale di Cast e genera il risultato PDF già impaginato.</p>
         <button className="office-import" disabled={importing||loading} type="button" onClick={()=>fileRef.current?.click()}>
           {importing?'Importazione…':'Importa JSON dal cantiere'}
         </button>
