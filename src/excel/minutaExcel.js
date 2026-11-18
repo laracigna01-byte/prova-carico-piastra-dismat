@@ -78,14 +78,14 @@ export function buildMinutaExcel(d){
  band(main,5,3,12,"c/da Andolina S.S. 122 Km 28 92024  CANICATTI'  (AG)",10);
  band(main,6,3,12,'PI/CF 04534491008 - Reg. Imprese di Agrigento - Cap. Sociale € 280.300 i.v.',10);
  band(main,7,3,12,'tel. 0922 859406  - info.dismat@gmail.com - www.dismat.it',10);main.heights.set(7,23);
- pairs(main,9,'Documento',tipo==='CERTIFICATO DI PROVA'?'Certificato nr.':tipo==='RAPPORTO DI PROVA'?'Rapporto nr.':'Da definire','Numero documento',numeroDoc);
+ pairs(main,9,tipo==='CERTIFICATO DI PROVA'?'Certificato nr.':'Rapporto nr.',numeroDoc,'Data:',test.dataDocumento);
  pairs(main,10,'Protocollo',test.protocollo,'Data',test.dataProtocollo);
  pairs(main,11,'Verb. accettazione nr.',test.verbaleAccettazione,'Data',test.dataAccettazione);
  pairs(main,12,'Consegna in Laboratorio',test.consegnaLaboratorio,'Data',test.dataConsegna);
  pairs(main,13,'Emendamento al cert. nr.',test.emendamentoNumero,'Data documento',test.dataDocumento);
  pairs(main,14,'Oggetto dei lavori:',test.oggettoLavori,'Tipo di prova:',config.label||test.tipoProva);
- pairs(main,15,'Ubicazione Cantiere:',test.cantiere,'Data della prova:',test.dataProva);
- pairs(main,16,'Richiedente:',test.committente,'ID PROVA:',test.verbale);
+ pairs(main,15,'Ubicazione Cantiere:',test.ubicazioneCantiere||test.cantiere,'Data della prova:',test.dataProva);
+ pairs(main,16,'Richiedente:',test.richiedente||test.committente,'ID PROVA:',test.verbale);
  pairs(main,17,'Direttore dei Lavori:',test.direttoreLavori,'Quota:',test.quota);
  pairs(main,18,'Impresa:',test.impresa,'Strato:',config.label||test.tipoProva);
  pairs(main,19,'Proprietario / Ente appaltante:',test.proprietario,'Diametro piastra:',numeric(test.diametro));
@@ -95,7 +95,7 @@ export function buildMinutaExcel(d){
  band(main,24,1,12,"Determinazione dei moduli di deformazione Md ed Md' mediante prova di carico a doppio ciclo con piastra circolare",8);main.heights.set(24,26);
  pairs(main,26,'Tratta:',test.tratta,'Km:',test.km);
  pairs(main,27,'Sezione:',test.sezione,'Distanza bordo:',test.distBordo);
- pairs(main,28,'Terreno:',test.terra,'Firma tecnico:',test.firmaTecnico?'Presente':'Non presente');
+ pairs(main,28,'Terreno:',test.terra,'La lettera di richiesta:',test.letteraRichiesta);
  band(main,30,1,12,'RISULTATI PROVA',2);
  put(main,31,1,'Md - 1° ciclo (N/mm²)',3);put(main,32,1,numeric(test.md),6);
  put(main,31,4,"Md' - 2° ciclo (N/mm²)",3);put(main,32,4,numeric(test.mdp),6);
