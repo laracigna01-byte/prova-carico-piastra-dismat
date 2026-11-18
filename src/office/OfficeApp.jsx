@@ -24,15 +24,16 @@ const CANTIERE_FIELDS=[
 const FIELDS=[
  ['numeroDocumento','Numero rapporto / certificato'],
  ['dataDocumento','Data documento'],
+ ['naturaCampioni','Natura dei campioni'],
  ['protocollo','Protocollo'],
  ['dataProtocollo','Data protocollo'],
- ['verbaleAccettazione','Verbale di accettazione'],
- ['dataAccettazione','Data accettazione'],
  ['oggettoLavori','Oggetto dei lavori'],
  ['richiedente','Richiedente'],
  ['direttoreLavori','Direttore dei lavori'],
  ['impresa','Impresa'],
- ['proprietario','Proprietario / Ente appaltante']
+ ['proprietario','Proprietario / Ente appaltante'],
+ ['provaEseguitaDa','Prova eseguita da'],
+ ['letteraRichiesta','La lettera di richiesta']
 ];
 function displayNumber(n,digits=2){return typeof n==='number'&&Number.isFinite(n)?n.toLocaleString('it-IT',{minimumFractionDigits:digits,maximumFractionDigits:digits}):'—'}
 function OfficeContent(){
@@ -145,13 +146,13 @@ function OfficeContent(){
       if(detail.technicalEdited&&!String(draft.notaCorrezioneTecnica||'').trim())throw new Error('Indica il motivo delle correzioni tecniche prima di esportare.');
       if(dirty)await saveDraft();
       await exportMinutaExcel(buildOfficeReport(selected,draft));
-      setMessage('Minuta Cast PDF 19 cm generata: verifica il file con nome CAST-PDF19cm-V3. Se il nome non cambia, stai usando una vecchia anteprima.');
+      setMessage('Minuta Cast PDF 19 cm generata: verifica il file con nome CAST-MODELLO-V4. Se il nome non cambia, stai usando una vecchia anteprima.');
     }catch(error){setMessage('Esportazione non riuscita: '+error.message)}
   }
   return <main className="office-root">
     <header className="office-header">
       <div className="office-brand"><img src="/logo-dismat.jpg" alt="Logo DISMAT"/>
-        <div><strong>LABORATORIO DISMAT</strong><span>Minuta Cast · PDF 19 cm · versione 3</span></div>
+        <div><strong>LABORATORIO DISMAT</strong><span>Minuta Cast · modello originale · versione 4</span></div>
       </div>
       <div className="office-header-actions"><a href="/">Apri app cantiere</a><button type="button" onClick={logout}>Esci</button></div>
     </header>
@@ -217,7 +218,7 @@ function OfficeContent(){
                 <div className="office-fields">
                   {FIELDS.map(([name,label])=>
                     <label key={name}>{label}<input type="text" inputMode={name==='numeroDocumento'?'numeric':'text'}
-                      value={draft[name]??''} onChange={e=>{setDraft(prev=>({...prev,[name]:e.target.value}));setDirty(true)}}/></label>
+                      value={draft[name]??selected.data?.[name]??({naturaCampioni:detail.testConfig.label,richiedente:detail.committente,provaEseguitaDa:detail.tecnico}[name]??'')} onChange={e=>{setDraft(prev=>({...prev,[name]:e.target.value}));setDirty(true)}}/></label>
                   )}
                   <label>Soglia tipo documento
                     <input type="number" min="0" value={draft.sogliaDocumento??135000} onChange={e=>{setDraft(prev=>({...prev,sogliaDocumento:e.target.value}));setDirty(true)}}/>
@@ -278,7 +279,7 @@ function OfficeContent(){
               </div>
               <div className="office-actions">
                 <button type="button" className="office-save" onClick={()=>void save()}>Salva completamento</button>
-                <button type="button" className="office-export" onClick={()=>void downloadExcel()}>Genera minuta Cast · versione 3</button>
+                <button type="button" className="office-export" onClick={()=>void downloadExcel()}>Genera minuta Cast · versione 4</button>
               </div>
             </>}
           </>
