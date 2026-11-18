@@ -62,3 +62,20 @@
 .office-export{padding:13px 22px}
 @media(max-width:900px){.office-layout{grid-template-columns:1fr;padding:14px;gap:16px}.office-sidebar{position:static}.office-records{max-height:260px}.office-metadata{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.office-header{padding:12px}.office-brand img{width:44px;height:44px}.office-brand strong{font-size:14px}.office-fields{grid-template-columns:1fr}.office-resultstrip{grid-template-columns:1fr}.office-card{padding:14px}.office-titleline h2{font-size:22px}}
+
+/* Dati importati precompilati: la modifica e' limitata alla copia ufficio. */
+.office-inputrow{display:flex;align-items:center;gap:6px;min-width:0}
+.office-inputrow input{flex:1}
+.office-reset{cursor:pointer;border:1px solid #d5d0c7;background:#f6f2e9;color:#5d4a2b;border-radius:7px;padding:9px 11px;min-width:37px;font-size:17px}
+.office-fields select,.office-technical-note textarea{width:100%;border:1px solid #d5d0c7;border-radius:8px;color:#252525;background:white;padding:11px 12px;font:inherit}
+.office-technical summary{cursor:pointer;font-size:15px;font-weight:700;line-height:1.4;color:#403522}
+.office-technical>details>summary{padding:3px 0 10px}
+.office-reading-group{margin:13px 0;padding:13px;border:1px solid #e7e0d3;border-radius:9px;background:#fdfcf9}
+.office-reading-group summary{font-size:13px;font-weight:700}
+.office-readings{margin-top:12px;padding:10px;border-bottom:1px solid #e9e3d9}
+.office-readings strong{color:#604f36;font-size:12px}
+.office-reading-grid{margin-top:8px;display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:7px}
+.office-reading-grid label{font-size:11px;color:#6a6156;font-weight:600;display:flex;flex-direction:column;gap:5px}
+.office-reading-grid input{width:100%;background:white;border:1px solid #d5d0c7;border-radius:7px;padding:9px;color:#34312c}
+.office-technical-note{display:flex;flex-direction:column;gap:8px;font-weight:700;font-size:12px;margin-top:13px}
+.office-technical .office-save{margin-top:15px}
