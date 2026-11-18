@@ -49,7 +49,11 @@ export function parseOfficeJson(text,sourceName='prova.json'){
 // L'ufficio usa i risultati del JSON quando disponibili, e ricostruisce solo grafico/tabella.
 export function buildOfficeReport(record,office=record.office||{}){
   if(!record||!isObj(record.data))throw new Error('Prova non selezionata.');
-  const d=record.data, config=TEST_TYPES[d.tipoProva];
+  const source=record.data;
+  // Correzioni applicate esclusivamente alla copia ufficio, senza mutare il JSON importato.
+  const d={...source,...office};
+  const editedTechnical=['c1','c2','diametro','tipoProva'].some(k=>Object.prototype.hasOwnProperty.call(office,k)&&JSON.stringify(office[k])!==JSON.stringify(source[k]));
+  const config=TEST_TYPES[d.tipoProva];
   if(!config)throw new Error('Tipologia prova non riconosciuta: '+d.tipoProva);
   const c1=isObj(d.c1)?d.c1:{},c2=isObj(d.c2)?d.c2:{};
   const p1=config.ciclo1,p2=config.ciclo2;
@@ -71,9 +75,9 @@ export function buildOfficeReport(record,office=record.office||{}){
   const calcMd=ds1>0&&r1.some(v=>v!==null)?((to1-from1)/1000/ds1)*diameter:null;
   const calcMdp=ds2>0&&r2.some(v=>v!==null)?((to2-from2)/1000/ds2)*diameter:null;
   const storedMd=numeric(d.md),storedMdp=numeric(d.mdp),storedRapporto=numeric(d.rapporto);
-  const md=Number.isFinite(storedMd)?storedMd:calcMd;
-  const mdp=Number.isFinite(storedMdp)?storedMdp:calcMdp;
-  const rapporto=Number.isFinite(storedRapporto)?storedRapporto:(md!==null&&mdp>0?md/mdp:null);
+  const md=editedTechnical?calcMd:(Number.isFinite(storedMd)?storedMd:calcMd);
+  const mdp=editedTechnical?calcMdp:(Number.isFinite(storedMdp)?storedMdp:calcMdp);
+  const rapporto=editedTechnical?(md!==null&&mdp>0?md/mdp:null):(Number.isFinite(storedRapporto)?storedRapporto:(md!==null&&mdp>0?md/mdp:null));
   const chart1=p1.flatMap((p,i)=>s1[i]!==null?[{x:p,y:s1[i]}]:[]);
   const lastC1=s1[s1.length-1],lastC2=s2[s2.length-1];
   const chartScarico1=lastC1!==null&&sScarico1!==null?[{x:p1[p1.length-1],y:lastC1},{x:config.scarico1,y:sScarico1}]:[];
@@ -83,7 +87,7 @@ export function buildOfficeReport(record,office=record.office||{}){
     const i1=p1.indexOf(p),i2=p2.indexOf(p);
     return {p,r1:i1>=0?r1[i1]:null,s1:i1>=0?s1[i1]:null,r2:i2>=0?r2[i2]:null,s2:i2>=0?s2[i2]:null,isRef:config.md.includes(p)||config.mdp.includes(p)};
   });
-  const mismatch=(Number.isFinite(storedMd)&&calcMd!==null&&Math.abs(storedMd-calcMd)>0.001)||(Number.isFinite(storedMdp)&&calcMdp!==null&&Math.abs(storedMdp-calcMdp)>0.001);
+  const mismatch=!editedTechnical&&((Number.isFinite(storedMd)&&calcMd!==null&&Math.abs(storedMd-calcMd)>0.001)||(Number.isFinite(storedMdp)&&calcMdp!==null&&Math.abs(storedMdp-calcMdp)>0.001));
   return {...d,...office,testConfig:config,md,mdp,rapporto,tableRows,chart1,chart2,chartScarico1,chartScarico2,
-    rScarico2:scarico2,sScarico2,rInizioC2,sInizioC2,sourceId:record.originalId,technicalMismatch:mismatch};
+    rScarico2:scarico2,sScarico2,rInizioC2,sInizioC2,sourceId:record.originalId,technicalMismatch:mismatch,technicalEdited:editedTechnical};
 }
