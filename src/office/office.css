@@ -1,0 +1,64 @@
+.office-root{min-height:100vh;background:#f7f7f5;color:#252525;font-family:Inter,Arial,Helvetica,sans-serif;font-size:14px}
+.office-root *{box-sizing:border-box}
+.office-root button,.office-root input{font:inherit}
+.office-header{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;background:#fff;border-bottom:3px solid #ddc475;padding:13px max(22px,calc((100vw - 1480px)/2))}
+.office-brand{display:flex;align-items:center;gap:15px}
+.office-brand img{width:58px;height:58px;object-fit:contain}
+.office-brand div{display:flex;flex-direction:column;gap:4px}
+.office-brand strong{font-size:19px;letter-spacing:.09em;color:#222}
+.office-brand span{color:#686868;font-size:12px}
+.office-header-actions{display:flex;align-items:center;gap:12px}
+.office-header-actions a{color:#38302a;text-decoration:none;font-weight:700;border:1px solid #cfcac2;border-radius:8px;padding:11px 14px;background:#fff}
+.office-header-actions button{background:#34302c;color:#fff;padding:11px 15px;border:0;border-radius:8px;cursor:pointer}
+.office-layout{max-width:1480px;margin:auto;display:grid;grid-template-columns:minmax(275px,330px) minmax(0,1fr);gap:24px;padding:24px}
+.office-sidebar{background:#fff;border:1px solid #e8e5df;border-radius:13px;padding:22px;align-self:start;position:sticky;top:15px}
+.office-section-caption{color:#8b6c27;font-size:10px;font-weight:800;letter-spacing:.13em}
+.office-sidebar h1{margin:9px 0;font-size:24px;line-height:1.15;color:#292522}
+.office-sidebar p,.office-empty p,.office-titleline p{color:#74716b;line-height:1.6;font-size:12px}
+.office-import,.office-export{cursor:pointer;border:0;border-radius:9px;padding:14px 15px;background:#e4c55c;color:#2f2813;font-weight:800}
+.office-import{display:block;width:100%;margin:20px 0}
+.office-root button:disabled{opacity:.65;cursor:not-allowed}
+.office-search-label{display:flex;flex-direction:column;gap:8px;font-size:11px;font-weight:700;color:#5b5954}
+.office-search-label input,.office-fields input{border:1px solid #d5d0c7;background:#fff;border-radius:8px;color:#252525;outline:0;padding:11px 12px;width:100%;min-width:0}
+.office-root input:focus{border-color:#a67d30;box-shadow:0 0 0 3px #ebddba}
+.office-record-count{font-size:11px;color:#8b8580;margin-top:15px;margin-bottom:9px}
+.office-records{max-height:55vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.office-record{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;background:#f9f8f5;color:#302f2c;border:1px solid #ece7df;border-radius:8px;padding:12px;cursor:pointer;width:100%}
+.office-record.selected{border-color:#c5a756;background:#fff9e7;box-shadow:inset 3px 0 #c5a756}
+.office-record strong{font-size:14px}
+.office-record span{font-size:12px;color:#5f5a52}
+.office-record small{font-size:11px;color:#837e76}
+.office-main{min-width:0;display:flex;flex-direction:column;gap:18px}
+.office-banner{border-radius:9px;background:#fff9e8;border:1px solid #eee0b4;padding:13px 15px;display:flex;align-items:center;gap:9px;font-size:12px;color:#6b5327}
+.office-banner-dot{width:9px;height:9px;border-radius:50%;background:#b7a044;flex:0 0 auto}
+.office-message{background:#f2f1ed;border:1px solid #dfd9cc;border-radius:9px;padding:13px 15px;line-height:1.5}
+.office-warning{background:#fff4ea;border:1px solid #dcaf89;border-radius:9px;padding:13px 15px;color:#854120;line-height:1.5}
+.office-empty{background:#fff;min-height:350px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;border:1px dashed #d8d0c2;border-radius:12px;text-align:center}
+.office-empty h2{font-size:21px;color:#403930}
+.office-titleline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.office-titleline h2{font-size:27px;line-height:1.1;margin:7px 0 0;color:#282320}
+.office-titleline p{margin:8px 0 0}
+.office-status{color:#65491e;background:#f7ecd0;border:1px solid #e7d8af;padding:8px 12px;border-radius:99px;font-size:11px;font-weight:700}
+.office-card{background:white;border:1px solid #e7e3db;box-shadow:0 4px 24px #28201808;border-radius:12px;padding:20px}
+.office-cardhead{display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #eeeae3;padding:0 0 12px;margin-bottom:15px}
+.office-cardhead h3{margin:0;font-size:16px;color:#2c2723}
+.office-cardhead span{font-size:11px;color:#7f765e;background:#f6f1e7;border-radius:99px;padding:6px 9px}
+.office-metadata{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin:18px 0}
+.office-metadata div{min-width:0}
+.office-metadata small{display:block;font-size:11px;color:#838079;margin-bottom:5px}
+.office-metadata strong{display:block;font-size:13px;overflow-wrap:anywhere}
+.office-resultstrip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.office-resultstrip div{background:#fff6db;border:1px solid #efe0b8;border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:5px}
+.office-resultstrip span,.office-resultstrip small{color:#755e2d;font-size:11px}
+.office-resultstrip strong{font-size:21px;color:#302817;font-variant-numeric:tabular-nums}
+.office-small{font-size:11px;color:#77716b;line-height:1.6;margin:12px 0 0}
+.office-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.office-fields label{font-size:12px;font-weight:700;color:#514a3e;display:flex;flex-direction:column;gap:7px}
+.office-type{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:16px;border-radius:8px;padding:12px 14px;background:#f8f5ee;border:1px solid #ece6da}
+.office-type span{font-size:12px;color:#766954}
+.office-type strong{font-size:14px;color:#362d1e}
+.office-actions{display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap}
+.office-save{border:1px solid #bcb3a6;border-radius:9px;padding:13px 20px;background:#fff;color:#3f352a;font-weight:750;cursor:pointer}
+.office-export{padding:13px 22px}
+@media(max-width:900px){.office-layout{grid-template-columns:1fr;padding:14px;gap:16px}.office-sidebar{position:static}.office-records{max-height:260px}.office-metadata{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.office-header{padding:12px}.office-brand img{width:44px;height:44px}.office-brand strong{font-size:14px}.office-fields{grid-template-columns:1fr}.office-resultstrip{grid-template-columns:1fr}.office-card{padding:14px}.office-titleline h2{font-size:22px}}
