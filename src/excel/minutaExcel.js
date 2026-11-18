@@ -144,4 +144,4 @@ export async function exportMinutaExcel(data){
  });
  const reportImage=await captureOriginalPlatePdf(data);
  if(!/^data:image\/png;base64,[A-Za-z0-9+/=]{100,}$/.test(reportImage))throw new Error('Immagine del PDF non generata: minuta non esportata.');
- const blob=buildMinutaExcel({...data,logoDataUrl,reportImage});const url=URL.createObjectURL(blob);const a=document.createElement('a');const name=String(data?.verbale||'senza-numero').replace(/[^A-Za-z0-9_-]/g,'_');a.href=url;a.download=`minuta-CAST-PDF19cm-${name}.xlsx`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2500);}
+ const blob=buildMinutaExcel({...data,logoDataUrl,reportImage});const url=URL.createObjectURL(blob);const a=document.createElement('a');const name=String(data?.verbale||'senza-numero').replace(/[^A-Za-z0-9_-]/g,'_');a.href=url;a.download=`minuta-CAST-PDF19cm-V3-${name}.xlsx`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2500);}
