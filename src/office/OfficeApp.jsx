@@ -7,11 +7,19 @@ import {loadOfficeRecords,saveOfficeRecord} from './officeStore';
 import './office.css';
 
 const FIELDS=[
+ ['numeroDocumento','Numero rapporto / certificato'],
+ ['dataDocumento','Data documento'],
+ ['protocollo','Protocollo'],
+ ['dataProtocollo','Data protocollo'],
+ ['verbaleAccettazione','Verb. accettazione nr.'],
+ ['dataAccettazione','Data accettazione'],
+ ['consegnaLaboratorio','Consegna in Laboratorio'],
+ ['dataConsegna','Data consegna'],
+ ['emendamentoNumero','Emendamento al cert. nr.'],
  ['oggettoLavori','Oggetto dei lavori'],
- ['direttoreLavori','Direttore dei lavori'],
- ['impresa','Impresa esecutrice'],
- ['proprietario','Proprietario / Ente appaltante'],
- ['numeroDocumento','Numero rapporto / certificato']
+ ['direttoreLavori','Direttore dei Lavori'],
+ ['impresa','Impresa'],
+ ['proprietario','Proprietario / Ente appaltante']
 ];
 function displayNumber(n,digits=2){return typeof n==='number'&&Number.isFinite(n)?n.toLocaleString('it-IT',{minimumFractionDigits:digits,maximumFractionDigits:digits}):'—'}
 function OfficeContent(){
