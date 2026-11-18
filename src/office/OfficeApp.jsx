@@ -112,22 +112,38 @@ function OfficeContent(){
   }
   async function importFiles(files){
     if(!files?.length)return;
+    if(dirty&&!window.confirm('Ci sono modifiche ufficio non salvate. Importare altri JSON senza salvarle?'))return;
     setImporting(true);setMessage('');
-    let n=0,invalid=0;const added=[];const failures=[];
-    for(const file of Array.from(files)){
-      try{
-        const parsed=parseOfficeJson(await file.text(),file.name);
-        for(const item of parsed.records){await saveOfficeRecord(item);added.push(item);n++}
-        invalid+=parsed.ignored;
-      }catch(error){failures.push(file.name+': '+error.message)}
-    }
-    if(added.length){
-      const next=[...added.reverse(),...records];
-      setRecords(next);setSelectedId(next[0].id);setDraft({});setDirty(false);
-    }
-    const report=n+' prova/e importata/e nell’archivio ufficio.'+(invalid?' '+invalid+' record ignorati.':'');
-    setMessage(report+(failures.length?' Problemi: '+failures.join(' | '):''));
-    setImporting(false);
+    let n=0,invalid=0,duplicates=0;
+    const added=[],failures=[];
+    try{
+      // Leggere ogni volta l'archivio ufficio: le prove gia' completate non devono
+      // essere duplicate o sovrascritte quando Cast reimporta lo stesso JSON.
+      const previous=await loadOfficeRecords();
+      const fingerprints=new Set(previous.map(rec=>String(rec.originalId)+'|'+JSON.stringify(rec.data)));
+      for(const file of Array.from(files)){
+        try{
+          const parsed=parseOfficeJson(await file.text(),file.name);
+          invalid+=parsed.ignored;
+          for(const item of parsed.records){
+            const fingerprint=String(item.originalId)+'|'+JSON.stringify(item.data);
+            if(fingerprints.has(fingerprint)){duplicates++;continue}
+            await saveOfficeRecord(item);
+            fingerprints.add(fingerprint);added.push(item);n++;
+          }
+        }catch(error){failures.push(file.name+': '+error.message)}
+      }
+      if(added.length){
+        const next=[...added.slice().reverse(),...previous];
+        setRecords(next);setSelectedId(next[0].id);setDraft({});setDirty(false);
+      }else setRecords(previous);
+      const report=n+' prova/e importata/e nell’archivio ufficio.'
+        +(duplicates?' '+duplicates+' gia\u0300 presenti, mantenute senza modifiche.':'')
+        +(invalid?' '+invalid+' record ignorati.':'');
+      setMessage(report+(failures.length?' Problemi: '+failures.join(' | '):''));
+    }catch(error){
+      setMessage('Importazione non riuscita: '+error.message);
+    }finally{setImporting(false)}
   }
   async function saveDraft(){
     if(!selected)throw new Error('Seleziona prima una prova.');
