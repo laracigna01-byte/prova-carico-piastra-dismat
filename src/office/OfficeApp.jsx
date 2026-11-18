@@ -85,7 +85,7 @@ function OfficeContent(){
     if(!selected||detail?.error)return;
     try{
       if(dirty)await saveDraft();
-      exportMinutaExcel(buildOfficeReport(selected,draft));
+      await exportMinutaExcel(buildOfficeReport(selected,draft));
       setMessage('Minuta Excel generata dai dati di cantiere e dalle integrazioni ufficio.');
     }catch(error){setMessage('Esportazione non riuscita: '+error.message)}
   }
