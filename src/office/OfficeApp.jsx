@@ -17,6 +17,9 @@ const FIELDS=[
  ['dataConsegna','Data consegna'],
  ['emendamentoNumero','Emendamento al cert. nr.'],
  ['oggettoLavori','Oggetto dei lavori'],
+ ['ubicazioneCantiere','Ubicazione Cantiere (se diversa)'],
+ ['richiedente','Richiedente'],
+ ['letteraRichiesta','Lettera di richiesta'],
  ['direttoreLavori','Direttore dei Lavori'],
  ['impresa','Impresa'],
  ['proprietario','Proprietario / Ente appaltante']
