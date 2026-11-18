@@ -35,7 +35,7 @@ function xmlSheet(s){
  const merged=s.merges.length?`<mergeCells count="${s.merges.length}">${s.merges.map(x=>`<mergeCell ref="${x}"/>`).join('')}</mergeCells>`:'';
  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="${NS}" xmlns:r="${REL}"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><sheetViews><sheetView workbookViewId="0" showGridLines="0"/></sheetViews><sheetFormatPr defaultRowHeight="${s.isMinuta?14:21}"/><cols>${widths}</cols><sheetData>${data}</sheetData>${merged}<printOptions horizontalCentered="1"/><pageMargins left="0.35" right="0.35" top="0.42" bottom="0.42" header="0.15" footer="0.15"/><pageSetup orientation="${s.isMinuta?'portrait':'landscape'}" paperSize="9" fitToWidth="1" fitToHeight="${s.isMinuta?1:0}"/>${s.drawing?'<drawing r:id="rId1"/>':''}</worksheet>`;
 }
-const styles=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="${NS}"><numFmts count="1"><numFmt numFmtId="164" formatCode="0.000"/></numFmts><fonts count="8"><font><sz val="10"/><name val="Aptos"/></font><font><b/><color rgb="FFFFFFFF"/><sz val="16"/><name val="Aptos Display"/></font><font><b/><color rgb="FF302E2A"/><sz val="10"/></font><font><color rgb="FF786F61"/><sz val="9"/></font><font><color rgb="FF965B34"/><sz val="10"/></font><font><b/><color rgb="FF4A3611"/><sz val="11"/></font><font><b/><color rgb="FF26201B"/><sz val="21"/><name val="Aptos Display"/></font><font><color rgb="FF3B352E"/><sz val="10"/><name val="Aptos"/></font></fonts><fills count="5"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF302E2A"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFF3F0E8"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFF2D7"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="hair"><color rgb="FFD4CDBF"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="12"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center"/></xf><xf numFmtId="0" fontId="2" fillId="3" borderId="1" xfId="0"/><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="4" fillId="0" borderId="1" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"/><xf numFmtId="164" fontId="5" fillId="4" borderId="1" xfId="0"/><xf numFmtId="2" fontId="0" fillId="0" borderId="1" xfId="0"/><xf numFmtId="0" fontId="3" fillId="3" borderId="0" xfId="0" applyAlignment="1"><alignment wrapText="1"/></xf><xf numFmtId="0" fontId="6" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="7" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="7" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+const styles=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="${NS}"><numFmts count="1"><numFmt numFmtId="164" formatCode="0.000"/></numFmts><fonts count="8"><font><sz val="10"/><name val="Aptos"/></font><font><b/><color rgb="FFFFFFFF"/><sz val="16"/><name val="Aptos Display"/></font><font><b/><color rgb="FF302E2A"/><sz val="10"/></font><font><color rgb="FF786F61"/><sz val="9"/></font><font><color rgb="FF965B34"/><sz val="10"/></font><font><b/><color rgb="FF4A3611"/><sz val="11"/></font><font><b/><color rgb="FF26201B"/><sz val="21"/><name val="Aptos Display"/></font><font><color rgb="FF3B352E"/><sz val="8.3"/><name val="Aptos"/></font></fonts><fills count="5"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF302E2A"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFF3F0E8"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFF2D7"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="hair"><color rgb="FFD4CDBF"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="12"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center"/></xf><xf numFmtId="0" fontId="2" fillId="3" borderId="1" xfId="0"/><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="4" fillId="0" borderId="1" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"/><xf numFmtId="164" fontId="5" fillId="4" borderId="1" xfId="0"/><xf numFmtId="2" fontId="0" fillId="0" borderId="1" xfId="0"/><xf numFmtId="0" fontId="3" fillId="3" borderId="0" xfId="0" applyAlignment="1"><alignment wrapText="1"/></xf><xf numFmtId="0" fontId="6" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="7" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="7" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
 function crctable(){let a=[];for(let n=0;n<256;n++){let c=n;for(let j=0;j<8;j++)c=c&1?0xEDB88320^(c>>>1):c>>>1;a[n]=c>>>0}return a;}const CRC=crctable();
 function checksum(bytes){let c=0xFFFFFFFF;for(const b of bytes)c=CRC[(c^b)&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
 function set16(a,pos,n){a[pos]=n&255;a[pos+1]=(n>>>8)&255;}
@@ -60,7 +60,7 @@ function drawingXML(photo,logo){
  const r='xmlns:r="'+REL+'"';
  const coords=(x,y)=>`<xdr:from><xdr:col>${x}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${y}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>`;
  const to=(x,y)=>`<xdr:to><xdr:col>${x}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${y}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to>`;
- const pic=photo?`<xdr:twoCellAnchor editAs="oneCell">${coords(0,16)}${to(12,56)}<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="Foto prova"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId2"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor>`:'';
+ const pic=photo?`<xdr:twoCellAnchor editAs="oneCell">${coords(0,17)}${to(12,55)}<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="Foto prova"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId2"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor>`:'';
  const logoAnchor=logo?`<xdr:twoCellAnchor editAs="oneCell">${coords(0,0)}${to(2,1)}<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="3" name="Logo DISMAT"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId3"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor>`:'';
  const chart=`<xdr:twoCellAnchor editAs="oneCell">${coords(0,39)}${to(12,51)}<xdr:graphicFrame macro=""><xdr:nvGraphicFramePr><xdr:cNvPr id="1" name="Grafico carico spostamento"/><xdr:cNvGraphicFramePr/></xdr:nvGraphicFramePr><xdr:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></xdr:xfrm><a:graphic><a:graphicData uri="${XL_CHART}"><c:chart xmlns:c="${XL_CHART}" r:id="rId1"/></a:graphicData></a:graphic></xdr:graphicFrame><xdr:clientData/></xdr:twoCellAnchor>`;
  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><xdr:wsDr xmlns:xdr="${XL_DRAW}" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" ${r}>${logoAnchor}${pic}</xdr:wsDr>`;
@@ -73,28 +73,39 @@ export function buildMinutaExcel(d){
 
 
 
+
  const main=sheet();main.cols=[[1,13],[2,6],[3,7],[4,9],[5,7],[6,7],[7,13],[8,7],[9,9],[10,8],[11,7],[12,8]];main.drawing=true;main.isMinuta=true;
- for(let row=1;row<=58;row++)main.heights.set(row,15);
- main.heights.set(1,80);main.heights.set(11,23);main.heights.set(12,23);main.heights.set(13,5);main.heights.set(14,17);main.heights.set(15,20);main.heights.set(16,5);
- for(let row=17;row<=56;row++)main.heights.set(row,12);
- main.heights.set(57,18);main.heights.set(58,4);
+ // Stessa sequenza del foglio originale "28) PROVA SU PIASTRA": nessuna voce extra.
+ for(let row=1;row<=56;row++)main.heights.set(row,13);
+ main.heights.set(1,76);
+ for(let row=2;row<=4;row++)main.heights.set(row,16);
+ main.heights.set(5,7);main.heights.set(6,19);main.heights.set(7,6);
+ for(let row=8;row<=12;row++)main.heights.set(row,16);
+ main.heights.set(13,4);main.heights.set(14,4);main.heights.set(15,17);
+ main.heights.set(16,22);main.heights.set(17,4);
+ for(let row=18;row<=55;row++)main.heights.set(row,13);
+ main.heights.set(56,3);
  const heading="L A B O R A T O R I O\nD I S M A T\nSperimentazione sulle Strutture e sui Materiali da Costruzione\nAutorizzato ai sensi dell'art. 20 Legge 1086/71 con D.M. 415 del 01/12/2020\nc/da Andolina S.S. 122 Km 28 92024  CANICATTI'  (AG)\nPI/CF 04534491008 - Reg. Imprese di Agrigento - Cap. Sociale € 280.300 i.v.\ntel. 0922 859406  - info.dismat@gmail.com - www.dismat.it";
  band(main,1,3,12,heading,11);
  pairs(main,2,'Rapporto nr.',numeroDoc,'Data:',test.dataDocumento);
  frm(main,2,1,'IF(PARAMETRI!B6="CERTIFICATO DI PROVA","Certificato nr.",IF(PARAMETRI!B6="RAPPORTO DI PROVA","Rapporto nr.","Documento nr."))',tipo==='CERTIFICATO DI PROVA'?'Certificato nr.':tipo==='RAPPORTO DI PROVA'?'Rapporto nr.':'Documento nr.',3);
  pairs(main,3,'Protocollo:',test.protocollo,'Data:',test.dataProtocollo);
  pairs(main,4,'Verb. accettazione nr:',test.verbaleAccettazione,'Data:',test.dataAccettazione);
- pairs(main,5,'Consegna in Laboratorio:',test.consegnaLaboratorio,'Natura campioni:',test.naturaCampioni);
- if(test.emendamentoNumero)pairs(main,6,'Emendamento nr:',test.emendamentoNumero,'Data:',test.dataEmendamento);
- pairs(main,7,'Oggetto dei lavori:',test.oggettoLavori,'Data prova:',test.dataProva);
- pairs(main,8,'Richiedente:',test.richiedente||test.committente,'',null);
- pairs(main,9,'Direttore dei Lavori:',test.direttoreLavori,'',null);
- pairs(main,10,'Impresa:',test.impresa,'',null);
- pairs(main,11,'Proprietario / Ente appaltante:',test.proprietario,'',null);
- pairs(main,12,'Direttore di Stabilimento/Produzione:',test.direttoreStabilimento,'',null);
- pairs(main,14,'Persona che consegna i campioni:',test.personaConsegnaCampioni,'Lettera di richiesta:',test.letteraRichiesta);
- frm(main,15,1,'PARAMETRI!B6',tipo,9);main.merges.push('A15:L15');
- put(main,57,2,'Lo Sperimentatore',3);put(main,57,9,'Il Direttore del Laboratorio',3);
+ if(test.emendamentoNumero){main.heights.set(5,16);pairs(main,5,'Emendamento al cert. nr.:',test.emendamentoNumero,'Data:',test.dataEmendamento);}
+ // Campi B6, B8:B12 e B15 effettivamente presenti nella minuta Piastra Cast.
+ function single(label,row,value){
+  put(main,row,1,label,3);put(main,row,5,value,4);
+  main.merges.push('A'+row+':D'+row,'E'+row+':L'+row);
+ }
+ single('Oggetto dei lavori:',6,test.oggettoLavori);
+ single('Ubicazione Cantiere:',8,test.ubicazioneCantiere||test.cantiere);
+ single('Richiedente:',9,test.richiedente||test.committente);
+ single('Direttore dei Lavori:',10,test.direttoreLavori);
+ single('Impresa:',11,test.impresa);
+ single('Proprietario / Ente appaltante:',12,test.proprietario);
+ single('Tecnico esecutore:',15,test.tecnico);
+ band(main,16,1,12,tipo,9);frm(main,16,1,'PARAMETRI!B6',tipo,9);
+ // Immagine del PDF originale dentro MINUTA: stesso contenuto tecnico che Cast cattura manualmente.
  const reading=sheet();reading.width=7;reading.cols=[[1,16],[2,18],[3,16],[4,17],[5,19],[6,19],[7,24]];
  band(reading,1,1,7,test.technicalEdited?'LETTURE DELLA COPIA UFFICIO - VERIFICARE LE CORREZIONI':'LETTURE ORIGINALI IMPORTATE DAL CANTIERE',1);reading.heights.set(1,32);
  ['Ciclo','Fase','Carico (kPa)','Numero lettura','Lettura (mm)','Ultima (mm)','Note'].forEach((t,i)=>put(reading,3,i+1,t,2));let line=4;
@@ -113,7 +124,7 @@ export function buildMinutaExcel(d){
  put(param,6,1,'Tipo suggerito',2);frm(param,6,2,'IF(ISNUMBER(B3),IF(B3<B4,"RAPPORTO DI PROVA","CERTIFICATO DI PROVA"),"DA DEFINIRE")',tipo,6);
  band(param,8,1,4,'Modifica il numero in MINUTA!D2 oppure la soglia qui in B4: titolo e intestazione si aggiornano. Verificare prima dell’emissione.',8);
  const sheets=[main,reading,graph,param];
- const book=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="${NS}" xmlns:r="${REL}"><bookViews><workbookView/></bookViews><sheets>${['MINUTA','LETTURE','GRAFICO','PARAMETRI'].map((n,i)=>`<sheet name="${n}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets><definedNames><definedName name="_xlnm.Print_Area" localSheetId="0">MINUTA!$A$1:$L$58</definedName></definedNames><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`;
+ const book=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="${NS}" xmlns:r="${REL}"><bookViews><workbookView/></bookViews><sheets>${['MINUTA','LETTURE','GRAFICO','PARAMETRI'].map((n,i)=>`<sheet name="${n}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets><definedNames><definedName name="_xlnm.Print_Area" localSheetId="0">MINUTA!$A$1:$L$56</definedName></definedNames><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`;
  const parts=[['[Content_Types].xml',`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="${CT}"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>${[...new Set([photo?.ext,logo?.ext].filter(Boolean))].map(ext=>`<Default Extension="${ext}" ContentType="image/${ext==='jpeg'?'jpeg':ext}"/>`).join('')}<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/><Override PartName="/xl/charts/chart1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/></Types>`],
  ['_rels/.rels',rels([['rId1',REL+'/officeDocument','xl/workbook.xml']])],
  ['xl/workbook.xml',book],
