@@ -6,6 +6,21 @@ import {parseOfficeJson,buildOfficeReport,classifyDocument} from './officeData';
 import {loadOfficeRecords,saveOfficeRecord} from './officeStore';
 import './office.css';
 
+const CANTIERE_FIELDS=[
+ ['verbale','Numero prova'],
+ ['cantiere','Cantiere'],
+ ['committente','Committente'],
+ ['dataProva','Data della prova'],
+ ['km','Km / Localizzazione'],
+ ['sezione','Sezione'],
+ ['quota','Quota'],
+ ['tratta','Tratta'],
+ ['terra','Terreno'],
+ ['strato','Strato / Note'],
+ ['distBordo','Distanza dal bordo'],
+ ['tecnico','Tecnico esecutore'],
+ ['presenti','Presenti']
+];
 const FIELDS=[
  ['numeroDocumento','Numero rapporto / certificato'],
  ['dataDocumento','Data documento'],
@@ -31,6 +46,43 @@ function OfficeContent(){
   const [records,setRecords]=useState([]);
   const [selectedId,setSelectedId]=useState('');
   const [draft,setDraft]=useState({});
+  function editCopy(name,value){
+    if(!selected)return;
+    setDraft(prev=>{
+      const next={...prev};
+      if(value===String(selected.data?.[name]??'')){delete next[name];}
+      else next[name]=value;
+      return next;
+    });
+    setDirty(true);
+  }
+  function resetCopy(name){
+    setDraft(prev=>{const next={...prev};delete next[name];return next;});
+    setDirty(true);
+  }
+  function editReading(cycle,step,index,value){
+    if(!selected)return;
+    const source=selected.data?.[cycle]||{};
+    setDraft(prev=>{
+      const next={...prev};
+      const updated=structuredClone(prev[cycle]||source);
+      const readings=Array.isArray(updated[step])?[...updated[step]]:[];
+      readings[index]=value;
+      updated[step]=readings;
+      if(JSON.stringify(updated)===JSON.stringify(source))delete next[cycle];
+      else next[cycle]=updated;
+      return next;
+    });
+    setDirty(true);
+  }
+  function resetTechnical(){
+    setDraft(prev=>{
+      const next={...prev};
+      for(const key of ['c1','c2','diametro','tipoProva','notaCorrezioneTecnica'])delete next[key];
+      return next;
+    });
+    setDirty(true);
+  }
   const [dirty,setDirty]=useState(false);
   const [loading,setLoading]=useState(true);
   const [importing,setImporting]=useState(false);
@@ -95,6 +147,7 @@ function OfficeContent(){
   async function downloadExcel(){
     if(!selected||detail?.error)return;
     try{
+      if(detail.technicalEdited&&!String(draft.notaCorrezioneTecnica||'').trim())throw new Error('Indica il motivo delle correzioni tecniche prima di esportare.');
       if(dirty)await saveDraft();
       await exportMinutaExcel(buildOfficeReport(selected,draft));
       setMessage('Minuta Excel generata dai dati di cantiere e dalle integrazioni ufficio.');
@@ -111,7 +164,7 @@ function OfficeContent(){
       <aside className="office-sidebar">
         <div className="office-section-caption">AREA RISERVATA ALL’ELABORAZIONE</div>
         <h1>Minute e rapporti</h1>
-        <p>Importa il JSON dei tecnici. Completa solo i dati di ufficio e genera la minuta modificabile.</p>
+        <p>Importa il JSON dei tecnici. Correggi i dati nella copia ufficio, completa le intestazioni e genera la minuta modificabile.</p>
         <button className="office-import" disabled={importing||loading} type="button" onClick={()=>fileRef.current?.click()}>
           {importing?'Importazione…':'Importa JSON dal cantiere'}
         </button>
@@ -132,7 +185,7 @@ function OfficeContent(){
         </div>
       </aside>
       <section className="office-main">
-        <div className="office-banner"><span className="office-banner-dot"/> I dati del cantiere sono di sola lettura. L’archivio dei tecnici rimane separato e invariato.</div>
+        <div className="office-banner"><span className="office-banner-dot"/> I dati del JSON sono precaricati e modificabili nella copia ufficio. Il JSON originale e l'app dei ragazzi rimangono invariati.</div>
         {message&&<div className="office-message" role="status">{message}</div>}
         {!selected?<div className="office-empty"><h2>Seleziona o importa una prova</h2><p>Puoi caricare il backup JSON dell’archivio Piastra o il JSON di una singola prova.</p></div>:
           <>
@@ -143,21 +196,26 @@ function OfficeContent(){
             <>
               {detail?.technicalMismatch&&<div className="office-warning">Attenzione: i risultati memorizzati nel JSON non coincidono con quelli ricalcolati dalle letture. Verifica la prova prima della consegna; nessun valore viene alterato automaticamente.</div>}
               <div className="office-card">
-                <div className="office-cardhead"><h3>01 · Dati ricevuti dal cantiere</h3><span>Non modificabili</span></div>
-                <div className="office-metadata">
-                  <div><small>Committente</small><strong>{detail.committente||'—'}</strong></div>
-                  <div><small>Cantiere</small><strong>{detail.cantiere||'—'}</strong></div>
-                  <div><small>Data prova</small><strong>{detail.dataProva||'—'}</strong></div>
-                  <div><small>Tipologia / strato</small><strong>{detail.testConfig.label}</strong></div>
-                  <div><small>Diametro piastra</small><strong>{detail.diametro||'—'} mm</strong></div>
-                  <div><small>Tecnico</small><strong>{detail.tecnico||'—'}</strong></div>
+                <div className="office-cardhead"><h3>01 · Dati del cantiere nella minuta</h3><span>Precompilati e modificabili</span></div>
+                <p className="office-small">I campi partono dai valori del JSON. Le correzioni valgono solo per questa minuta e vengono salvate nell'archivio ufficio.</p>
+                <div className="office-fields">
+                  {CANTIERE_FIELDS.map(([name,label])=>
+                    <label key={name}>{label}
+                      <div className="office-inputrow">
+                        <input type="text" value={draft[name]??selected.data?.[name]??''}
+                          onChange={e=>editCopy(name,e.target.value)} />
+                        {Object.prototype.hasOwnProperty.call(draft,name)&&
+                          <button className="office-reset" type="button" title="Ripristina il valore ricevuto dal cantiere" onClick={()=>resetCopy(name)}>↶</button>}
+                      </div>
+                    </label>
+                  )}
                 </div>
                 <div className="office-resultstrip">
                   <div><span>Md · 1° ciclo</span><strong>{displayNumber(detail.md,3)}</strong><small>N/mm²</small></div>
                   <div><span>Md’ · 2° ciclo</span><strong>{displayNumber(detail.mdp,3)}</strong><small>N/mm²</small></div>
                   <div><span>Rapporto Md/Md’</span><strong>{displayNumber(detail.rapporto,3)}</strong><small>—</small></div>
                 </div>
-                <p className="office-small">Letture C1 e C2, grafico, foto e risultati vengono trasferiti direttamente dal JSON nella minuta Excel.</p>
+                <p className="office-small">Le letture originali restano conservate. Se occorre correggerle nella copia ufficio, espandi la sezione tecnica in basso: i risultati vengono ricalcolati.</p>
               </div>
               <div className="office-card">
                 <div className="office-cardhead"><h3>02 · Completamento dell’architetto</h3><span>Modificabile</span></div>
@@ -172,6 +230,56 @@ function OfficeContent(){
                 </div>
                 <div className="office-type"><span>Tipologia suggerita dal numero</span><strong>{classifyDocument(draft.numeroDocumento,draft.sogliaDocumento??135000)}</strong></div>
                 <p className="office-small">La soglia riproduce la regola del modello Excel. La tipologia definitiva resta soggetta alla verifica e all’approvazione del responsabile.</p>
+              </div>
+              <div className="office-card office-technical">
+                <details>
+                  <summary>03 · Dati tecnici e letture (correzioni facoltative nella copia ufficio)</summary>
+                  <p className="office-small">Le letture provengono dal JSON. Se vengono corrette, Md, Md' e il grafico sono ricalcolati solo nella minuta di Cast. Le letture originali non vengono sovrascritte.</p>
+                  <div className="office-fields">
+                    <label>Diametro piastra (mm)
+                      <select value={draft.diametro??selected.data?.diametro??'300'} onChange={e=>editCopy('diametro',e.target.value)}>
+                        {['300','450','600'].map(v=><option key={v} value={v}>{v} mm</option>)}
+                      </select>
+                    </label>
+                    <label>Tipologia di prova
+                      <select value={draft.tipoProva??selected.data?.tipoProva??'fondazione'} onChange={e=>editCopy('tipoProva',e.target.value)}>
+                        <option value="fondazione">Fondazione</option>
+                        <option value="fondo_scavo">Fondo scavo</option>
+                        <option value="rilevato">Rilevato</option>
+                      </select>
+                    </label>
+                  </div>
+                  {[
+                    ['c1','1° ciclo',[...detail.testConfig.ciclo1.map(p=>['p'+p,p+' kPa']),['scarico50','Scarico']]],
+                    ['c2','2° ciclo',[...detail.testConfig.ciclo2.map(p=>['p'+p,p+' kPa']),['scarico','Scarico']]]
+                  ].map(([cycle,label,steps])=>
+                    <details className="office-reading-group" key={cycle}>
+                      <summary>{label} · Letture in mm</summary>
+                      {steps.map(([step,stepLabel])=>
+                        <div className="office-readings" key={step}>
+                          <strong>{stepLabel}</strong>
+                          <div className="office-reading-grid">
+                            {(draft[cycle]?.[step]??selected.data?.[cycle]?.[step]??[]).map((reading,index)=>
+                              <label key={step+'-'+index}>Lettura {index+1}
+                                <input type="text" inputMode="decimal" value={reading??''}
+                                  onChange={e=>editReading(cycle,step,index,e.target.value)}/>
+                              </label>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </details>
+                  )}
+                  <label className="office-technical-note">Motivo delle correzioni tecniche
+                    <textarea rows={2} value={draft.notaCorrezioneTecnica??''}
+                      onChange={e=>{setDraft(prev=>({...prev,notaCorrezioneTecnica:e.target.value}));setDirty(true)}}
+                      placeholder="Obbligatorio per esportare se hai modificato le letture o il diametro"/>
+                  </label>
+                  {detail.technicalEdited&&<div className="office-warning">
+                    Le letture o i parametri tecnici sono stati modificati rispetto al JSON. Md, Md' e il grafico sono ricalcolati per la minuta. Inserisci il motivo e verifica la correttezza prima dell'emissione.
+                  </div>}
+                  <button type="button" className="office-save" onClick={resetTechnical}>Ripristina tutti i dati tecnici dal JSON</button>
+                </details>
               </div>
               <div className="office-actions">
                 <button type="button" className="office-save" onClick={()=>void save()}>Salva completamento</button>
