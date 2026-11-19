@@ -111,7 +111,8 @@ function OfficeContent(){
     setSelectedId(record.id);setDraft(record.office||{});setDirty(false);setMessage('');
   }
   async function importFiles(files){
-    if(!files?.length)return;
+    const incomingFiles=Array.from(files||[]);
+    if(!incomingFiles.length)return;
     if(dirty&&!window.confirm('Ci sono modifiche ufficio non salvate. Importare altri JSON senza salvarle?'))return;
     setImporting(true);setMessage('');
     let n=0,invalid=0,duplicates=0;
@@ -122,7 +123,7 @@ function OfficeContent(){
       // essere duplicate o sovrascritte quando Cast reimporta lo stesso JSON.
       const previous=await loadOfficeRecords();
       const fingerprints=new Set(previous.map(rec=>String(rec.originalId)+'|'+JSON.stringify(rec.data)));
-      for(const file of Array.from(files)){
+      for(const file of incomingFiles){
         try{
           const parsed=parseOfficeJson(await file.text(),file.name);
           invalid+=parsed.ignored;
@@ -183,7 +184,7 @@ function OfficeContent(){
           {importing?'Importazione…':'Importa JSON dal cantiere'}
         </button>
         <input ref={fileRef} hidden multiple type="file" accept=".json,.txt,application/json,text/plain"
-          onChange={event=>{void importFiles(event.target.files);event.target.value=''}}/>
+          onChange={event=>{const selectedFiles=Array.from(event.currentTarget.files||[]);event.currentTarget.value='';void importFiles(selectedFiles)}}/>
         <label className="office-search-label">Cerca tra le prove importate
           <input type="search" value={search} placeholder="Numero, cantiere, committente…" onChange={e=>setSearch(e.target.value)}/>
         </label>
