@@ -171,13 +171,13 @@ function OfficeContent(){
       if(detail.technicalEdited&&!String(draft.notaCorrezioneTecnica||'').trim())throw new Error('Indica il motivo delle correzioni tecniche prima di esportare.');
       if(dirty)await saveDraft();
       await exportMinutaExcel(buildOfficeReport(selected,draft));
-      setMessage('Minuta Cast PDF 19 cm generata: verifica il file con nome CAST-MODELLO-V4. Se il nome non cambia, stai usando una vecchia anteprima.');
+      setMessage('Minuta Cast PDF 19 cm generata: verifica il file con nome CAST-MODELLO-V5. Se il nome non cambia, stai usando una vecchia anteprima.');
     }catch(error){setMessage('Esportazione non riuscita: '+error.message)}
   }
   return <main className="office-root">
     <header className="office-header">
       <div className="office-brand"><img src="/logo-dismat.jpg" alt="Logo DISMAT"/>
-        <div><strong>LABORATORIO DISMAT</strong><span>Minuta Cast · modello originale · versione 4</span></div>
+        <div><strong>LABORATORIO DISMAT</strong><span>Minuta Cast · modello originale · versione 5</span></div>
       </div>
       <div className="office-header-actions"><a href="/">Apri app cantiere</a><button type="button" onClick={logout}>Esci</button></div>
     </header>
@@ -331,7 +331,7 @@ function OfficeContent(){
               </div>
               <div className="office-actions">
                 <button type="button" className="office-save" onClick={()=>void save()}>Salva completamento</button>
-                <button type="button" className="office-export" onClick={()=>void downloadExcel()}>Genera minuta Cast · versione 4</button>
+                <button type="button" className="office-export" onClick={()=>void downloadExcel()}>Genera minuta Cast · versione 5</button>
               </div>
             </>}
           </>
