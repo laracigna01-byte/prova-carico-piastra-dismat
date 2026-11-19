@@ -79,3 +79,17 @@
 .office-reading-grid input{width:100%;background:white;border:1px solid #d5d0c7;border-radius:7px;padding:9px;color:#34312c}
 .office-technical-note{display:flex;flex-direction:column;gap:8px;font-weight:700;font-size:12px;margin-top:13px}
 .office-technical .office-save{margin-top:15px}
+
+/* Tipo documento per la minuta Cast: scelta esplicita, soglia solo avanzata. */
+.office-document-choice{border:0;margin:20px 0 0;padding:0;min-width:0}
+.office-document-choice legend{font-size:13px;font-weight:800;color:#3e3526;padding:0}
+.office-document-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+.office-document-option{display:flex;align-items:center;gap:10px;min-width:0;padding:14px;border:1px solid #ddd6c8;border-radius:9px;background:#faf9f6;color:#4a4032;font-size:12px;font-weight:750;line-height:1.35;cursor:pointer}
+.office-document-option.selected{border-color:#c3a344;background:#fff7dd;box-shadow:inset 0 0 0 1px #ddc365}
+.office-document-option input[type="radio"]{width:18px;height:18px;accent-color:#947121;flex:0 0 auto;margin:0}
+.office-document-option:focus-within{outline:2px solid #b38b39;outline-offset:2px}
+.office-document-advanced{margin-top:16px;padding:13px 15px;border:1px solid #e6e0d3;border-radius:9px;background:#fcfbf8}
+.office-document-advanced summary{font-size:12px;font-weight:750;color:#67583e;cursor:pointer}
+.office-document-advanced label{display:flex;flex-direction:column;gap:8px;max-width:420px;margin-top:14px;font-size:12px;font-weight:700;color:#514a3e}
+.office-document-advanced input{border:1px solid #d5d0c7;border-radius:8px;padding:10px 12px;color:#252525;background:#fff}
+@media(max-width:780px){.office-document-options{grid-template-columns:1fr}.office-document-option{min-height:46px}}

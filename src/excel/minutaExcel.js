@@ -1,5 +1,6 @@
 /* Minuta Cast: intestazione originale e screenshot PDF generato automaticamente. */
 import {captureOriginalPlatePdf} from '../office/pdfSnapshot';
+import {classifyDocument} from '../office/officeData';
 const NS = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
 const REL = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
 const PKG = 'http://schemas.openxmlformats.org/package/2006/relationships';
@@ -69,7 +70,9 @@ function rels(items){return `<?xml version="1.0" encoding="UTF-8" standalone="ye
 export function buildMinutaExcel(d){
  const test=d||{}, rows=Array.isArray(test.tableRows)?test.tableRows:[], config=test.testConfig||{}, photo=photoBytes(test.reportImage),logo=photoBytes(test.logoDataUrl);
  const numeroDoc=numeric(test.numeroDocumento), soglia=numeric(test.sogliaDocumento)??135000;
- const tipo=numeroDoc===null?'DA DEFINIRE':numeroDoc<soglia?'RAPPORTO DI PROVA':'CERTIFICATO DI PROVA';
+ const modalita=['rapporto','certificato'].includes(test.modalitaDocumento)?test.modalitaDocumento:'auto';
+ const tipo=classifyDocument(numeroDoc,soglia,modalita);
+ const scelta=modalita==='rapporto'?'RAPPORTO DI PROVA':modalita==='certificato'?'CERTIFICATO DI PROVA':'AUTOMATICO';
 
 
 
@@ -118,9 +121,11 @@ export function buildMinutaExcel(d){
  [test.chart1,test.chartScarico1,test.chart2,test.chartScarico2].forEach((values,k)=>{(values||[]).forEach((p,i)=>{put(graph,i+3,k*2+1,numeric(p.x),7);put(graph,i+3,k*2+2,numeric(p.y),7);});});
  const param=sheet();param.cols=[[1,30],[2,28],[3,24],[4,18]];band(param,1,1,4,'PARAMETRI AMMINISTRATIVI',1);param.heights.set(1,32);
  put(param,3,1,'Numero documento (MINUTA!C2)',3);frm(param,3,2,'IF(ISNUMBER(MINUTA!C2),MINUTA!C2,"")',numeroDoc??'',4);
- put(param,4,1,'Soglia (modificabile)',3);put(param,4,2,soglia,4);
- put(param,6,1,'Tipo suggerito',2);frm(param,6,2,'IF(ISNUMBER(B3),IF(B3<B4,"RAPPORTO DI PROVA","CERTIFICATO DI PROVA"),"DA DEFINIRE")',tipo,6);
- band(param,8,1,4,'Modifica il numero in MINUTA!C2 oppure la soglia qui in B4: titolo e intestazione si aggiornano. Verificare prima dell’emissione.',8);
+ put(param,4,1,'Soglia automatica (avanzata)',3);put(param,4,2,soglia,4);
+ put(param,5,1,'Modalità documento',3);put(param,5,2,scelta,4);
+ put(param,6,1,'Titolo risultante',2);
+ frm(param,6,2,'IF(B5="RAPPORTO DI PROVA","RAPPORTO DI PROVA",IF(B5="CERTIFICATO DI PROVA","CERTIFICATO DI PROVA",IF(ISNUMBER(B3),IF(B3<B4,"RAPPORTO DI PROVA","CERTIFICATO DI PROVA"),"DA DEFINIRE")))',tipo,6);
+ band(param,8,1,4,'La modalità B5 determina il titolo in MINUTA. In automatico usa il numero in MINUTA!C2 e la soglia B4. Verificare prima dell’emissione.',8);
  const sheets=[main,reading,graph,param];
  const book=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="${NS}" xmlns:r="${REL}"><bookViews><workbookView/></bookViews><sheets>${['MINUTA','LETTURE','GRAFICO','PARAMETRI'].map((n,i)=>`<sheet name="${n}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets><definedNames><definedName name="_xlnm.Print_Area" localSheetId="0">MINUTA!$A$1:$L$61</definedName></definedNames><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`;
  const parts=[['[Content_Types].xml',`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="${CT}"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>${[...new Set([photo?.ext,logo?.ext].filter(Boolean))].map(ext=>`<Default Extension="${ext}" ContentType="image/${ext==='jpeg'?'jpeg':ext}"/>`).join('')}<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/><Override PartName="/xl/charts/chart1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/></Types>`],
@@ -147,4 +152,4 @@ export async function exportMinutaExcel(data){
  });
  const reportImage=await captureOriginalPlatePdf(data);
  if(!/^data:image\/png;base64,[A-Za-z0-9+/=]{100,}$/.test(reportImage))throw new Error('Immagine del PDF non generata: minuta non esportata.');
- const blob=buildMinutaExcel({...data,logoDataUrl,reportImage});const url=URL.createObjectURL(blob);const a=document.createElement('a');const name=String(data?.verbale||'senza-numero').replace(/[^A-Za-z0-9_-]/g,'_');a.href=url;a.download=`minuta-CAST-MODELLO-V4-${name}.xlsx`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2500);}
+ const blob=buildMinutaExcel({...data,logoDataUrl,reportImage});const url=URL.createObjectURL(blob);const a=document.createElement('a');const name=String(data?.verbale||'senza-numero').replace(/[^A-Za-z0-9_-]/g,'_');a.href=url;a.download=`minuta-CAST-MODELLO-V5-${name}.xlsx`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2500);}
