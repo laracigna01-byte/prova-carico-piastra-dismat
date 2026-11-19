@@ -111,20 +111,23 @@ function OfficeContent(){
     setSelectedId(record.id);setDraft(record.office||{});setDirty(false);setMessage('');
   }
   async function importFiles(files){
-    if(!files?.length)return;
+    const incomingFiles=Array.from(files||[]);
+    if(!incomingFiles.length)return;
     if(dirty&&!window.confirm('Ci sono modifiche ufficio non salvate. Importare altri JSON senza salvarle?'))return;
     setImporting(true);setMessage('');
     let n=0,invalid=0,duplicates=0;
+    const invalidReasons=[];
     const added=[],failures=[];
     try{
       // Leggere ogni volta l'archivio ufficio: le prove gia' completate non devono
       // essere duplicate o sovrascritte quando Cast reimporta lo stesso JSON.
       const previous=await loadOfficeRecords();
       const fingerprints=new Set(previous.map(rec=>String(rec.originalId)+'|'+JSON.stringify(rec.data)));
-      for(const file of Array.from(files)){
+      for(const file of incomingFiles){
         try{
           const parsed=parseOfficeJson(await file.text(),file.name);
           invalid+=parsed.ignored;
+          invalidReasons.push(...(parsed.problems||[]).slice(0,3).map(problem=>file.name+': '+problem));
           for(const item of parsed.records){
             const fingerprint=String(item.originalId)+'|'+JSON.stringify(item.data);
             if(fingerprints.has(fingerprint)){duplicates++;continue}
@@ -139,7 +142,7 @@ function OfficeContent(){
       }else setRecords(previous);
       const report=n+' prova/e importata/e nell’archivio ufficio.'
         +(duplicates?' '+duplicates+' gia\u0300 presenti, mantenute senza modifiche.':'')
-        +(invalid?' '+invalid+' record ignorati.':'');
+        +(invalid?' '+invalid+' record ignorati: '+invalidReasons.slice(0,3).join(' | ')+(invalidReasons.length>3?' | ...':'')+'.':'');
       setMessage(report+(failures.length?' Problemi: '+failures.join(' | '):''));
     }catch(error){
       setMessage('Importazione non riuscita: '+error.message);
@@ -180,8 +183,8 @@ function OfficeContent(){
         <button className="office-import" disabled={importing||loading} type="button" onClick={()=>fileRef.current?.click()}>
           {importing?'Importazione…':'Importa JSON dal cantiere'}
         </button>
-        <input ref={fileRef} hidden multiple type="file" accept=".json,application/json"
-          onChange={event=>{void importFiles(event.target.files);event.target.value=''}}/>
+        <input ref={fileRef} hidden multiple type="file" accept=".json,.txt,application/json,text/plain"
+          onChange={event=>{const selectedFiles=Array.from(event.currentTarget.files||[]);event.currentTarget.value='';void importFiles(selectedFiles)}}/>
         <label className="office-search-label">Cerca tra le prove importate
           <input type="search" value={search} placeholder="Numero, cantiere, committente…" onChange={e=>setSearch(e.target.value)}/>
         </label>
@@ -198,6 +201,7 @@ function OfficeContent(){
       </aside>
       <section className="office-main">
         <div className="office-banner"><span className="office-banner-dot"/> I dati del JSON sono precaricati e modificabili nella copia ufficio. Il JSON originale e l'app dei ragazzi rimangono invariati.</div>
+        {selected?.importNote&&<div className="office-warning" role="alert">{selected.importNote}</div>}
         {message&&<div className="office-message" role="status">{message}</div>}
         {!selected?<div className="office-empty"><h2>Seleziona o importa una prova</h2><p>Puoi caricare il backup JSON dell’archivio Piastra o il JSON di una singola prova.</p></div>:
           <>

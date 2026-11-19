@@ -27,23 +27,59 @@ export function classifyDocument(num,threshold=135000){
   if(!Number.isFinite(n))return 'DA DEFINIRE';
   return n<(Number.isFinite(t)?t:135000)?'RAPPORTO DI PROVA':'CERTIFICATO DI PROVA';
 }
+// Accetta i JSON creati dalla Piastra, anche nelle versioni con un ciclo
+// incompleto. Non altera mai i dati nel file originale.
+const normalizeTestType = value => {
+  const raw=String(value??'').trim().toLowerCase().replace(/\s+/g,' ').replace(/[-_]/g,' ');
+  if(raw==='fondazione')return 'fondazione';
+  if(raw==='fondo scavo')return 'fondo_scavo';
+  if(raw==='rilevato')return 'rilevato';
+  return null;
+};
 export function parseOfficeJson(text,sourceName='prova.json'){
-  const parsed=JSON.parse(text);
-  const items=Array.isArray(parsed)?parsed:Array.isArray(parsed?.records)?parsed.records:[parsed];
-  const records=items.filter(r=>{
-    const d=isObj(r?.data)?r.data:r;
-    return isObj(d)&&isObj(d.c1)&&isObj(d.c2)&&typeof d.tipoProva==='string'&&Boolean(TEST_TYPES[d.tipoProva]);
-  }).map((r,i)=>{
-    const data=isObj(r.data)?r.data:r;
-    return {
+  let parsed;
+  try{
+    parsed=JSON.parse(String(text??'').replace(/^\uFEFF/,'').trim());
+  }catch(error){
+    throw new Error('Il file non contiene JSON leggibile. Verifica che sia il backup esportato dalla Piastra (può anche avere estensione .txt). Dettaglio: '+error.message);
+  }
+  const items=Array.isArray(parsed)?parsed:
+    Array.isArray(parsed?.records)?parsed.records:
+    Array.isArray(parsed?.tests)?parsed.tests:
+    Array.isArray(parsed?.prove)?parsed.prove:
+    [parsed];
+  const records=[],problems=[];
+  for(let i=0;i<items.length;i++){
+    const r=items[i];
+    const data=isObj(r?.data)?r.data:r;
+    const indexLabel=String(r?.id??r?.data?.verbale??'record '+(i+1));
+    if(!isObj(data)){
+      problems.push(indexLabel+': dati prova assenti');continue;
+    }
+    const c1=isObj(data.c1),c2=isObj(data.c2);
+    if(!c1&&!c2){
+      problems.push(indexLabel+': mancano le letture C1/C2 della Piastra');continue;
+    }
+    const type=normalizeTestType(data.tipoProva??data.testConfig?.label);
+    if(!type){
+      problems.push(indexLabel+': tipologia prova non riconosciuta ('
+        +String(data.tipoProva??'non indicata')+')');continue;
+    }
+    const normalized={...data,tipoProva:type,c1:c1?data.c1:{},c2:c2?data.c2:{}};
+    records.push({
       id:typeof crypto!=='undefined'&&crypto.randomUUID?crypto.randomUUID():'office-'+Date.now()+'-'+Math.random().toString(36).slice(2),
-      originalId:String(r.id||data.verbale||'prova-'+(i+1)),
-      sourceName, importedAt:new Date().toISOString(),
-      data:structuredClone(data),office:{}
-    };
-  });
-  if(!records.length)throw new Error('Il JSON non contiene prove Piastra valide con i due cicli di lettura.');
-  return {records,ignored:items.length-records.length};
+      originalId:String(r?.id||data.verbale||'prova-'+(i+1)),
+      sourceName,importedAt:new Date().toISOString(),
+      data:structuredClone(normalized),office:{},
+      importNote:(!c1||!c2)?'Prova parziale: un ciclo non è presente nel JSON. Verificare prima della consegna.':null
+    });
+  }
+  if(!records.length){
+    throw new Error('Nessuna prova Piastra importabile nel file. '
+      +(problems.length?problems.slice(0,3).join(' | '):'Il backup non contiene prove.')
+      +(problems.length>3?' (e altri '+(problems.length-3)+' problemi)':''));
+  }
+  return {records,ignored:problems.length,problems};
 }
 // Calcolo ricostruito dal motore corrente: lo stesso motore dei tecnici rimane intatto.
 // L'ufficio usa i risultati del JSON quando disponibili, e ricostruisce solo grafico/tabella.
