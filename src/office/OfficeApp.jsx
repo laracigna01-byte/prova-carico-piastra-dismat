@@ -85,6 +85,12 @@ function OfficeContent(){
   const [message,setMessage]=useState('');
   const [search,setSearch]=useState('');
   const selected=records.find(r=>r.id===selectedId)||null;
+  const documentMode=draft.modalitaDocumento??'auto';
+  const effectiveDocumentType=classifyDocument(
+    draft.numeroDocumento??selected?.data?.numeroDocumento,
+    draft.sogliaDocumento??135000,
+    documentMode
+  );
   const detail=useMemo(()=>{
     if(!selected)return null;
     try{return buildOfficeReport(selected,draft)}catch(error){return {error:error.message}}
@@ -240,12 +246,38 @@ function OfficeContent(){
                     <label key={name}>{label}<input type="text" inputMode={name==='numeroDocumento'?'numeric':'text'}
                       value={draft[name]??selected.data?.[name]??({naturaCampioni:detail.testConfig.label,richiedente:detail.committente,provaEseguitaDa:detail.tecnico}[name]??'')} onChange={e=>{setDraft(prev=>({...prev,[name]:e.target.value}));setDirty(true)}}/></label>
                   )}
-                  <label>Soglia tipo documento
-                    <input type="number" min="0" value={draft.sogliaDocumento??135000} onChange={e=>{setDraft(prev=>({...prev,sogliaDocumento:e.target.value}));setDirty(true)}}/>
-                  </label>
                 </div>
-                <div className="office-type"><span>Tipologia suggerita dal numero</span><strong>{classifyDocument(draft.numeroDocumento,draft.sogliaDocumento??135000)}</strong></div>
-                <p className="office-small">La soglia riproduce la regola del modello Excel. La tipologia definitiva resta soggetta alla verifica e all’approvazione del responsabile.</p>
+                <fieldset className="office-document-choice">
+                  <legend>Tipo di documento da generare</legend>
+                  <div className="office-document-options">
+                    {[
+                      ['auto','Automatico in base al numero'],
+                      ['rapporto','Rapporto di prova'],
+                      ['certificato','Certificato di prova']
+                    ].map(([mode,label])=>
+                      <label key={mode} className={documentMode===mode?'office-document-option selected':'office-document-option'}>
+                        <input type="radio" name="modalitaDocumento" value={mode}
+                          checked={documentMode===mode}
+                          onChange={()=>{setDraft(prev=>({...prev,modalitaDocumento:mode}));setDirty(true)}}/>
+                        <span>{label}</span>
+                      </label>
+                    )}
+                  </div>
+                </fieldset>
+                <div className="office-type"><span>Documento che verrà generato</span><strong>{effectiveDocumentType}</strong></div>
+                <p className="office-small">
+                  {documentMode==='auto'
+                    ?'In modalità automatica il titolo segue il numero documento e la soglia. Se manca il numero, il titolo resta da definire.'
+                    :'Scelta manuale per questa minuta: il titolo non dipende dal numero o dalla soglia. Verifica il tipo di documento prima della consegna.'}
+                </p>
+                <details className="office-document-advanced">
+                  <summary>Impostazioni avanzate · soglia automatica</summary>
+                  <label>Soglia per la classificazione automatica
+                    <input type="number" min="0" step="1" value={draft.sogliaDocumento??135000}
+                      onChange={e=>{setDraft(prev=>({...prev,sogliaDocumento:e.target.value}));setDirty(true)}}/>
+                  </label>
+                  <p className="office-small">Valore originale 135000. Si applica soltanto alla scelta automatica. Non serve modificarlo per scegliere una minuta.</p>
+                </details>
               </div>
               <div className="office-card office-technical">
                 <details>
