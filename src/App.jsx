@@ -1706,6 +1706,14 @@ async function importArchiveBackup(file) {
               Archivio
             </button>
 
+            <a
+              href="/ufficio"
+              className="elaborazioni-link"
+              aria-label="Apri Elaborazioni, area ufficio"
+            >
+              Elaborazioni
+            </a>
+
             <button
               type="button"
               className="theme-btn"
