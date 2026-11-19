@@ -22,7 +22,10 @@ const interp = (x,xp,fp) => {
   for(let i=0;i<xp.length-1;i++)if(x>=xp[i]&&x<=xp[i+1])return fp[i]+((fp[i+1]-fp[i])*(x-xp[i]))/(xp[i+1]-xp[i]);
   return 0;
 };
-export function classifyDocument(num,threshold=135000){
+// La scelta manuale vale solo per la copia di ufficio e non modifica i dati tecnici.
+export function classifyDocument(num,threshold=135000,mode='auto'){
+  if(mode==='rapporto')return 'RAPPORTO DI PROVA';
+  if(mode==='certificato')return 'CERTIFICATO DI PROVA';
   const n=numeric(num),t=numeric(threshold);
   if(!Number.isFinite(n))return 'DA DEFINIRE';
   return n<(Number.isFinite(t)?t:135000)?'RAPPORTO DI PROVA':'CERTIFICATO DI PROVA';
