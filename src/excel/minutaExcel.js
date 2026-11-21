@@ -62,7 +62,7 @@ function drawingXML(photo,logo){
  const coords=(x,y)=>`<xdr:from><xdr:col>${x}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${y}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>`;
  const to=(x,y)=>`<xdr:to><xdr:col>${x}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${y}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to>`;
  const pic=photo?`<xdr:oneCellAnchor>${coords(1,18)}<xdr:ext cx="6840000" cy="6300000"/><xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="Ritaglio PDF Piastra - 19 cm"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId2"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:oneCellAnchor>`:'';
- const logoAnchor=logo?`<xdr:twoCellAnchor editAs="oneCell">${coords(0,0)}${to(6,1)}<xdr:pic><xdr:nvPicPr><xdr:cNvPr id="3" name="Logo DISMAT"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId3"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor>`:'';
+ const logoAnchor=logo?`<xdr:oneCellAnchor><xdr:from><xdr:col>1</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>0</xdr:row><xdr:rowOff>30000</xdr:rowOff></xdr:from><xdr:ext cx="900000" cy="891892"/><xdr:pic><xdr:nvPicPr><xdr:cNvPr id="3" name="Logo DISMAT"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId3"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:oneCellAnchor>`:'';
  const chart=`<xdr:twoCellAnchor editAs="oneCell">${coords(0,39)}${to(12,51)}<xdr:graphicFrame macro=""><xdr:nvGraphicFramePr><xdr:cNvPr id="1" name="Grafico carico spostamento"/><xdr:cNvGraphicFramePr/></xdr:nvGraphicFramePr><xdr:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></xdr:xfrm><a:graphic><a:graphicData uri="${XL_CHART}"><c:chart xmlns:c="${XL_CHART}" r:id="rId1"/></a:graphicData></a:graphic></xdr:graphicFrame><xdr:clientData/></xdr:twoCellAnchor>`;
  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><xdr:wsDr xmlns:xdr="${XL_DRAW}" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" ${r}>${logoAnchor}${pic}</xdr:wsDr>`;
 }
@@ -91,13 +91,13 @@ export function buildMinutaExcel(d){
  });
  main.isMinuta=true;main.drawing=true;
  for(let row=1;row<=54;row++)main.heights.set(row,14.1);
- main.heights.set(1,99.2);
+ main.heights.set(1,75);
  for(let row=2;row<=6;row++)main.heights.set(row,12.95);
  main.heights.set(7,16.5);main.heights.set(8,18);
  for(let row=9;row<=17;row++)main.heights.set(row,12.95);
  main.heights.set(18,14.1);
  const heading="L A B O R A T O R I O\nD I S M A T\nSperimentazione sulle Strutture e sui Materiali da Costruzione\nAutorizzato ai sensi dell'art. 20 Legge 1086/71 con D.M. 415 del 01/12/2020\nc/da Andolina S.S. 122 Km 28 92024 CANICATTI' (AG)\nPI/CF 04534491008 - Reg. Imprese di Agrigento - Cap. Sociale € 280.300 i.v.\ntel. 0922 859406 - info.dismat@gmail.com - www.dismat.it";
- put(main,1,14,heading,16);main.merges.push('N1:AO1');
+ put(main,1,7,heading,16);main.merges.push('G1:AH1');
  // Celle di destinazione estratte dall'originale, non una versione reinterpretata.
  // Le etichette rimangono dove le ha messe Cast; sono editabili i dati.
  frm(main,2,2,'IF(PARAMETRI!B6="CERTIFICATO DI PROVA","Certificato nr.",IF(PARAMETRI!B6="RAPPORTO DI PROVA","Rapporto nr.","Documento nr."))',
@@ -133,8 +133,8 @@ export function buildMinutaExcel(d){
    ...Array.from({length:9},(_,i)=>'N'+(i+8)+':AO'+(i+8))
  );
  // Titolo unico e dinamico immediatamente sopra la fotografia del PDF.
- frm(main,18,22,'IF(PARAMETRI!B6="DA DEFINIRE","",PARAMETRI!B6)',
-   tipo==='DA DEFINIRE'?'':tipo,12);main.merges.push('V18:AO18');
+ frm(main,18,2,'IF(PARAMETRI!B6="DA DEFINIRE","",PARAMETRI!B6)',
+   tipo==='DA DEFINIRE'?'':tipo,12);main.merges.push('B18:AH18');
  // Il PDF autentico della Piastra viene catturato dal generatore esistente
  // e inserito come UNICA immagine tecnica, non ridisegnato qui.
  const reading=sheet();reading.width=7;reading.cols=[[1,16],[2,18],[3,16],[4,17],[5,19],[6,19],[7,24]];
@@ -157,7 +157,7 @@ export function buildMinutaExcel(d){
  frm(param,6,2,'IF(B5="RAPPORTO DI PROVA","RAPPORTO DI PROVA",IF(B5="CERTIFICATO DI PROVA","CERTIFICATO DI PROVA",IF(ISNUMBER(B3),IF(B3<B4,"RAPPORTO DI PROVA","CERTIFICATO DI PROVA"),"DA DEFINIRE")))',tipo,6);
  band(param,8,1,4,'La modalità B5 determina il titolo in MINUTA. In automatico usa il numero in MINUTA!G2 e la soglia B4. Verificare prima dell’emissione.',8);
  const sheets=[main,reading,graph,param];
- const book=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="${NS}" xmlns:r="${REL}"><bookViews><workbookView/></bookViews><sheets>${['MINUTA','LETTURE','GRAFICO','PARAMETRI'].map((n,i)=>`<sheet name="${n}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets><definedNames><definedName name="_xlnm.Print_Area" localSheetId="0">MINUTA!$A$1:$AR$54</definedName></definedNames><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`;
+ const book=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="${NS}" xmlns:r="${REL}"><bookViews><workbookView/></bookViews><sheets>${['MINUTA','LETTURE','GRAFICO','PARAMETRI'].map((n,i)=>`<sheet name="${n}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets><definedNames><definedName name="_xlnm.Print_Area" localSheetId="0">MINUTA!$A$1:$AK$54</definedName></definedNames><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`;
  const parts=[['[Content_Types].xml',`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="${CT}"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>${[...new Set([photo?.ext,logo?.ext].filter(Boolean))].map(ext=>`<Default Extension="${ext}" ContentType="image/${ext==='jpeg'?'jpeg':ext}"/>`).join('')}<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/><Override PartName="/xl/charts/chart1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/></Types>`],
  ['_rels/.rels',rels([['rId1',REL+'/officeDocument','xl/workbook.xml']])],
  ['xl/workbook.xml',book],
@@ -182,4 +182,4 @@ export async function exportMinutaExcel(data){
  });
  const reportImage=await captureOriginalPlatePdf(data);
  if(!/^data:image\/png;base64,[A-Za-z0-9+/=]{100,}$/.test(reportImage))throw new Error('Immagine del PDF non generata: minuta non esportata.');
- const blob=buildMinutaExcel({...data,logoDataUrl,reportImage});const url=URL.createObjectURL(blob);const a=document.createElement('a');const name=String(data?.verbale||'senza-numero').replace(/[^A-Za-z0-9_-]/g,'_');a.href=url;a.download=`minuta-CAST-GRIGLIA-CAST-V7-${name}.xlsx`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2500);}
+ const blob=buildMinutaExcel({...data,logoDataUrl,reportImage});const url=URL.createObjectURL(blob);const a=document.createElement('a');const name=String(data?.verbale||'senza-numero').replace(/[^A-Za-z0-9_-]/g,'_');a.href=url;a.download=`minuta-CAST-GRIGLIA-CAST-V8-${name}.xlsx`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2500);}
