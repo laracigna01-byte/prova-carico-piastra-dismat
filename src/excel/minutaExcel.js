@@ -81,8 +81,9 @@ export function buildMinutaExcel(d){
 
  const main=sheet();main.cols=[[1,9.5],[2,6.5],[3,9.5],[4,9.5],[5,7],[6,7],[7,7],[8,9.5],[9,10],[10,9],[11,8],[12,9]];main.drawing=true;main.isMinuta=true;
  for(let row=1;row<=61;row++)main.heights.set(row,12);
- main.heights.set(1,88);main.heights.set(5,7);main.heights.set(7,5);main.heights.set(14,5);main.heights.set(16,6);main.heights.set(17,5);main.heights.set(18,18);
- // Copia fedele dell'ordine dei campi nella scheda "28) PROVA SU PIASTRA" di Cast.
+ main.heights.set(1,75);main.heights.set(4,16);main.heights.set(5,7);main.heights.set(7,5);main.heights.set(14,12);main.heights.set(16,12);main.heights.set(17,5);main.heights.set(18,18);
+ // Modello della consegna: foglio "1 (4)" del file 66985 di Cast.
+ // Il foglio "28) PROVA SU PIASTRA" contiene le elaborazioni tecniche, non la sua minuta di consegna.
  const heading="L A B O R A T O R I O\nD I S M A T\nSperimentazione sulle Strutture e sui Materiali da Costruzione\nAutorizzato ai sensi dell'art. 20 Legge 1086/71 con D.M. 415 del 01/12/2020\nc/da Andolina S.S. 122 Km 28 92024  CANICATTI' (AG)\nPI/CF 04534491008 - Reg. Imprese di Agrigento - Cap. Sociale € 280.300 i.v.\ntel. 0922 859406 - info.dismat@gmail.com - www.dismat.it";
  band(main,1,5,12,heading,11);
  function triple(row,l1,v1,l2,v2,l3,v3){
@@ -93,9 +94,15 @@ export function buildMinutaExcel(d){
  triple(2,'Rapporto nr.',numeroDoc,'Data:',test.dataDocumento,'Natura dei campioni:',test.naturaCampioni||config.label||'');
  frm(main,2,1,'IF(PARAMETRI!B6="CERTIFICATO DI PROVA","Certificato nr.",IF(PARAMETRI!B6="RAPPORTO DI PROVA","Rapporto nr.","Documento nr."))',tipo==='CERTIFICATO DI PROVA'?'Certificato nr.':tipo==='RAPPORTO DI PROVA'?'Rapporto nr.':'Documento nr.',3);
  triple(3,'Protocollo:',test.protocollo,'Data:',test.dataProtocollo,'Data della prova:',test.dataProva);
+ // Rigo 4 dell'originale: non precompilare valori non presenti nel JSON.
+ put(main,4,1,'Verb. accettazione nr:',3);put(main,4,3,test.verbaleAccettazione,13);
+ put(main,4,5,'Data:',3);put(main,4,6,test.dataAccettazione,13);
+ put(main,4,8,'Consegna in Laboratorio:',3);put(main,4,11,test.consegnaLaboratorio,13);
+ main.merges.push('A4:B4','C4:D4','F4:G4','H4:J4','K4:L4');
  function single(row,label,value){
-   put(main,row,1,label,3);put(main,row,4,value,13);
-   main.merges.push('A'+row+':C'+row,'D'+row+':L'+row);
+   const wide=[12,13,14].includes(row);
+   put(main,row,1,label,3);put(main,row,wide?5:4,value,13);
+   main.merges.push('A'+row+':'+(wide?'D':'C')+row,(wide?'E':'D')+row+':L'+row);
  }
  single(6,'Oggetto dei lavori:',test.oggettoLavori);
  single(8,'Ubicazione Cantiere:',test.ubicazioneCantiere||test.cantiere);
@@ -103,8 +110,10 @@ export function buildMinutaExcel(d){
  single(10,'Direttore dei Lavori:',test.direttoreLavori);
  single(11,'Impresa:',test.impresa);
  single(12,'Proprietario / Ente appaltante:',test.proprietario);
- single(13,'Prova eseguita da:',test.provaEseguitaDa||test.tecnico);
- single(15,'La lettera di richiesta:',test.letteraRichiesta);
+ single(13,'Direttore di Stabilimento/Produzione:',test.direttoreStabilimento);
+ single(14,'Collaudatore / Tecnico Verificatore:',test.collaudatore);
+ single(15,'Prova eseguita da:',test.provaEseguitaDa||test.tecnico);
+ single(16,'La lettera di richiesta:',test.letteraRichiesta);
  frm(main,18,1,'IF(PARAMETRI!B6="DA DEFINIRE","",PARAMETRI!B6)',tipo==='DA DEFINIRE'?'':tipo,12);main.merges.push('A18:L18');
  // Il risultato tecnico originale inizia subito sotto il titolo, con larghezza fisica di 19 cm.
  const reading=sheet();reading.width=7;reading.cols=[[1,16],[2,18],[3,16],[4,17],[5,19],[6,19],[7,24]];
@@ -152,4 +161,4 @@ export async function exportMinutaExcel(data){
  });
  const reportImage=await captureOriginalPlatePdf(data);
  if(!/^data:image\/png;base64,[A-Za-z0-9+/=]{100,}$/.test(reportImage))throw new Error('Immagine del PDF non generata: minuta non esportata.');
- const blob=buildMinutaExcel({...data,logoDataUrl,reportImage});const url=URL.createObjectURL(blob);const a=document.createElement('a');const name=String(data?.verbale||'senza-numero').replace(/[^A-Za-z0-9_-]/g,'_');a.href=url;a.download=`minuta-CAST-MODELLO-V5-${name}.xlsx`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2500);}
+ const blob=buildMinutaExcel({...data,logoDataUrl,reportImage});const url=URL.createObjectURL(blob);const a=document.createElement('a');const name=String(data?.verbale||'senza-numero').replace(/[^A-Za-z0-9_-]/g,'_');a.href=url;a.download=`minuta-CAST-ORIGINALE-V6-${name}.xlsx`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2500);}
