@@ -81,7 +81,7 @@ export function buildMinutaExcel(d){
 
  const main=sheet();main.cols=[[1,9.5],[2,6.5],[3,9.5],[4,9.5],[5,7],[6,7],[7,7],[8,9.5],[9,10],[10,9],[11,8],[12,9]];main.drawing=true;main.isMinuta=true;
  for(let row=1;row<=61;row++)main.heights.set(row,12);
- main.heights.set(1,75);main.heights.set(5,7);main.heights.set(7,5);main.heights.set(14,12);main.heights.set(16,12);main.heights.set(17,5);main.heights.set(18,18);
+ main.heights.set(1,75);main.heights.set(4,16);main.heights.set(5,7);main.heights.set(7,5);main.heights.set(14,12);main.heights.set(16,12);main.heights.set(17,5);main.heights.set(18,18);
  // Modello della consegna: foglio "1 (4)" del file 66985 di Cast.
  // Il foglio "28) PROVA SU PIASTRA" contiene le elaborazioni tecniche, non la sua minuta di consegna.
  const heading="L A B O R A T O R I O\nD I S M A T\nSperimentazione sulle Strutture e sui Materiali da Costruzione\nAutorizzato ai sensi dell'art. 20 Legge 1086/71 con D.M. 415 del 01/12/2020\nc/da Andolina S.S. 122 Km 28 92024  CANICATTI' (AG)\nPI/CF 04534491008 - Reg. Imprese di Agrigento - Cap. Sociale € 280.300 i.v.\ntel. 0922 859406 - info.dismat@gmail.com - www.dismat.it";
@@ -95,10 +95,14 @@ export function buildMinutaExcel(d){
  frm(main,2,1,'IF(PARAMETRI!B6="CERTIFICATO DI PROVA","Certificato nr.",IF(PARAMETRI!B6="RAPPORTO DI PROVA","Rapporto nr.","Documento nr."))',tipo==='CERTIFICATO DI PROVA'?'Certificato nr.':tipo==='RAPPORTO DI PROVA'?'Rapporto nr.':'Documento nr.',3);
  triple(3,'Protocollo:',test.protocollo,'Data:',test.dataProtocollo,'Data della prova:',test.dataProva);
  // Rigo 4 dell'originale: non precompilare valori non presenti nel JSON.
- triple(4,'Verb. accettazione nr:',test.verbaleAccettazione,'Data:',test.dataAccettazione,'Consegna in Laboratorio:',test.consegnaLaboratorio);
+ put(main,4,1,'Verb. accettazione nr:',3);put(main,4,3,test.verbaleAccettazione,13);
+ put(main,4,5,'Data:',3);put(main,4,6,test.dataAccettazione,13);
+ put(main,4,8,'Consegna in Laboratorio:',3);put(main,4,11,test.consegnaLaboratorio,13);
+ main.merges.push('A4:B4','C4:D4','F4:G4','H4:J4','K4:L4');
  function single(row,label,value){
-   put(main,row,1,label,3);put(main,row,4,value,13);
-   main.merges.push('A'+row+':C'+row,'D'+row+':L'+row);
+   const wide=[12,13,14].includes(row);
+   put(main,row,1,label,3);put(main,row,wide?5:4,value,13);
+   main.merges.push('A'+row+':'+(wide?'D':'C')+row,(wide?'E':'D')+row+':L'+row);
  }
  single(6,'Oggetto dei lavori:',test.oggettoLavori);
  single(8,'Ubicazione Cantiere:',test.ubicazioneCantiere||test.cantiere);
