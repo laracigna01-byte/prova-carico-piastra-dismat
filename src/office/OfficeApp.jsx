@@ -11,6 +11,8 @@ const CANTIERE_FIELDS=[
  ['verbale','Numero prova'],
  ['cantiere','Cantiere'],
  ['committente','Committente'],
+ ['direttoreLavori','Direttore dei lavori'],
+ ['impresa','Impresa'],
  ['dataProva','Data della prova'],
  ['km','Km / Localizzazione'],
  ['sezione','Sezione'],
@@ -32,8 +34,6 @@ const FIELDS=[
  ['dataAccettazione','Data accettazione'],
  ['oggettoLavori','Oggetto dei lavori'],
  ['richiedente','Richiedente'],
- ['direttoreLavori','Direttore dei lavori'],
- ['impresa','Impresa'],
  ['direttoreStabilimento','Direttore di stabilimento / produzione'],
  ['nomeSperimentatore','Nome sperimentatore']
 ];
