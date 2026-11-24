@@ -204,11 +204,12 @@ export async function exportPiastraExcel(data) {
   // Il PDF tecnico di Piastra viene catturato dal motore esistente, non ridisegnato.
   const response=await fetch('/logo-dismat.jpg');
   if(!response.ok)throw new Error('Logo DISMAT non disponibile.');
+  const logoBlob=await response.blob();
   const logoDataUrl=await new Promise((resolve,reject)=>{
     const reader=new FileReader();
     reader.onload=()=>resolve(reader.result);
     reader.onerror=()=>reject(new Error('Lettura logo non riuscita.'));
-    reader.readAsDataURL(await response.blob());
+    reader.readAsDataURL(logoBlob);
   });
   const reportImage=await captureOriginalPlatePdf(data);
   if(!/^data:image\/png;base64,[A-Za-z0-9+/=]{100,}$/.test(reportImage)){
