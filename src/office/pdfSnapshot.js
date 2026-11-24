@@ -16,11 +16,11 @@ function loadPdfJs(){
   });
   return loader;
 }
-export async function captureOriginalPlatePdf(data){
+export async function captureOriginalPlatePdf(data,{includeTechnicalSignature=true}={}){
   const pdfjs=await loadPdfJs();
   pdfjs.GlobalWorkerOptions.workerSrc='/office-pdf.worker.min.js';
   const chartMaxX=Math.max(1,...[...(data.chart1||[]),...(data.chart2||[]),...(data.chartScarico1||[]),...(data.chartScarico2||[])].map(p=>Number(p.x)||0));
-  const bytes=new Uint8Array(await createOfficePlatePdf({...data,chartMaxX}));
+  const bytes=new Uint8Array(await createOfficePlatePdf({...data,chartMaxX},{includeTechnicalSignature}));
   const task=pdfjs.getDocument({data:bytes});
   const pdf=await task.promise;
   try{

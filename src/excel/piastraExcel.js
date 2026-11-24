@@ -130,13 +130,20 @@ export function buildPiastraExcel(d={}) {
     ws.addImage(snapshot,{tl:{col:1,row:16},ext:{width:imageWidth,height:imageHeight}});
   }
 
-  // La firma autografa del tecnico viene gia mostrata nel riquadro tecnico
-  // del PDF della Piastra catturato sopra. Non duplicarla nel blocco firme.
+  // Firma originale della prova, indipendente dal ritaglio tecnico.
+  // Come Palo, sopra il nome dello sperimentatore, nello spazio libero
+  // dopo il ritaglio (che termina circa a riga 55.2).
+  const technicalSignature = addPng(book,d.firmaTecnico);
+  if (technicalSignature !== null) {
+    ws.addImage(technicalSignature,{tl:{col:7,row:55.3},ext:{width:170,height:40}});
+  }
+  ws.mergeCells('B58:T58');setCell(ws,'B58','Lo Sperimentatore');
+  ws.mergeCells('B59:T59');setCell(ws,'B59',d.nomeSperimentatore||d.provaEseguitaDa||d.tecnico);
   // Il firmatario del Laboratorio resta identico a Palo, nella stessa posizione.
   const firma=laboratorySignature(d);
   ws.mergeCells('V58:AN58');setCell(ws,'V58',firma.qualifica);
   ws.mergeCells('V59:AN59');setCell(ws,'V59',firma.nome);
-  for(const ref of ['V58','V59']){
+  for(const ref of ['B58','B59','V58','V59']){
     ws.getCell(ref).alignment={horizontal:'center'};
     ws.getCell(ref).font={name:'Arial',size:8,bold:ref.endsWith('59')};
   }
@@ -211,7 +218,7 @@ export async function exportPiastraExcel(data) {
     reader.onerror=()=>reject(new Error('Lettura logo non riuscita.'));
     reader.readAsDataURL(logoBlob);
   });
-  const reportImage=await captureOriginalPlatePdf(data);
+  const reportImage=await captureOriginalPlatePdf(data,{includeTechnicalSignature:false});
   if(!/^data:image\/png;base64,[A-Za-z0-9+/=]{100,}$/.test(reportImage)){
     throw new Error('Immagine del PDF Piastra non generata.');
   }

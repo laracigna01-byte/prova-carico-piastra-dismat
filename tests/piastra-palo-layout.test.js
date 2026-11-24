@@ -22,8 +22,8 @@ test('Piastra usa esattamente le misure, i merge, e le firme del certificato Pal
  for(const [cell,value] of [['B5','Oggetto dei lavori'],['O5','Ponte - manutenzione strutturale'],['B6','Ubicazione cantiere'],['B7','Richiedente'],['B8','Direttore dei lavori'],['B9','Impresa'],['B10','Direttore di stabilimento/produzione'],['B11','Prova eseguita da'],['V58','Il Direttore del Laboratorio'],['V59','Dott. Ing. Elio Lo Giudice']]) {
    assert.equal(ws.getCell(cell).value,value,cell);
  }
- assert.equal(ws.getCell('B58').value,null,'The handwritten technician signature is already in the technical snapshot');
- assert.equal(ws.getCell('B59').value,null,'No repeated experimenter name under the signature');
+ assert.equal(ws.getCell('B58').value,'Lo Sperimentatore');
+ assert.equal(ws.getCell('B59').value,'Tecnico prova');
  assert.equal(ws.getCell('B2').result,'Certificato nr.');
  assert.equal(ws.getCell('G2').value,145000);
  assert.equal(ws.getCell('B15').result,'CERTIFICATO DI PROVA - CARICO STATICO SU PIASTRA');
@@ -50,4 +50,22 @@ test('Vice, proprietario e soglia documento; non copia numeri fra prove',()=>{
  assert.equal(ws.getCell('B15').result,'RAPPORTO DI PROVA - CARICO STATICO SU PIASTRA');
  assert.equal(b.getWorksheet('PARAMETRI').getCell('B4').value,135000);
  assert.equal(laboratorySignature({ruoloFirmatarioLaboratorio:'vice'}).nome,'Dott. Ing Giuseppe Navarra');
+});
+
+test('Firma touchpad originale nel blocco finale, senza modificare il ritaglio tecnico',async()=>{
+ const b=buildPiastraExcel({...input,firmaTecnico:png,nomeSperimentatore:'Tecnico firmatario'});
+ const ws=b.getWorksheet('MINUTA');
+ assert.equal(ws.getCell('B59').value,'Tecnico firmatario');
+ assert.equal(ws.getImages().length,3);
+ const signature=ws.getImages()[2];
+ assert.equal(signature.range.tl.nativeCol,7);
+ assert.equal(signature.range.tl.nativeRow,55);
+ assert.equal(signature.range.ext.height,40);
+ assert.equal(ws.getImages()[1].range.ext.width,735);
+ assert.equal(ws.pageSetup.printArea,'A1:AN61');
+ assert.equal(ws.getCell('V59').value,'Dott. Ing. Elio Lo Giudice');
+ const bytes=await b.xlsx.writeBuffer();
+ const reopened=new b.constructor();
+ await reopened.xlsx.load(bytes);
+ assert.equal(reopened.getWorksheet('MINUTA').getImages().length,3);
 });

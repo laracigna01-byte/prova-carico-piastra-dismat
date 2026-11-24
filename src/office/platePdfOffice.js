@@ -1,6 +1,6 @@
 ﻿import { jsPDF } from "jspdf";
 
-export async function createOfficePlatePdf(data) {
+export async function createOfficePlatePdf(data, {includeTechnicalSignature = true} = {}) {
   const pdf = new jsPDF({
     unit: "mm",
     format: "a4",
@@ -975,7 +975,8 @@ export async function createOfficePlatePdf(data) {
 
   cursorY += 49.5;
 
-  // FIRME SEPARATE SOTTO IL GRAFICO
+  // FIRME SEPARATE SOTTO IL GRAFICO (omesse solo nel ritaglio Excel)
+  if (includeTechnicalSignature) {
   const signatureLineY = Math.min(
     cursorY + 8,
     CONTENT_BOTTOM - 5
@@ -1033,6 +1034,8 @@ export async function createOfficePlatePdf(data) {
   );
 
  
+
+  }
 
   // BORDO AREA 19 x 19 cm
   pdf.setDrawColor(235, 235, 235);
