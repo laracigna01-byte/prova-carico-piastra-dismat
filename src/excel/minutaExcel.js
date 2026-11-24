@@ -1,7 +1,7 @@
 /* Minuta Cast: intestazione originale e screenshot PDF generato automaticamente. */
-import {captureOriginalPlatePdf} from '../office/pdfSnapshot';
-import {classifyDocument} from '../office/officeData';
-import {laboratorySignature} from '../office/laboratoryFields';
+import {captureOriginalPlatePdf} from '../office/pdfSnapshot.js';
+import {classifyDocument} from '../office/officeData.js';
+import {laboratorySignature} from '../office/laboratoryFields.js';
 const NS = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
 const REL = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
 const PKG = 'http://schemas.openxmlformats.org/package/2006/relationships';

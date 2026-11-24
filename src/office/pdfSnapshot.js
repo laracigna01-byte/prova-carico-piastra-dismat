@@ -1,4 +1,4 @@
-import {createOfficePlatePdf} from './platePdfOffice';
+import {createOfficePlatePdf} from './platePdfOffice.js';
 
 // La stessa grafica PDF che Cast oggi ritaglia: rasterizzazione automatica
 // a 19 cm. PDF.js e worker sono locali, senza servizi o costi esterni.
