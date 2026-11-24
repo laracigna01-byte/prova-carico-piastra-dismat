@@ -19,9 +19,11 @@ test('Piastra usa esattamente le misure, i merge, e le firme del certificato Pal
  assert.equal(ws.getRow(5).height,37);
  assert.equal(ws.getRow(15).height,16);
  assert.equal(ws.getCell('G1').master.address,'G1');
- for(const [cell,value] of [['B5','Oggetto dei lavori'],['O5','Ponte - manutenzione strutturale'],['B6','Ubicazione cantiere'],['B7','Richiedente'],['B8','Direttore dei lavori'],['B9','Impresa'],['B10','Direttore di stabilimento/produzione'],['B11','Prova eseguita da'],['B58','Lo Sperimentatore'],['B59','Tecnico prova'],['V58','Il Direttore del Laboratorio'],['V59','Dott. Ing. Elio Lo Giudice']]) {
+ for(const [cell,value] of [['B5','Oggetto dei lavori'],['O5','Ponte - manutenzione strutturale'],['B6','Ubicazione cantiere'],['B7','Richiedente'],['B8','Direttore dei lavori'],['B9','Impresa'],['B10','Direttore di stabilimento/produzione'],['B11','Prova eseguita da'],['V58','Il Direttore del Laboratorio'],['V59','Dott. Ing. Elio Lo Giudice']]) {
    assert.equal(ws.getCell(cell).value,value,cell);
  }
+ assert.equal(ws.getCell('B58').value,null,'The handwritten technician signature is already in the technical snapshot');
+ assert.equal(ws.getCell('B59').value,null,'No repeated experimenter name under the signature');
  assert.equal(ws.getCell('B2').result,'Certificato nr.');
  assert.equal(ws.getCell('G2').value,145000);
  assert.equal(ws.getCell('B15').result,'CERTIFICATO DI PROVA - CARICO STATICO SU PIASTRA');
