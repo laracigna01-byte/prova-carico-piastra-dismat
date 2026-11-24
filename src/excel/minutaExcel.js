@@ -35,7 +35,10 @@ function xmlSheet(s){
  }).join('');
  const widths=(s.cols.length?s.cols:Array.from({length:s.width},(_,i)=>[i+1,14])).map(([i,w])=>`<col min="${i}" max="${i}" width="${w}" customWidth="1"/>`).join('');
  const merged=s.merges.length?`<mergeCells count="${s.merges.length}">${s.merges.map(x=>`<mergeCell ref="${x}"/>`).join('')}</mergeCells>`:'';
- return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="${NS}" xmlns:r="${REL}"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><sheetViews><sheetView workbookViewId="0" showGridLines="0"${s.isMinuta?' view="normal" zoomScale="110" zoomScaleNormal="110"':''}/></sheetViews><sheetFormatPr defaultRowHeight="${s.isMinuta?14:21}"/><cols>${widths}</cols><sheetData>${data}</sheetData>${merged}<printOptions horizontalCentered="${s.isMinuta?0:1}" verticalCentered="0"/><pageMargins left="${s.isMinuta?0.25:0.35}" right="${s.isMinuta?0.25:0.35}" top="${s.isMinuta?0.25:0.42}" bottom="${s.isMinuta?0.25:0.42}" header="0.15" footer="0.15"/><pageSetup orientation="${s.isMinuta?'portrait':'landscape'}" paperSize="9" fitToWidth="1" fitToHeight="${s.isMinuta?1:0}"/>${s.drawing?'<drawing r:id="rId1"/>':''}</worksheet>`;
+ const footer=s.signatureFooter
+   ?`<headerFooter><oddFooter>${ESC('&L&"Arial,Regular"&8'+s.signatureFooter.leftTitle+'\n'+s.signatureFooter.leftName+'&R&"Arial,Regular"&8'+s.signatureFooter.rightTitle+'\n'+s.signatureFooter.rightName)}</oddFooter></headerFooter>`
+   :'';
+ return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="${NS}" xmlns:r="${REL}"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><sheetViews><sheetView workbookViewId="0" showGridLines="0"${s.isMinuta?' view="normal" zoomScale="110" zoomScaleNormal="110"':''}/></sheetViews><sheetFormatPr defaultRowHeight="${s.isMinuta?14:21}"/><cols>${widths}</cols><sheetData>${data}</sheetData>${merged}<printOptions horizontalCentered="${s.isMinuta?0:1}" verticalCentered="0"/><pageMargins left="${s.isMinuta?0.25:0.35}" right="${s.isMinuta?0.25:0.35}" top="${s.isMinuta?0.25:0.42}" bottom="${s.isMinuta?0.25:0.42}" header="0.15" footer="0.15"/><pageSetup orientation="${s.isMinuta?'portrait':'landscape'}" paperSize="9" fitToWidth="1" fitToHeight="${s.isMinuta?1:0}"/>${footer}${s.drawing?'<drawing r:id="rId1"/>':''}</worksheet>`;
 }
 const styles=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="${NS}"><numFmts count="1"><numFmt numFmtId="164" formatCode="0.000"/></numFmts><fonts count="11"><font><sz val="10"/><name val="Aptos"/></font><font><b/><color rgb="FFFFFFFF"/><sz val="16"/><name val="Aptos Display"/></font><font><b/><color rgb="FF302E2A"/><sz val="10"/></font><font><color rgb="FF786F61"/><sz val="9"/></font><font><color rgb="FF343434"/><sz val="10"/></font><font><b/><color rgb="FF4A3611"/><sz val="11"/></font><font><b/><color rgb="FF26201B"/><sz val="21"/><name val="Aptos Display"/></font><font><color rgb="FF3B352E"/><sz val="8.3"/><name val="Aptos"/></font><font><color rgb="FF514A3E"/><sz val="8"/><name val="Arial"/></font><font><color rgb="FF2C2A27"/><sz val="8"/><name val="Arial"/></font><font><color rgb="FF292929"/><sz val="7"/><name val="Arial"/></font></fonts><fills count="5"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF302E2A"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFF3F0E8"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFF2D7"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="3"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="hair"><color rgb="FFD4CDBF"/></bottom><diagonal/></border><border><left/><right/><top/><bottom style="dotted"><color rgb="FFA19A8F"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="17"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center"/></xf><xf numFmtId="0" fontId="2" fillId="3" borderId="1" xfId="0"/><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="4" fillId="0" borderId="1" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"/><xf numFmtId="164" fontId="5" fillId="4" borderId="1" xfId="0"/><xf numFmtId="2" fontId="0" fillId="0" borderId="1" xfId="0"/><xf numFmtId="0" fontId="3" fillId="3" borderId="0" xfId="0" applyAlignment="1"><alignment wrapText="1"/></xf><xf numFmtId="0" fontId="6" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="7" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="7" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf><xf numFmtId="0" fontId="4" fillId="0" borderId="2" xfId="0" applyAlignment="1"><alignment vertical="center"/></xf><xf numFmtId="0" fontId="8" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center"/></xf><xf numFmtId="0" fontId="9" fillId="0" borderId="2" xfId="0" applyAlignment="1"><alignment vertical="center"/></xf><xf numFmtId="0" fontId="10" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
 function crctable(){let a=[];for(let n=0;n<256;n++){let c=n;for(let j=0;j<8;j++)c=c&1?0xEDB88320^(c>>>1):c>>>1;a[n]=c>>>0}return a;}const CRC=crctable();
@@ -110,8 +113,7 @@ export function buildMinutaExcel(d){
  put(main,3,25,'Data della prova:',14);put(main,3,33,test.dataProva,15);
  put(main,4,2,'Verb. accettazione nr:',14);put(main,4,9,test.verbaleAccettazione,15);
  put(main,4,14,'Data:',14);put(main,4,16,test.dataAccettazione,15);
- // Le etichette di laboratorio rispecchiano Palo. Le righe eliminabili
- // restano vuote: non si sposta lo screenshot/PDF della Piastra approvato.
+ // Ordine amministrativo come Palo. Le firme non appaiono nei dati generali.
  const firma=laboratorySignature(test);
  const details=[
    [6,'Oggetto dei lavori:',test.oggettoLavori],
@@ -119,11 +121,21 @@ export function buildMinutaExcel(d){
    [9,'Richiedente:',test.richiedente||test.committente],
    [10,'Direttore dei Lavori:',test.direttoreLavori],
    [11,'Impresa:',test.impresa],
-   ...(test.mostraProprietario===true?[[12,'Proprietario / Ente appaltante:',test.proprietario]]:[]),
-   [13,'Direttore di Stabilimento/Produzione:',test.direttoreStabilimento],
-   [15,'Prova eseguita da:',test.nomeSperimentatore||test.provaEseguitaDa||test.tecnico],
-   [16,firma.qualifica+':',firma.nome],
  ];
+ if(test.mostraProprietario===true)details.push([12,'Proprietario / Ente appaltante:',test.proprietario]);
+ const nextRow=test.mostraProprietario===true?13:12;
+ details.push(
+   [nextRow,'Direttore di Stabilimento/Produzione:',test.direttoreStabilimento],
+   [nextRow+1,'Prova eseguita da:',test.nomeSperimentatore||test.provaEseguitaDa||test.tecnico]
+ );
+ // La firma e nel footer della pagina A4, non sopra il ritaglio tecnico.
+ // Manteniamo le dimensioni originali del PDF fotografato, grafico e letture.
+ main.signatureFooter={
+   leftTitle:'Lo Sperimentatore',
+   leftName:String(test.nomeSperimentatore||test.provaEseguitaDa||test.tecnico||''),
+   rightTitle:firma.qualifica,
+   rightName:firma.nome
+ };
  for(const [row,label,value] of details){
    put(main,row,2,label,14);put(main,row,14,value,15);
  }
