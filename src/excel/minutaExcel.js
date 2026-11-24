@@ -1,6 +1,7 @@
 /* Minuta Cast: intestazione originale e screenshot PDF generato automaticamente. */
 import {captureOriginalPlatePdf} from '../office/pdfSnapshot';
 import {classifyDocument} from '../office/officeData';
+import {laboratorySignature} from '../office/laboratoryFields';
 const NS = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main';
 const REL = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
 const PKG = 'http://schemas.openxmlformats.org/package/2006/relationships';
@@ -109,18 +110,19 @@ export function buildMinutaExcel(d){
  put(main,3,25,'Data della prova:',14);put(main,3,33,test.dataProva,15);
  put(main,4,2,'Verb. accettazione nr:',14);put(main,4,9,test.verbaleAccettazione,15);
  put(main,4,14,'Data:',14);put(main,4,16,test.dataAccettazione,15);
- put(main,4,25,'Consegna in Laboratorio:',14);put(main,4,33,test.consegnaLaboratorio,15);
+ // Le etichette di laboratorio rispecchiano Palo. Le righe eliminabili
+ // restano vuote: non si sposta lo screenshot/PDF della Piastra approvato.
+ const firma=laboratorySignature(test);
  const details=[
    [6,'Oggetto dei lavori:',test.oggettoLavori],
    [8,'Ubicazione Cantiere:',test.ubicazioneCantiere||test.cantiere],
    [9,'Richiedente:',test.richiedente||test.committente],
    [10,'Direttore dei Lavori:',test.direttoreLavori],
    [11,'Impresa:',test.impresa],
-   [12,'Proprietario / Ente appaltante:',test.proprietario],
+   ...(test.mostraProprietario===true?[[12,'Proprietario / Ente appaltante:',test.proprietario]]:[]),
    [13,'Direttore di Stabilimento/Produzione:',test.direttoreStabilimento],
-   [14,'Collaudatore / Tecnico Verificatore:',test.collaudatore],
-   [15,'Prova eseguita da:',test.provaEseguitaDa||test.tecnico],
-   [16,'La lettera di richiesta:',test.letteraRichiesta],
+   [15,'Prova eseguita da:',test.nomeSperimentatore||test.provaEseguitaDa||test.tecnico],
+   [16,firma.qualifica+':',firma.nome],
  ];
  for(const [row,label,value] of details){
    put(main,row,2,label,14);put(main,row,14,value,15);

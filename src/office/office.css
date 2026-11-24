@@ -93,3 +93,15 @@
 .office-document-advanced label{display:flex;flex-direction:column;gap:8px;max-width:420px;margin-top:14px;font-size:12px;font-weight:700;color:#514a3e}
 .office-document-advanced input{border:1px solid #d5d0c7;border-radius:8px;padding:10px 12px;color:#252525;background:#fff}
 @media(max-width:780px){.office-document-options{grid-template-columns:1fr}.office-document-option{min-height:46px}}
+
+/* Dati laboratorio coerenti con Palo: qualifica, proprietario facoltativo, duplicazione. */
+.office-document-options--two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.office-optional-fields{margin-top:16px}
+.office-check-row{display:flex;align-items:center;gap:11px;background:#fff9e8;border:1px solid #e8d7a9;border-radius:9px;padding:13px 15px;font-size:12px;font-weight:750;color:#403729;cursor:pointer}
+.office-check-row input[type="checkbox"]{width:18px;height:18px;flex:0 0 18px;margin:0;accent-color:#947121}
+.office-owner-entry{display:flex;flex-direction:column;gap:8px;margin-top:12px;font-size:12px;font-weight:700;color:#514a3e}
+.office-owner-entry input{width:100%;border:1px solid #d5d0c7;border-radius:8px;padding:11px 12px;background:#fff;color:#252525}
+.office-signature-preview{font-weight:750;margin-top:12px}
+.office-lab-actions{margin-top:14px}
+.office-lab-actions .office-small{margin-top:8px}
+@media(max-width:780px){.office-document-options--two{grid-template-columns:1fr}}

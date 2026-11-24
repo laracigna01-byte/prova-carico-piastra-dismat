@@ -4,6 +4,7 @@ import {useAuth} from '../security/AuthContext';
 import {exportMinutaExcel} from '../excel/minutaExcel';
 import {parseOfficeJson,buildOfficeReport,classifyDocument} from './officeData';
 import {loadOfficeRecords,saveOfficeRecord} from './officeStore';
+import {laboratorySignature,latestLaboratoryData} from './laboratoryFields';
 import './office.css';
 
 const CANTIERE_FIELDS=[
@@ -22,23 +23,19 @@ const CANTIERE_FIELDS=[
  ['presenti','Presenti']
 ];
 const FIELDS=[
- ['numeroDocumento','Numero rapporto / certificato'],
+ ['numeroDocumento','Numero documento'],
  ['dataDocumento','Data documento'],
  ['naturaCampioni','Natura dei campioni'],
  ['protocollo','Protocollo'],
  ['dataProtocollo','Data protocollo'],
  ['verbaleAccettazione','Verbale di accettazione nr.'],
- ['dataAccettazione','Data verbale di accettazione'],
- ['consegnaLaboratorio','Consegna in laboratorio'],
+ ['dataAccettazione','Data accettazione'],
  ['oggettoLavori','Oggetto dei lavori'],
  ['richiedente','Richiedente'],
  ['direttoreLavori','Direttore dei lavori'],
  ['impresa','Impresa'],
- ['proprietario','Proprietario / Ente appaltante'],
- ['direttoreStabilimento','Direttore di Stabilimento/Produzione'],
- ['collaudatore','Collaudatore / Tecnico Verificatore'],
- ['provaEseguitaDa','Prova eseguita da'],
- ['letteraRichiesta','La lettera di richiesta']
+ ['direttoreStabilimento','Direttore di stabilimento / produzione'],
+ ['nomeSperimentatore','Nome sperimentatore']
 ];
 function displayNumber(n,digits=2){return typeof n==='number'&&Number.isFinite(n)?n.toLocaleString('it-IT',{minimumFractionDigits:digits,maximumFractionDigits:digits}):'—'}
 function OfficeContent(){
@@ -170,6 +167,19 @@ function OfficeContent(){
   async function save(){
     try{await saveDraft()}catch(error){setMessage('Salvataggio non riuscito: '+error.message)}
   }
+  function duplicateLaboratoryData(){
+    if(!selected)return;
+    const reusable=latestLaboratoryData(records,selected.id);
+    if(!reusable){
+      setMessage('Per riutilizzare i dati, completa e salva prima una prova in Elaborazioni.');
+      return;
+    }
+    const sourceName=reusable.source.data?.verbale||reusable.source.originalId||'prova precedente';
+    if(!window.confirm('Copiare soltanto i dati comuni del laboratorio dalla prova '+sourceName+'? Le letture, i numeri documento, le date e le prove originali non saranno modificati.'))return;
+    setDraft(prev=>({...prev,...reusable.values}));
+    setDirty(true);
+    setMessage('Dati di laboratorio copiati dalla prova '+sourceName+'. Verifica i campi e salva il completamento.');
+  }
   async function downloadExcel(){
     if(!selected||detail?.error)return;
     try{
@@ -245,12 +255,41 @@ function OfficeContent(){
                 <p className="office-small">Le letture originali restano conservate. Se occorre correggerle nella copia ufficio, espandi la sezione tecnica in basso: i risultati vengono ricalcolati.</p>
               </div>
               <div className="office-card">
-                <div className="office-cardhead"><h3>02 · Completamento dell’architetto</h3><span>Modificabile</span></div>
+                <div className="office-cardhead"><h3>02 · Dati di laboratorio</h3><span>Modificabili e riutilizzabili</span></div>
                 <div className="office-fields">
                   {FIELDS.map(([name,label])=>
                     <label key={name}>{label}<input type="text" inputMode={name==='numeroDocumento'?'numeric':'text'}
                       value={draft[name]??selected.data?.[name]??({naturaCampioni:detail.testConfig.label,richiedente:detail.committente,provaEseguitaDa:detail.tecnico}[name]??'')} onChange={e=>{setDraft(prev=>({...prev,[name]:e.target.value}));setDirty(true)}}/></label>
                   )}
+                </div>
+                <fieldset className="office-document-choice">
+                  <legend>Firmatario nel certificato</legend>
+                  <div className="office-document-options office-document-options--two">
+                    {[['direttore','Il Direttore del Laboratorio'],['vice','Il Vicedirettore del Laboratorio']].map(([value,label])=>
+                      <label key={value} className={(draft.ruoloFirmatarioLaboratorio??draft.ruoloDirezioneLavori??'direttore')===value?'office-document-option selected':'office-document-option'}>
+                        <input type="radio" name="firmaLaboratorioPiastra" checked={(draft.ruoloFirmatarioLaboratorio??draft.ruoloDirezioneLavori??'direttore')===value}
+                          onChange={()=>{setDraft(prev=>({...prev,ruoloFirmatarioLaboratorio:value}));setDirty(true)}}/>
+                        <span>{label}</span>
+                      </label>
+                    )}
+                  </div>
+                  <p className="office-small office-signature-preview">{laboratorySignature(draft).qualifica} {laboratorySignature(draft).nome}</p>
+                </fieldset>
+                <div className="office-optional-fields">
+                  <label className="office-check-row">
+                    <input type="checkbox" checked={draft.mostraProprietario===true}
+                      onChange={e=>{setDraft(prev=>({...prev,mostraProprietario:e.target.checked}));setDirty(true)}}/>
+                    <span>Includi Proprietario / Ente appaltante nel certificato</span>
+                  </label>
+                  {draft.mostraProprietario===true&&
+                    <label className="office-owner-entry">Proprietario / Ente appaltante
+                      <input type="text" value={draft.proprietario??selected.data?.proprietario??''}
+                        onChange={e=>{setDraft(prev=>({...prev,proprietario:e.target.value}));setDirty(true)}}/>
+                    </label>}
+                </div>
+                <div className="office-lab-actions">
+                  <button className="office-save" type="button" onClick={duplicateLaboratoryData}>Duplica dati laboratorio</button>
+                  <p className="office-small">Riutilizza i dati amministrativi di una prova già salvata. Non copia letture, identificativi, date o numeri dei documenti.</p>
                 </div>
                 <fieldset className="office-document-choice">
                   <legend>Tipo di documento da generare</legend>
