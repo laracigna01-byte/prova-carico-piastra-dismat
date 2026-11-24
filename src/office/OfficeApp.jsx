@@ -1,7 +1,7 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {LoginGate} from '../security/LoginGate';
 import {useAuth} from '../security/AuthContext';
-import {exportMinutaExcel} from '../excel/minutaExcel';
+import {exportPiastraExcel as exportMinutaExcel} from '../excel/piastraExcel';
 import {parseOfficeJson,buildOfficeReport,classifyDocument} from './officeData';
 import {loadOfficeRecords,saveOfficeRecord} from './officeStore';
 import {laboratorySignature,latestLaboratoryData} from './laboratoryFields';
