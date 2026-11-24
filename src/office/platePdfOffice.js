@@ -764,7 +764,9 @@ export async function createOfficePlatePdf(data) {
   });
 
   const photoY = dataBodyY;
-  const photoH = 46;
+  // Riserva piu altezza alla foto senza spostare tabella o grafico:
+  // il blocco risultati a sinistra termina comunque piu in basso.
+  const photoH = 54;
 
   pdf.setDrawColor(185, 185, 185);
   pdf.setFillColor(255, 255, 255);
@@ -786,13 +788,17 @@ export async function createOfficePlatePdf(data) {
 
   if (fotoProva) {
     try {
+      // La fotografia si adatta al riquadro senza stiramenti.
+      const imageSize=pdf.getImageProperties(fotoProva);
+      const fit=Math.min((rightW-2)/imageSize.width,(photoH-2)/imageSize.height);
+      const imageW=imageSize.width*fit, imageH=imageSize.height*fit;
       pdf.addImage(
         fotoProva,
         "JPEG",
-        rightX + 1,
-        photoY + 1,
-        rightW - 2,
-        photoH - 2
+        rightX+(rightW-imageW)/2,
+        photoY+(photoH-imageH)/2,
+        imageW,
+        imageH
       );
     } catch {
       pdf.setFontSize(6.2);

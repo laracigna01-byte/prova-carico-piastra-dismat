@@ -35,12 +35,10 @@ function xmlSheet(s){
  }).join('');
  const widths=(s.cols.length?s.cols:Array.from({length:s.width},(_,i)=>[i+1,14])).map(([i,w])=>`<col min="${i}" max="${i}" width="${w}" customWidth="1"/>`).join('');
  const merged=s.merges.length?`<mergeCells count="${s.merges.length}">${s.merges.map(x=>`<mergeCell ref="${x}"/>`).join('')}</mergeCells>`:'';
- const footer=s.signatureFooter
-   ?`<headerFooter><oddFooter>${ESC('&L&"Arial,Regular"&8'+s.signatureFooter.leftTitle+'\n'+s.signatureFooter.leftName+'&R&"Arial,Regular"&8'+s.signatureFooter.rightTitle+'\n'+s.signatureFooter.rightName)}</oddFooter></headerFooter>`
-   :'';
- return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="${NS}" xmlns:r="${REL}"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><sheetViews><sheetView workbookViewId="0" showGridLines="0"${s.isMinuta?' view="normal" zoomScale="110" zoomScaleNormal="110"':''}/></sheetViews><sheetFormatPr defaultRowHeight="${s.isMinuta?14:21}"/><cols>${widths}</cols><sheetData>${data}</sheetData>${merged}<printOptions horizontalCentered="${s.isMinuta?0:1}" verticalCentered="0"/><pageMargins left="${s.isMinuta?0.25:0.35}" right="${s.isMinuta?0.25:0.35}" top="${s.isMinuta?0.25:0.42}" bottom="${s.isMinuta?0.25:0.42}" header="0.15" footer="0.15"/><pageSetup orientation="${s.isMinuta?'portrait':'landscape'}" paperSize="9" fitToWidth="1" fitToHeight="${s.isMinuta?1:0}"/>${footer}${s.drawing?'<drawing r:id="rId1"/>':''}</worksheet>`;
+
+ return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="${NS}" xmlns:r="${REL}"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><sheetViews><sheetView workbookViewId="0" showGridLines="0"${s.isMinuta?' view="normal" zoomScale="110" zoomScaleNormal="110"':''}/></sheetViews><sheetFormatPr defaultRowHeight="${s.isMinuta?14:21}"/><cols>${widths}</cols><sheetData>${data}</sheetData>${merged}<printOptions horizontalCentered="${s.isMinuta?0:1}" verticalCentered="0"/><pageMargins left="${s.isMinuta?0.16:0.35}" right="${s.isMinuta?0.16:0.35}" top="${s.isMinuta?0.17:0.42}" bottom="${s.isMinuta?0.17:0.42}" header="0" footer="0"/><pageSetup orientation="${s.isMinuta?'portrait':'landscape'}" paperSize="9" fitToWidth="1" fitToHeight="${s.isMinuta?1:0}"/>${s.drawing?'<drawing r:id="rId1"/>':''}</worksheet>`;
 }
-const styles=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="${NS}"><numFmts count="1"><numFmt numFmtId="164" formatCode="0.000"/></numFmts><fonts count="11"><font><sz val="10"/><name val="Aptos"/></font><font><b/><color rgb="FFFFFFFF"/><sz val="16"/><name val="Aptos Display"/></font><font><b/><color rgb="FF302E2A"/><sz val="10"/></font><font><color rgb="FF786F61"/><sz val="9"/></font><font><color rgb="FF343434"/><sz val="10"/></font><font><b/><color rgb="FF4A3611"/><sz val="11"/></font><font><b/><color rgb="FF26201B"/><sz val="21"/><name val="Aptos Display"/></font><font><color rgb="FF3B352E"/><sz val="8.3"/><name val="Aptos"/></font><font><color rgb="FF514A3E"/><sz val="8"/><name val="Arial"/></font><font><color rgb="FF2C2A27"/><sz val="8"/><name val="Arial"/></font><font><color rgb="FF292929"/><sz val="7"/><name val="Arial"/></font></fonts><fills count="5"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF302E2A"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFF3F0E8"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFF2D7"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="3"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="hair"><color rgb="FFD4CDBF"/></bottom><diagonal/></border><border><left/><right/><top/><bottom style="dotted"><color rgb="FFA19A8F"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="17"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center"/></xf><xf numFmtId="0" fontId="2" fillId="3" borderId="1" xfId="0"/><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="4" fillId="0" borderId="1" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"/><xf numFmtId="164" fontId="5" fillId="4" borderId="1" xfId="0"/><xf numFmtId="2" fontId="0" fillId="0" borderId="1" xfId="0"/><xf numFmtId="0" fontId="3" fillId="3" borderId="0" xfId="0" applyAlignment="1"><alignment wrapText="1"/></xf><xf numFmtId="0" fontId="6" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="7" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="7" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf><xf numFmtId="0" fontId="4" fillId="0" borderId="2" xfId="0" applyAlignment="1"><alignment vertical="center"/></xf><xf numFmtId="0" fontId="8" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center"/></xf><xf numFmtId="0" fontId="9" fillId="0" borderId="2" xfId="0" applyAlignment="1"><alignment vertical="center"/></xf><xf numFmtId="0" fontId="10" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+const styles=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="${NS}"><numFmts count="1"><numFmt numFmtId="164" formatCode="0.000"/></numFmts><fonts count="11"><font><sz val="10"/><name val="Aptos"/></font><font><b/><color rgb="FFFFFFFF"/><sz val="16"/><name val="Aptos Display"/></font><font><b/><color rgb="FF302E2A"/><sz val="10"/></font><font><color rgb="FF786F61"/><sz val="9"/></font><font><color rgb="FF343434"/><sz val="10"/></font><font><b/><color rgb="FF4A3611"/><sz val="11"/></font><font><b/><color rgb="FF26201B"/><sz val="21"/><name val="Aptos Display"/></font><font><color rgb="FF3B352E"/><sz val="8.3"/><name val="Aptos"/></font><font><color rgb="FF514A3E"/><sz val="8"/><name val="Arial"/></font><font><color rgb="FF2C2A27"/><sz val="8"/><name val="Arial"/></font><font><color rgb="FF292929"/><sz val="7"/><name val="Arial"/></font></fonts><fills count="5"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF302E2A"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFF3F0E8"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFF2D7"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="3"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="hair"><color rgb="FFD4CDBF"/></bottom><diagonal/></border><border><left/><right/><top/><bottom style="dotted"><color rgb="FFA19A8F"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="17"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center"/></xf><xf numFmtId="0" fontId="2" fillId="3" borderId="1" xfId="0"/><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="4" fillId="0" borderId="1" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"/><xf numFmtId="164" fontId="5" fillId="4" borderId="1" xfId="0"/><xf numFmtId="2" fontId="0" fillId="0" borderId="1" xfId="0"/><xf numFmtId="0" fontId="3" fillId="3" borderId="0" xfId="0" applyAlignment="1"><alignment wrapText="1"/></xf><xf numFmtId="0" fontId="6" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="7" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="7" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf><xf numFmtId="0" fontId="4" fillId="0" borderId="2" xfId="0" applyAlignment="1"><alignment vertical="center"/></xf><xf numFmtId="0" fontId="8" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment vertical="center"/></xf><xf numFmtId="0" fontId="9" fillId="0" borderId="2" xfId="0" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf><xf numFmtId="0" fontId="10" fillId="0" borderId="0" xfId="0" applyAlignment="1"><alignment horizontal="right" vertical="center" wrapText="1"/></xf></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
 function crctable(){let a=[];for(let n=0;n<256;n++){let c=n;for(let j=0;j<8;j++)c=c&1?0xEDB88320^(c>>>1):c>>>1;a[n]=c>>>0}return a;}const CRC=crctable();
 function checksum(bytes){let c=0xFFFFFFFF;for(const b of bytes)c=CRC[(c^b)&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
 function set16(a,pos,n){a[pos]=n&255;a[pos+1]=(n>>>8)&255;}
@@ -65,7 +63,7 @@ function drawingXML(photo,logo){
  const r='xmlns:r="'+REL+'"';
  const coords=(x,y)=>`<xdr:from><xdr:col>${x}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${y}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>`;
  const to=(x,y)=>`<xdr:to><xdr:col>${x}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${y}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to>`;
- const pic=photo?`<xdr:oneCellAnchor>${coords(1,18)}<xdr:ext cx="6840000" cy="6300000"/><xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="Ritaglio PDF Piastra - 19 cm"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId2"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:oneCellAnchor>`:'';
+ const pic=photo?`<xdr:oneCellAnchor>${coords(1,16)}<xdr:ext cx="6840000" cy="6300000"/><xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="Ritaglio PDF Piastra - 19 cm"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId2"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:oneCellAnchor>`:'';
  const logoAnchor=logo?`<xdr:oneCellAnchor><xdr:from><xdr:col>1</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>0</xdr:row><xdr:rowOff>30000</xdr:rowOff></xdr:from><xdr:ext cx="900000" cy="891892"/><xdr:pic><xdr:nvPicPr><xdr:cNvPr id="3" name="Logo DISMAT"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId3"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:oneCellAnchor>`:'';
  const chart=`<xdr:twoCellAnchor editAs="oneCell">${coords(0,39)}${to(12,51)}<xdr:graphicFrame macro=""><xdr:nvGraphicFramePr><xdr:cNvPr id="1" name="Grafico carico spostamento"/><xdr:cNvGraphicFramePr/></xdr:nvGraphicFramePr><xdr:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/></xdr:xfrm><a:graphic><a:graphicData uri="${XL_CHART}"><c:chart xmlns:c="${XL_CHART}" r:id="rId1"/></a:graphicData></a:graphic></xdr:graphicFrame><xdr:clientData/></xdr:twoCellAnchor>`;
  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><xdr:wsDr xmlns:xdr="${XL_DRAW}" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" ${r}>${logoAnchor}${pic}</xdr:wsDr>`;
@@ -84,35 +82,27 @@ export function buildMinutaExcel(d){
 
 
  const main=sheet();
- // Griglia e misure rilevate dal foglio originale "1 (4)" del file Cast 66985:
- // A = 146/256, B:AO = 621/256, AP=1206/256, AQ=621/256,
- // AR=182/256 (formato originale BIFF8). Non si ricostruisce più con 12 colonne.
- main.cols=Array.from({length:53},(_,index)=>{
-   const c=index+1;
-   const width=c===1?146/256:c<=41?621/256:c===42?1206/256:
-     c===43?621/256:c===44?182/256:c===45?10:2267/256;
-   return [c,width];
- });
+ // Griglia, margini e quote delle righe del certificato Palo approvato.
+ // Il ritaglio tecnico da 19 cm resta un'immagine indipendente: non si ridimensiona.
+ main.cols=Array.from({length:40},(_,index)=>[index+1,index===0?146/256:621/256]);
  main.isMinuta=true;main.drawing=true;
- for(let row=1;row<=54;row++)main.heights.set(row,14.1);
- main.heights.set(1,75);
- for(let row=2;row<=6;row++)main.heights.set(row,12.95);
- main.heights.set(7,16.5);main.heights.set(8,18);
- for(let row=9;row<=17;row++)main.heights.set(row,12.95);
- main.heights.set(18,14.1);
+ for(let row=1;row<=61;row++)main.heights.set(row,12.95);
+ main.heights.set(1,76);
+ main.heights.set(5,37);
+ main.heights.set(15,16);
  const heading="L A B O R A T O R I O\nD I S M A T\nSperimentazione sulle Strutture e sui Materiali da Costruzione\nAutorizzato ai sensi dell'art. 20 Legge 1086/71 con D.M. 415 del 01/12/2020\nc/da Andolina S.S. 122 Km 28 92024 CANICATTI' (AG)\nPI/CF 04534491008 - Reg. Imprese di Agrigento - Cap. Sociale € 280.300 i.v.\ntel. 0922 859406 - info.dismat@gmail.com - www.dismat.it";
- put(main,1,7,heading,16);main.merges.push('G1:AH1');
- // Celle di destinazione estratte dall'originale, non una versione reinterpretata.
- // Le etichette rimangono dove le ha messe Cast; sono editabili i dati.
+ put(main,1,7,heading,16);main.merges.push('G1:AN1');
+ // Intestazione organizzata come Palo: tre colonne affiancate, stessi merge.
  frm(main,2,2,'IF(PARAMETRI!B6="CERTIFICATO DI PROVA","Certificato nr.",IF(PARAMETRI!B6="RAPPORTO DI PROVA","Rapporto nr.","Documento nr."))',
    tipo==='CERTIFICATO DI PROVA'?'Certificato nr.':tipo==='RAPPORTO DI PROVA'?'Rapporto nr.':'Documento nr.',14);
- put(main,2,7,numeroDoc,15);put(main,2,14,'Data:',14);put(main,2,16,test.dataDocumento,15);
- put(main,2,25,'Natura dei campioni:',14);put(main,2,33,test.naturaCampioni||config.label,15);
- put(main,3,2,'Protocollo:',14);put(main,3,7,test.protocollo,15);
- put(main,3,14,'Data:',14);put(main,3,16,test.dataProtocollo,15);
- put(main,3,25,'Data della prova:',14);put(main,3,33,test.dataProva,15);
- put(main,4,2,'Verb. accettazione nr:',14);put(main,4,9,test.verbaleAccettazione,15);
- put(main,4,14,'Data:',14);put(main,4,16,test.dataAccettazione,15);
+ put(main,2,7,numeroDoc,15);
+ put(main,2,15,'Data',14);put(main,2,19,test.dataDocumento,15);
+ put(main,2,27,'Natura campioni',14);put(main,2,33,test.naturaCampioni||config.label,15);
+ put(main,3,2,'Protocollo',14);put(main,3,7,test.protocollo,15);
+ put(main,3,15,'Data',14);put(main,3,19,test.dataProtocollo,15);
+ put(main,3,27,'Data prova',14);put(main,3,33,test.dataProva,15);
+ put(main,4,2,'Verbale accett.',14);put(main,4,7,test.verbaleAccettazione,15);
+ put(main,4,15,'Data',14);put(main,4,19,test.dataAccettazione,15);
  // Ordine amministrativo come Palo. Le firme non appaiono nei dati generali.
  const firma=laboratorySignature(test);
  const details=[
@@ -128,27 +118,26 @@ export function buildMinutaExcel(d){
    [nextRow,'Direttore di Stabilimento/Produzione:',test.direttoreStabilimento],
    [nextRow+1,'Prova eseguita da:',test.nomeSperimentatore||test.provaEseguitaDa||test.tecnico]
  );
- // La firma e nel footer della pagina A4, non sopra il ritaglio tecnico.
- // Manteniamo le dimensioni originali del PDF fotografato, grafico e letture.
- main.signatureFooter={
-   leftTitle:'Lo Sperimentatore',
-   leftName:String(test.nomeSperimentatore||test.provaEseguitaDa||test.tecnico||''),
-   rightTitle:firma.qualifica,
-   rightName:firma.nome
- };
- for(const [row,label,value] of details){
-   put(main,row,2,label,14);put(main,row,14,value,15);
+ for(const [index,label,value] of details.map(([_,label,value],index)=>[index,label,value])){
+   const row=index+5;
+   put(main,row,2,label,14);put(main,row,15,value,15);
+   main.merges.push(`B${row}:N${row}`,`O${row}:AN${row}`);
  }
  main.merges.push(
-   'G2:K2','P2:U2','AG2:AO2',
-   'G3:K3','P3:U3','AG3:AO3',
-   'I4:K4','P4:U4','Y4:AF4','AG4:AO4',
-   'N6:AO7',
-   ...Array.from({length:9},(_,i)=>'N'+(i+8)+':AO'+(i+8))
+   'B2:F2','G2:N2','O2:R2','S2:Z2','AA2:AF2','AG2:AN2',
+   'B3:F3','G3:N3','O3:R3','S3:Z3','AA3:AF3','AG3:AN3',
+   'B4:F4','G4:N4','O4:R4','S4:Z4'
  );
- // Titolo unico e dinamico immediatamente sopra la fotografia del PDF.
- frm(main,18,2,'IF(PARAMETRI!B6="DA DEFINIRE","",PARAMETRI!B6)',
-   tipo==='DA DEFINIRE'?'':tipo,12);main.merges.push('B18:AH18');
+ // Titolo nella riga 15, identica alla posizione in Palo.
+ frm(main,15,2,'IF(PARAMETRI!B6="DA DEFINIRE","",PARAMETRI!B6&" - CARICO STATICO SU PIASTRA")',
+   tipo==='DA DEFINIRE'?'':tipo+' - CARICO STATICO SU PIASTRA',2);
+ main.merges.push('B15:AN15');
+ // Firme IN CELLA al piede del certificato, nello stesso punto del Palo.
+ put(main,58,2,'Lo Sperimentatore',11);
+ put(main,59,2,test.nomeSperimentatore||test.provaEseguitaDa||test.tecnico,12);
+ put(main,58,22,firma.qualifica,11);
+ put(main,59,22,firma.nome,12);
+ main.merges.push('B58:T58','B59:T59','V58:AN58','V59:AN59');
  // Il PDF autentico della Piastra viene catturato dal generatore esistente
  // e inserito come UNICA immagine tecnica, non ridisegnato qui.
  const reading=sheet();reading.width=7;reading.cols=[[1,16],[2,18],[3,16],[4,17],[5,19],[6,19],[7,24]];
@@ -171,7 +160,7 @@ export function buildMinutaExcel(d){
  frm(param,6,2,'IF(B5="RAPPORTO DI PROVA","RAPPORTO DI PROVA",IF(B5="CERTIFICATO DI PROVA","CERTIFICATO DI PROVA",IF(ISNUMBER(B3),IF(B3<B4,"RAPPORTO DI PROVA","CERTIFICATO DI PROVA"),"DA DEFINIRE")))',tipo,6);
  band(param,8,1,4,'La modalità B5 determina il titolo in MINUTA. In automatico usa il numero in MINUTA!G2 e la soglia B4. Verificare prima dell’emissione.',8);
  const sheets=[main,reading,graph,param];
- const book=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="${NS}" xmlns:r="${REL}"><bookViews><workbookView/></bookViews><sheets>${['MINUTA','LETTURE','GRAFICO','PARAMETRI'].map((n,i)=>`<sheet name="${n}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets><definedNames><definedName name="_xlnm.Print_Area" localSheetId="0">MINUTA!$A$1:$AR$54</definedName></definedNames><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`;
+ const book=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="${NS}" xmlns:r="${REL}"><bookViews><workbookView/></bookViews><sheets>${['MINUTA','LETTURE','GRAFICO','PARAMETRI'].map((n,i)=>`<sheet name="${n}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets><definedNames><definedName name="_xlnm.Print_Area" localSheetId="0">MINUTA!$A$1:$AN$61</definedName></definedNames><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`;
  const parts=[['[Content_Types].xml',`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="${CT}"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>${[...new Set([photo?.ext,logo?.ext].filter(Boolean))].map(ext=>`<Default Extension="${ext}" ContentType="image/${ext==='jpeg'?'jpeg':ext}"/>`).join('')}<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((_,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/><Override PartName="/xl/charts/chart1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/></Types>`],
  ['_rels/.rels',rels([['rId1',REL+'/officeDocument','xl/workbook.xml']])],
  ['xl/workbook.xml',book],
