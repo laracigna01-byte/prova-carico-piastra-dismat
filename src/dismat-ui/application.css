@@ -1,10 +1,4 @@
-/* DISMAT UI v0.1 — only application chrome, no technical chart or print selectors. */
-.theme-dark,.theme-light {
-  --du-bg:#101112;--du-surface:#1b1c1e;--du-raised:#242527;--du-border:#46484b;--du-text:#f6f3e9;--du-muted:#b5b5b8;--du-accent:#f3c84b;--du-accent-text:#f3c84b;--du-focus:#f3c84b;--du-soft:#312c1c;
-}
-.theme-light {
-  --du-bg:#f6f5f1;--du-surface:#fff;--du-raised:#eeede8;--du-border:#b6b3aa;--du-text:#1c1d1f;--du-muted:#52545a;--du-accent-text:#765400;--du-focus:#846000;--du-soft:#fff3cd;
-}
+@import "./display-core.css";
 @media screen {
 body.theme-dark,body.theme-light{background:var(--du-bg);color:var(--du-text)}
 .app-shell.piastra-app{--dismat-bg:var(--du-bg);--dismat-surface:var(--du-surface);--dismat-surface-high:var(--du-raised);--dismat-border:var(--du-border);--dismat-text:var(--du-text);--dismat-muted:var(--du-muted);--dismat-blue:var(--du-accent-text)}
@@ -31,4 +25,24 @@ body.theme-dark,body.theme-light{background:var(--du-bg);color:var(--du-text)}
 .theme-dark .app-shell .palo-cycle-tabs button.is-active,.theme-light .app-shell .palo-cycle-tabs button.is-active{background:var(--du-soft);border-color:var(--du-focus);color:var(--du-accent-text)}
 .theme-dark .app-shell .palo-step-nav button,.theme-light .app-shell .palo-step-nav button,.theme-dark .app-shell .palo-step-footer button,.theme-light .app-shell .palo-step-footer button{background:var(--du-accent);border-color:var(--du-accent);color:#1e1b11}
 @media(max-width:600px){.theme-dark .du-header,.theme-light .du-header{padding:12px;gap:12px}.du-header .brand small{display:none}.du-header .brand p{font-size:11px}.du-header .brand img{width:38px;height:38px;flex-basis:38px}.du-header .header-actions button,.du-header .header-actions a{width:auto;flex:1 1 auto}}
+}
+
+/* Adapter for existing proof apps. Do not recolor technical chart series or print layouts. */
+@media screen{
+body.theme-dark,body.theme-light{background:var(--du-backdrop)}
+.app-shell.piastra-app.theme-dark,.app-shell.piastra-app.theme-light{background:var(--du-backdrop)!important;color:var(--du-text)!important}
+.app-shell:is(.theme-dark,.theme-light) .du-header,
+:is(.theme-dark,.theme-light) .app-shell .du-header{background:var(--du-panel);border-color:var(--du-border);border-radius:var(--du-radius);box-shadow:var(--du-shadow)}
+.app-shell:is(.theme-dark,.theme-light),:is(.theme-dark,.theme-light) .app-shell{font-family:var(--du-font)}
+.app-shell:is(.theme-dark,.theme-light) .panel,:is(.theme-dark,.theme-light) .app-shell .panel{position:relative;background:var(--du-panel);border:1px solid var(--du-border);border-radius:var(--du-radius);color:var(--du-text);box-shadow:var(--du-shadow)}
+.app-shell:is(.theme-dark,.theme-light) .panel::before,:is(.theme-dark,.theme-light) .app-shell .panel::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--du-edge);pointer-events:none;z-index:1;border-radius:var(--du-radius) 0 0 var(--du-radius)}
+.app-shell:is(.theme-dark,.theme-light) .panel-toggle,:is(.theme-dark,.theme-light) .app-shell .panel-toggle{background:var(--du-raised)!important;color:var(--du-text)!important}
+.app-shell:is(.theme-dark,.theme-light) .field :is(input,select,textarea),:is(.theme-dark,.theme-light) .app-shell .field :is(input,select,textarea){background:var(--du-field)!important;border-color:var(--du-field-border)!important;color:var(--du-text)!important;border-radius:var(--du-control-radius)!important}
+.app-shell:is(.theme-dark,.theme-light) .field label,:is(.theme-dark,.theme-light) .app-shell .field label{color:var(--du-muted)!important}
+.app-shell .du-header .header-title b{color:var(--du-text);text-shadow:var(--du-title-glow);font-size:clamp(24px,3vw,36px);letter-spacing:-.04em}
+.app-shell .du-header .brand p{color:var(--du-accent-text)}
+.app-shell .du-header .header-actions .elaborazioni-link,.app-shell .du-header .header-actions .primary-btn,
+.app-shell .workflow-nav .next,.app-shell .palo-step-nav button,.app-shell .palo-step-footer button{background:var(--du-primary);color:var(--du-primary-ink);box-shadow:var(--du-primary-glow);border-radius:var(--du-control-radius);border-color:transparent}
+.app-shell .du-header .header-actions .header-btn{background:var(--du-secondary);color:var(--du-secondary-text);border-color:var(--du-border);border-radius:var(--du-control-radius)}
+.app-shell .du-header .du-luminous-switch{border-radius:40px}
 }

@@ -1,0 +1,32 @@
+/* DISMAT UI 0.2 — shared visual language of Display Control.
+   Source: RemotePanel.ps1, 489e801491b6bb0b184d51016da582d260c617e4.
+   CSS only; no dependency on React, Angular, archives or calculation engines. */
+.theme-dark,.du-dark {
+  --du-bg:#0d1012;--du-surface:#1a1d1b;--du-raised:#302f27;--du-border:#85643c;--du-text:#f6eddd;--du-muted:#c7b9a2;
+  --du-accent:#efb445;--du-accent-text:#ffd274;--du-focus:#ffcd6e;--du-soft:#302a1e;
+  --du-field:#121715;--du-field-border:#8d7047;--du-secondary:#39372f;--du-secondary-text:#fbe9cf;
+  --du-backdrop:radial-gradient(ellipse at 14% 0%,#c7952c1a,transparent 44%),radial-gradient(ellipse at 86% 12%,#aa5a2d13,transparent 42%),#0d1012;
+  --du-panel:linear-gradient(145deg,#202420,#141715);
+  --du-shadow:0 12px 34px #030403a0,0 0 28px #cc934e12;--du-title-glow:0 0 32px #e9ae4045;
+}
+.theme-light,.du-light {
+  --du-bg:#f6f3eb;--du-surface:#fffdf8;--du-raised:#eee8dc;--du-border:#bda98a;--du-text:#28251f;--du-muted:#625747;
+  --du-accent:#efb445;--du-accent-text:#80520c;--du-focus:#8c5e16;--du-soft:#fff0cd;
+  --du-field:#fffefa;--du-field-border:#ad997a;--du-secondary:#f0e7d7;--du-secondary-text:#493923;
+  --du-backdrop:radial-gradient(ellipse at 14% 0%,#c7952c16,transparent 44%),radial-gradient(ellipse at 86% 12%,#aa5a2d0c,transparent 42%),#f6f3eb;
+  --du-panel:linear-gradient(145deg,#fffdf8,#f6f2e9);
+  --du-shadow:0 12px 34px #49351812,0 0 28px #cc934e0b;--du-title-glow:none;
+}
+.theme-dark,.theme-light,.du-dark,.du-light {
+  --du-primary:linear-gradient(110deg,#e8a53a,#ffd479);--du-primary-ink:#201a10;--du-primary-glow:0 0 20px #edb44a30;
+  --du-edge:linear-gradient(#ffd274,#f0a845,#bc4c39);--du-radius:20px;--du-control-radius:12px;
+  --du-font:'Segoe UI',system-ui,sans-serif;
+}
+@media screen {
+  .du-header.du-header{position:relative;background:var(--du-panel);border:1px solid var(--du-border);border-radius:var(--du-radius);box-shadow:var(--du-shadow);font-family:var(--du-font)}
+  .du-header.du-header h1,.du-header.du-header .header-title b{letter-spacing:-.04em;color:var(--du-text);text-shadow:var(--du-title-glow);font-size:clamp(24px,3vw,36px)}
+  .du-header.du-header .kicker,.du-header.du-header small,.du-header.du-header .brand p{color:var(--du-accent-text)}
+  .du-header.du-header p,.du-header.du-header .header-title span{color:var(--du-muted)}
+  .du-panel-look{background:var(--du-panel);border:1px solid var(--du-border);border-radius:var(--du-radius);box-shadow:var(--du-shadow)}
+  .du-primary-look{background:var(--du-primary);color:var(--du-primary-ink);border:1px solid transparent;border-radius:var(--du-control-radius);box-shadow:var(--du-primary-glow)}
+}
