@@ -1,7 +1,7 @@
 @import "./display-core.css";
 @media screen {
 body.theme-dark,body.theme-light{background:var(--du-bg);color:var(--du-text)}
-.app-shell.piastra-app{--dismat-bg:var(--du-bg);--dismat-surface:var(--du-surface);--dismat-surface-high:var(--du-raised);--dismat-border:var(--du-border);--dismat-text:var(--du-text);--dismat-muted:var(--du-muted);--dismat-blue:var(--du-accent-text)}
+.app-shell.piastra-app:is(.theme-dark,.theme-light){--dismat-bg:var(--du-bg);--dismat-surface:var(--du-surface);--dismat-surface-high:var(--du-raised);--dismat-border:var(--du-border);--dismat-text:var(--du-text);--dismat-muted:var(--du-muted);--dismat-blue:var(--du-accent-text)}
 .theme-dark .du-header,.theme-light .du-header{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 18px;align-items:center;background:var(--du-surface);border:1px solid var(--du-border);border-radius:16px;padding:20px;box-shadow:0 12px 36px #00000018}
 .du-header .brand{grid-column:1;grid-row:1;min-width:0;display:flex;align-items:center;gap:12px}
 .du-header .brand img{width:48px;height:48px;flex:0 0 48px;object-fit:contain;border-radius:8px}

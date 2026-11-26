@@ -1,6 +1,6 @@
 /* DISMAT Luminous Switch — approved day/night design. */
-.du-luminous-switch.du-luminous-switch{position:relative;display:block;box-sizing:border-box;width:116px;height:52px;min-height:52px;min-width:116px;max-width:116px;padding:0;margin:0;flex:0 0 116px;border:1px solid #d5a43f;border-radius:40px;background:linear-gradient(135deg,#fff1ad,#ffc84f 52%,#efad35);box-shadow:inset 0 2px 5px #8e5a263d,0 0 20px #f8ba4945;cursor:pointer;isolation:isolate;transition:background .6s,border .6s,box-shadow .6s;align-self:start}
-.du-luminous-switch.du-luminous-switch.is-night{background:linear-gradient(135deg,#353c55,#171e32 48%,#11141f);border-color:#77788c;box-shadow:0 0 23px #aebcff29,inset 0 2px 8px #0008}
+button.du-luminous-switch.du-luminous-switch.du-luminous-switch{position:relative;display:block;box-sizing:border-box;width:116px;height:52px;min-height:52px;min-width:116px;max-width:116px;padding:0;margin:0;flex:0 0 116px;border:1px solid #d5a43f;border-radius:40px;background:linear-gradient(135deg,#fff1ad,#ffc84f 52%,#efad35);box-shadow:inset 0 2px 5px #8e5a263d,0 0 20px #f8ba4945;cursor:pointer;isolation:isolate;transition:background .6s,border .6s,box-shadow .6s;align-self:start}
+button.du-luminous-switch.du-luminous-switch.du-luminous-switch.is-night{background:linear-gradient(135deg,#353c55,#171e32 48%,#11141f);border-color:#77788c;box-shadow:0 0 23px #aebcff29,inset 0 2px 8px #0008}
 .du-luminous-switch .du-sky{position:absolute;inset:0;border-radius:inherit;overflow:hidden;pointer-events:none}
 .du-sky::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 22% 45%,#fffce7aa,transparent 55%);transition:opacity .5s}
 .is-night .du-sky::before{opacity:0}
@@ -22,6 +22,6 @@
 .du-orbit{position:absolute;top:-8px;left:-8px;width:66px;height:66px;border-radius:50%;background:#fff4c331;transition:transform .65s cubic-bezier(.22,1,.36,1),background .5s}
 .du-orbit-2{width:85px;height:85px;left:-17px;top:-17px;background:#fff4c318}
 .is-night .du-orbit{transform:translateX(64px);background:#c0c8ef17}.is-night .du-orbit-2{background:#c0c8ef0c}
-.du-luminous-switch.du-luminous-switch:focus-visible{outline:2px solid #c88e13;outline-offset:4px}
+button.du-luminous-switch.du-luminous-switch.du-luminous-switch:focus-visible{outline:2px solid #c88e13;outline-offset:4px}
 @keyframes du-twinkle{from{opacity:.4}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.du-luminous-switch,.du-luminous-switch *,.du-sky::before{transition:none!important;animation:none!important}}
