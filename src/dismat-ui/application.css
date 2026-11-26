@@ -1,0 +1,34 @@
+/* DISMAT UI v0.1 — only application chrome, no technical chart or print selectors. */
+.theme-dark,.theme-light {
+  --du-bg:#101112;--du-surface:#1b1c1e;--du-raised:#242527;--du-border:#46484b;--du-text:#f6f3e9;--du-muted:#b5b5b8;--du-accent:#f3c84b;--du-accent-text:#f3c84b;--du-focus:#f3c84b;--du-soft:#312c1c;
+}
+.theme-light {
+  --du-bg:#f6f5f1;--du-surface:#fff;--du-raised:#eeede8;--du-border:#b6b3aa;--du-text:#1c1d1f;--du-muted:#52545a;--du-accent-text:#765400;--du-focus:#846000;--du-soft:#fff3cd;
+}
+@media screen {
+body.theme-dark,body.theme-light{background:var(--du-bg);color:var(--du-text)}
+.app-shell.piastra-app{--dismat-bg:var(--du-bg);--dismat-surface:var(--du-surface);--dismat-surface-high:var(--du-raised);--dismat-border:var(--du-border);--dismat-text:var(--du-text);--dismat-muted:var(--du-muted);--dismat-blue:var(--du-accent-text)}
+.theme-dark .du-header,.theme-light .du-header{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 18px;align-items:center;background:var(--du-surface);border:1px solid var(--du-border);border-radius:16px;padding:20px;box-shadow:0 12px 36px #00000018}
+.du-header .brand{grid-column:1;grid-row:1;min-width:0;display:flex;align-items:center;gap:12px}
+.du-header .brand img{width:48px;height:48px;flex:0 0 48px;object-fit:contain;border-radius:8px}
+.theme-dark .du-header .brand p,.theme-light .du-header .brand p{color:var(--du-text);font-size:14px;letter-spacing:.13em}
+.theme-dark .du-header .brand small,.theme-light .du-header .brand small{color:var(--du-muted);font-size:11px}
+.du-header .du-luminous-switch{grid-column:2;grid-row:1;justify-self:end}
+.du-header .header-title{grid-column:1/-1;grid-row:2;display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;min-width:0;margin:0}
+.theme-dark .du-header .header-title b,.theme-light .du-header .header-title b{font-size:clamp(20px,3vw,32px);font-weight:800;letter-spacing:-.035em;color:var(--du-text)}
+.theme-dark .du-header .header-title span,.theme-light .du-header .header-title span{color:var(--du-muted)}
+.du-header .header-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:8px;margin:0;width:100%}
+.theme-dark .du-header .header-actions .header-btn,.theme-light .du-header .header-actions .header-btn{background:var(--du-raised);border:1px solid var(--du-border);color:var(--du-text)}
+.du-header .header-actions .elaborazioni-link{background:var(--du-accent);color:#1e1b11}
+.du-header .header-actions button,.du-header .header-actions a{min-height:44px;border-radius:9px}
+.theme-dark .app-shell .panel,.theme-light .app-shell .panel{background:var(--du-surface);border-color:var(--du-border);color:var(--du-text);border-radius:12px}
+.theme-dark .app-shell .panel-toggle,.theme-light .app-shell .panel-toggle{background:var(--du-raised);color:var(--du-text);border-color:var(--du-border)}
+.theme-dark .app-shell .field label,.theme-light .app-shell .field label,.theme-dark .app-shell .section-header span,.theme-light .app-shell .section-header span{color:var(--du-muted)}
+.theme-dark .app-shell .field input,.theme-light .app-shell .field input,.theme-dark .app-shell .field select,.theme-light .app-shell .field select,.theme-dark .app-shell .field textarea,.theme-light .app-shell .field textarea{background:var(--du-bg);border-color:var(--du-border);color:var(--du-text);border-radius:9px}
+.theme-dark .app-shell .field :is(input,select,textarea):focus-visible,.theme-light .app-shell .field :is(input,select,textarea):focus-visible,.du-header :is(button,a):focus-visible{outline:2px solid var(--du-focus);outline-offset:2px}
+.theme-dark .app-shell .palo-quick-nav,.theme-light .app-shell .palo-quick-nav,.theme-dark .app-shell .palo-step-workflow,.theme-light .app-shell .palo-step-workflow{background:var(--du-surface);border-color:var(--du-border);color:var(--du-text)}
+.theme-dark .app-shell .palo-quick-nav button,.theme-light .app-shell .palo-quick-nav button,.theme-dark .app-shell .palo-cycle-tabs button,.theme-light .app-shell .palo-cycle-tabs button{background:var(--du-raised);border-color:var(--du-border);color:var(--du-text)}
+.theme-dark .app-shell .palo-cycle-tabs button.is-active,.theme-light .app-shell .palo-cycle-tabs button.is-active{background:var(--du-soft);border-color:var(--du-focus);color:var(--du-accent-text)}
+.theme-dark .app-shell .palo-step-nav button,.theme-light .app-shell .palo-step-nav button,.theme-dark .app-shell .palo-step-footer button,.theme-light .app-shell .palo-step-footer button{background:var(--du-accent);border-color:var(--du-accent);color:#1e1b11}
+@media(max-width:600px){.theme-dark .du-header,.theme-light .du-header{padding:12px;gap:12px}.du-header .brand small{display:none}.du-header .brand p{font-size:11px}.du-header .brand img{width:38px;height:38px;flex-basis:38px}.du-header .header-actions button,.du-header .header-actions a{width:auto;flex:1 1 auto}}
+}

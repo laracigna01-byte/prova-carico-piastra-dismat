@@ -1,4 +1,6 @@
-﻿import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import { LuminousSwitch } from "./dismat-ui/LuminousSwitch";
+import "./dismat-ui/application.css";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { exportReport } from "./pdf/exportReport";
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid,
@@ -1688,7 +1690,8 @@ async function importArchiveBackup(file) {
         chartMaxX={chartMaxX}
       />
 
-      <header className="app-header">
+      <header className="app-header du-header">
+        <LuminousSwitch dark={theme === "dark"} onToggle={() => setTheme(theme === "dark" ? "light" : "dark")} />
         <div className="brand">
           <img src="/logo-dismat.jpg" alt="Laboratorio DISMAT" />
           <div>
@@ -1714,13 +1717,7 @@ async function importArchiveBackup(file) {
               Elaborazioni
             </a>
 
-            <button
-              type="button"
-              className="theme-btn"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            >
-              {theme === "dark" ? "☀️ Passa al chiaro" : "🌙 Passa allo scuro"}
-            </button>
+            
 
             <LogoutButton />
           </div>
